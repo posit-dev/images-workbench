@@ -1,10 +1,15 @@
-variable os {
-  default = "ubuntu"
+variable image_name {
+  default = "workbench"
 }
 
 function get_safe_version {
   params = [version]
-  result = replace(version, ".", "")
+  result = replace(version, "+", "-")
+}
+
+function get_clean_version {
+    params = [version]
+    result = regex_replace(version, "[+|-].*", "")
 }
 
 function get_suffix {
@@ -12,15 +17,24 @@ function get_suffix {
   result = type == "std" ? "" : "-${type}"
 }
 
-function get_tag {
-  params = [version, type]
-  result = "ubuntu${get_safe_version(version)}${get_suffix(type)}"
+function get_tags {
+  params = [version, os, type, mark_latest]
+  result = concat(
+    [
+      "${registry}/${namespace}/${image_name}:${os}-${get_clean_version(version)}",
+      "${registry}/${namespace}/${image_name}:${os}-${get_clean_version(version)}${get_suffix(type)}",
+      "${registry}/${namespace}/${image_name}:${os}-${get_safe_version(version)}",
+      "${registry}/${namespace}/${image_name}:${os}-${get_safe_version(version)}${get_suffix(type)}",
+    ],
+      mark_latest ? ["${registry}/${namespace}/${image_name}:latest${get_suffix(type)}", "${registry}/${namespace}/${image_name}:${os}${get_suffix(type)}"] :
+      []
+  )
 }
 
-variable ubuntu_build_matrix {
+variable workbench_build_matrix {
   default = {
-    versions = [
-      "22.04"
+    builds = [
+      {version = "2024.04.2+764.pro1", os = "ubuntu2204", mark_latest = true},
     ]
   }
 }
@@ -34,20 +48,22 @@ group "default" {
 
 target "std" {
   inherits = ["_"]
-  matrix = ubuntu_build_matrix
-  name = "${get_tag(versions, "std")}"
-  tags = [
-    "${namespace}/${image_name}:${get_tag(versions, "std")}"
-  ]
-  dockerfile = "${os}/${versions}/Containerfile.std"
+  matrix = workbench_build_matrix
+  name = "${builds.os}-${replace(get_clean_version(builds.version), ".", "-")}-std"
+  tags = get_tags(builds.version, builds.os, "std", builds.mark_latest)
+  dockerfile = "workbench/${builds.version}/Containerfile.${builds.os}.std"
+  args = {
+    "REGISTRY" = registry
+  }
 }
 
 target "min" {
   inherits = ["_"]
-  matrix = ubuntu_build_matrix
-  name = "${get_tag(versions, "min")}"
-  tags = [
-    "${namespace}/${image_name}:${get_tag(versions, "min")}"
-  ]
-  dockerfile = "${os}/${versions}/Containerfile.min"
+  matrix = workbench_build_matrix
+  name = "${builds.os}-${replace(get_clean_version(builds.version), ".", "-")}-min"
+  tags = get_tags(builds.version, builds.os, "min", builds.mark_latest)
+  dockerfile = "workbench/${builds.version}/Containerfile.${builds.os}.min"
+  args = {
+    "REGISTRY" = registry
+  }
 }

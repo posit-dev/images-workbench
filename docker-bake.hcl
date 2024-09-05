@@ -6,10 +6,6 @@ variable namespace {
   default = "posit"
 }
 
-variable image_name {
-  default = "workbench"
-}
-
 target "_" {
   labels = {
     "org.opencontainers.image.created" = timestamp()

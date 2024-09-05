@@ -1,1 +1,5 @@
 build-essential
+libclang-dev
+libpq5
+psmisc
+rrdtool
