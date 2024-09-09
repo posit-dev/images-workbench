@@ -32,10 +32,8 @@ libssl-dev
 libtiff-dev
 libudunits2-dev
 libxml2-dev 
-make 
-psmisc
-python3 
-rrdtool
+make
+python3
 tcl 
 tk 
 tk-dev 
