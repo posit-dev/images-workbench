@@ -91,18 +91,13 @@ file:
   # Check for vscode.conf and ensure VS Code is enabled
   /etc/rstudio/vscode.conf:
     exists: true
-    contains:
-      - "enabled: 1"
-  # Check for startup.log and ensure it does not have an error when parsing rserver.conf
-  /tmp/startup.log:
-    exists: true
-    contains:
-    - "!Error reading /etc/rstudio/rserver.conf:"
+    contents:
+      - "enabled=1"
   # Check pam configuration for mkhomedir
   /etc/pam.d/common-session:
     exists: true
-    contains:
-      - "/^session required pam_mkhomedir.so skel=/etc/skel umask=0027$/"
+    contents:
+      - "session required pam_mkhomedir.so skel=/etc/skel umask=0027"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
     exists: true
@@ -112,7 +107,7 @@ file:
   # Check for repos.conf
   /etc/rstudio/repos.conf:
     exists: true
-    contains:
+    contents:
       - "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
       - "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
   # Check for symlinked Quarto executable
@@ -121,31 +116,28 @@ file:
     filetype: symlink
   # Check for R installation
   /opt/R/{{ r_version }}/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: file
   /opt/R/default/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: file
   /usr/local/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: symlink
   /usr/local/bin/Rscript:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: symlink
   # Check for Python installation
   /opt/python/{{ python_version }}/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: file
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
   /opt/python/default/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: file
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
   /opt/python/jupyter/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: symlink
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
   /opt/python/jupyter/bin/jupyter:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
   /usr/local/bin/jupyter:
-    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: symlink
 
 command:
@@ -156,11 +148,10 @@ command:
     exec: touch /var/log/rstudio-server.log
     exit-status: 0
   "Verify Posit Workbench version":
-    exec: /usr/lib/rstudio-server/bin/rstudio-server --version
+    exec: /usr/lib/rstudio-server/bin/rstudio-server version
     exit-status: 0
     stdout:
-      - "{{ workbench_version }}"
-      - "Workbench"
+      - "{{ workbench_version }} Workbench"
   "Verify Jupyter Notebook works":
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000

@@ -34,9 +34,11 @@ test image version type os='ubuntu' os_version='22.04' registry='docker.io':
   if [[ "{{type}}" != "std" ]]; then
     suffix="-{{type}}"
   fi
+  GOSS_SLEEP=30 \
   GOSS_PATH={{justfile_directory()}}/tools/goss \
   GOSS_FILES_PATH={{justfile_directory()}}/{{image}}/{{version}}/test \
     {{justfile_directory()}}/tools/dgoss run \
     -e IMAGE_TYPE="{{type}}" \
     -v {{justfile_directory()}}/common/{{os}}/{{os_version}}:/tmp/deps \
-    {{registry}}/posit/{{image}}:{{os}}{{replace(os_version, ".", "")}}-{{replace_regex(version, "[+].*", "")}}${suffix}
+    {{registry}}/posit/{{image}}:{{os}}{{replace(os_version, ".", "")}}-{{replace_regex(version, "[+].*", "")}}${suffix} \
+    /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
