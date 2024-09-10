@@ -100,7 +100,7 @@ file:
       - "session required pam_mkhomedir.so skel=/etc/skel umask=0027"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
-    exists: true
+    exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
     owner: root
     group: root
     mode: "0600"
@@ -156,6 +156,7 @@ command:
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000
     exit-status: 0
+    skip: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
   "Verify R installation is version {{ r_version }}":
     exec: /opt/R/{{ r_version }}/bin/R --version
     exit-status: 0
