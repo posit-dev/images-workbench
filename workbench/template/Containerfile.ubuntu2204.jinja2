@@ -1,20 +1,22 @@
-ARG REGISTRY=docker.io
+ARG BASE_IMAGE_REGISTRY=docker.io
 {% if not is_minimal -%}
 ARG PYTHON_VERSION="{{ python_version }}"
 ARG R_VERSION="{{ r_version }}"
-FROM ${REGISTRY}/posit/base:ubuntu2204
+FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204
+LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204"
 {%- else -%}
-FROM ${REGISTRY}/posit/base:ubuntu2204-min
+FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min
+LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min"
 {%- endif %}
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCRIPTS_DIR=/opt/positscripts
+ARG SCRIPTS_DIR=/opt/posit/scripts
 {%- if not is_minimal %}
 ARG PYTHON_VERSION="{{ python_version }}"
 ARG R_VERSION="{{ r_version }}"
 {%- endif %}
-ARG WORKBENCH_VERSION="{{ workbench_version }}"
+ARG WORKBENCH_VERSION="{{ image_version }}"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV STARTUP_DEBUG_MODE 0
@@ -30,21 +32,21 @@ ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
 ### Install System Packages ###
-COPY common/ubuntu/22.04/packages.txt /tmp/packages.txt
+COPY {{ rel_path }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 {% if not is_minimal -%}
-COPY common/ubuntu/22.04/optional_packages.txt /tmp/optional_packages.txt
+COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 {%- endif %}
 RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/packages.txt) \
-    && rm -f /tmp/packages.txt \
+    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
+    && rm -f /tmp/ubuntu2204_packages.txt \
     {%- if not is_minimal %}
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/optional_packages.txt) \
-    && rm -f /tmp/optional_packages.txt \
+    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_optional_packages.txt) \
+    && rm -f /tmp/ubuntu2204_optional_packages.txt \
     {%- endif %}
     && $SCRIPTS_DIR/apt.sh --clean
 
-### Install Workbench {{ workbench_version }} ###
-COPY common/ubuntu/scripts/install_workbench.sh /tmp/install_workbench.sh
+### Install Workbench {{ image_version }} ###
+COPY {{ rel_path }}/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
@@ -73,9 +75,14 @@ COPY {{ rel_path }}/conf/rstudio /etc/rstudio
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
     && mkdir -p /startup/custom/ \
-    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0027\n' >> /etc/pam.d/common-session \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+
+{% if not is_minimal -%}
+LABEL co.posit.image.tools.python="{{ python_version }}" \
+      co.posit.image.tools.r="{{ r_version }}"
+{%- endif %}
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp

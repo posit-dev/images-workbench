@@ -1,9 +1,10 @@
-ARG REGISTRY=docker.io
-FROM ${REGISTRY}/posit/base:ubuntu2204-min
+ARG BASE_IMAGE_REGISTRY=docker.io
+FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min
+LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCRIPTS_DIR=/opt/positscripts
+ARG SCRIPTS_DIR=/opt/posit/scripts
 ARG WORKBENCH_VERSION="2024.04.2+764.pro1"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
@@ -20,15 +21,15 @@ ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
 ### Install System Packages ###
-COPY common/ubuntu/22.04/packages.txt /tmp/packages.txt
+COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 
 RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/packages.txt) \
-    && rm -f /tmp/packages.txt \
+    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
+    && rm -f /tmp/ubuntu2204_packages.txt \
     && $SCRIPTS_DIR/apt.sh --clean
 
 ### Install Workbench 2024.04.2+764.pro1 ###
-COPY common/ubuntu/scripts/install_workbench.sh /tmp/install_workbench.sh
+COPY workbench/2024.04.2+764.pro1/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
@@ -47,9 +48,11 @@ COPY workbench/2024.04.2+764.pro1/conf/rstudio /etc/rstudio
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
     && mkdir -p /startup/custom/ \
-    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0027\n' >> /etc/pam.d/common-session \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+
+
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp

@@ -73,7 +73,7 @@ file:
     owner: rstudio-server
     group: rstudio-server
   # Check for code-server executable (path varies based on RStudio Workbench version)
-  {{ $version_split := split "." "2024.04.2+764.pro1" }}
+  {{ $version_split := split &#34;.&#34; &#34;2024.04.2+764.pro1&#34; }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
   /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
     exists: true
@@ -164,7 +164,6 @@ command:
     exit-status: 0
     stdout:
       - "3.12.1"
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
