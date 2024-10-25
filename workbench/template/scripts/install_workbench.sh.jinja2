@@ -37,7 +37,7 @@ sed -i 's/$LAUNCHER_ADMIN_SCRIPT start/echo "Skipping launcher startup."/g' /var
 echo "$d Install Workbench $d"
 dpkg --configure rstudio-server
 apt-get install -yf
-rm -f /tmp/{{ workbench_name }}.deb
+rm -f /tmp/workbench.deb
 
 # Clean up
 $SCRIPTS_DIR/apt.sh --clean

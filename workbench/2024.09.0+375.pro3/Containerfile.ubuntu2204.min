@@ -5,7 +5,7 @@ LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubun
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
 ARG SCRIPTS_DIR=/opt/posit/scripts
-ARG WORKBENCH_VERSION="2024.04.2+764.pro1"
+ARG WORKBENCH_VERSION="2024.09.0+375.pro3"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV STARTUP_DEBUG_MODE 0
@@ -21,15 +21,15 @@ ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
 ### Install System Packages ###
-COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
+COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 
 RUN $SCRIPTS_DIR/apt.sh --update upgrade \
     && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
     && rm -f /tmp/ubuntu2204_packages.txt \
     && $SCRIPTS_DIR/apt.sh --clean
 
-### Install Workbench 2024.04.2+764.pro1 ###
-COPY workbench/2024.04.2+764.pro1/scripts/install_workbench.sh /tmp/install_workbench.sh
+### Install Workbench 2024.09.0+375.pro3 ###
+COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
@@ -38,11 +38,11 @@ RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 
 ### Copy startup scripts ###
-COPY --chmod=0775 workbench/2024.04.2+764.pro1/scripts/startup.sh /usr/local/bin/startup.sh
-COPY workbench/2024.04.2+764.pro1/startup/launcher /startup/launcher
-COPY workbench/2024.04.2+764.pro1/startup/base /startup/base
-COPY workbench/2024.04.2+764.pro1/startup/supervisord.conf /etc/supervisor/supervisord.conf
-COPY workbench/2024.04.2+764.pro1/conf/rstudio /etc/rstudio
+COPY --chmod=0775 workbench/2024.09.0+375.pro3/scripts/startup.sh /usr/local/bin/startup.sh
+COPY workbench/2024.09.0+375.pro3/startup/launcher /startup/launcher
+COPY workbench/2024.09.0+375.pro3/startup/base /startup/base
+COPY workbench/2024.09.0+375.pro3/startup/supervisord.conf /etc/supervisor/supervisord.conf
+COPY workbench/2024.09.0+375.pro3/conf/rstudio /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \

@@ -18,13 +18,13 @@ package:
   r-4.4.0:
     installed: true
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  {{ $apt_package_list := readFile "/tmp/deps/packages.txt" | splitList "\n" }}
+  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
   {{end}}
   {{ if eq .Env.IMAGE_TYPE "std" }}
-  {{ $apt_package_list := readFile "/tmp/deps/optional_packages.txt" | splitList "\n" }}
+  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_optional_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
@@ -46,10 +46,10 @@ port:
 process:
   rserver:
     running: true
-    skip: false
+    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
   rstudio-launche:
     running: true
-    skip: false
+    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
 
 file:
   # Check that license files were not accidentally included in build
@@ -93,7 +93,7 @@ file:
   /etc/pam.d/common-session:
     exists: true
     contents:
-      - "session required pam_mkhomedir.so skel=/etc/skel umask=0027"
+      - "session required pam_mkhomedir.so skel=/etc/skel umask=0077"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
     exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
