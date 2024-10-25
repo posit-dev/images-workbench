@@ -50,7 +50,7 @@ target "std" {
     "co.posit.image.version" = "${builds.version}"
     "co.posit.image.name" = "${image_name}"
     "co.posit.internal.goss.test.wait" = "10"
-    "co.posit.internal.goss.test.command" = "/usr/lib/rstudio-server/bin/rserver --server-daemonize 0 > /dev/stderr",
+    "co.posit.internal.goss.test.command" = "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf",
     "co.posit.internal.goss.test.path" = "${image_name}/${builds.version}/test"
     "co.posit.internal.goss.test.deps" = "${image_name}/${builds.version}/deps"
   }

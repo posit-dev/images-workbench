@@ -48,10 +48,10 @@ port:
 process:
   rserver:
     running: true
-    skip: false
+    skip: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
   rstudio-launche:
     running: true
-    skip: false
+    skip: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
 
 file:
   # Check that license files were not accidentally included in build
@@ -97,7 +97,7 @@ file:
   /etc/pam.d/common-session:
     exists: true
     contents:
-      - "session required pam_mkhomedir.so skel=/etc/skel umask=0027"
+      - "session required pam_mkhomedir.so skel=/etc/skel umask=0077"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
     exists: {% raw %}{{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}{% endraw %}
@@ -168,6 +168,7 @@ command:
     exit-status: 0
     stdout:
       - "{{ python_version }}"
+    skip: {% raw %}{{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}{% endraw %}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
