@@ -1,0 +1,8 @@
+build-essential
+libclang-dev
+libpq5
+psmisc
+oddjob-mkhomedir
+rrdtool
+sssd
+supervisor
