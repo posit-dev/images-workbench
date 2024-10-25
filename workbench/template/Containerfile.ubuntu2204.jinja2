@@ -1,12 +1,11 @@
-ARG BASE_IMAGE_REGISTRY=docker.io
 {% if not is_minimal -%}
 ARG PYTHON_VERSION="{{ python_version }}"
 ARG R_VERSION="{{ r_version }}"
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204"
+FROM cripittwood.azurecr.io/posit/base:ubuntu2204
+LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204"
 {%- else -%}
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min"
+FROM cripittwood.azurecr.io/posit/base:ubuntu2204-min
+LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204-min"
 {%- endif %}
 
 ### ARG declarations ###

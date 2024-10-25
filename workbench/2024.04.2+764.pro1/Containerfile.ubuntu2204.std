@@ -1,8 +1,7 @@
-ARG BASE_IMAGE_REGISTRY=docker.io
 ARG PYTHON_VERSION="3.12.1"
 ARG R_VERSION="4.4.0"
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204"
+FROM cripittwood.azurecr.io/posit/base:ubuntu2204
+LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive

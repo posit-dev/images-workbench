@@ -1,5 +1,7 @@
 #!/usr/bin/env just --justfile
 
+BAKERY_VERSION := "0.2.0.dev0"
+
 init-venv:
   #!/bin/bash
   set -ex
@@ -9,7 +11,7 @@ init-venv:
 install-bakery:
   #!/bin/bash
   # TODO: Update this after package is published somewhere
-  {{justfile_directory()}}/.venv/bin/pip3 install https://saipittwood.blob.core.windows.net/packages/posit_bakery-0.1.0-py3-none-any.whl
+  {{justfile_directory()}}/.venv/bin/pip3 install https://saipittwood.blob.core.windows.net/packages/posit_bakery-{{ BAKERY_VERSION }}-py3-none-any.whl
 
 install-goss:
   #!/bin/bash

@@ -1,0 +1,11 @@
+[[registry]]
+host = "cripittwood.azurecr.io"
+namespace = "posit"
+
+[repository]
+url = "github.com/rstudio/posit-images-base"
+vendor = "Posit Software, PBC"
+maintainer = "docker@posit.co"
+authors = [
+    "Ian H. Pittwood <ian.pittwood@posit.co>"
+]
