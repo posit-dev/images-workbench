@@ -18,13 +18,13 @@ package:
   r-4.4.1:
     installed: true
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  {{ $apt_package_list := readFile "/tmp/deps/packages.txt" | splitList "\n" }}
+  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
   {{end}}
   {{ if eq .Env.IMAGE_TYPE "std" }}
-  {{ $apt_package_list := readFile "/tmp/deps/optional_packages.txt" | splitList "\n" }}
+  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_optional_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
