@@ -73,7 +73,7 @@ file:
     owner: rstudio-server
     group: rstudio-server
   # Check for code-server executable (path varies based on RStudio Workbench version)
-  {{ $version_split := split &#34;.&#34; &#34;2024.04.2+764.pro1&#34; }}
+  {{ $version_split := split "." "2024.04.2+764.pro1" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
   /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
     exists: true
