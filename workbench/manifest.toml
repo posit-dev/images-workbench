@@ -25,4 +25,4 @@ type = "min"
 type = "std"
 [target.goss]
 command = "supervisord -c /etc/supervisor/supervisord.conf"
-wait = 10
+wait = 15
