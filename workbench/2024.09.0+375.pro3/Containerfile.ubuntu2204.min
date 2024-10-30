@@ -1,5 +1,7 @@
-FROM cripittwood.azurecr.io/posit/base:ubuntu2204-min
-LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204-min"
+FROM docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+
+ADD --chmod=750 https://saipittwood.blob.core.windows.net/packages/pti /usr/local/bin/pti
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
@@ -22,10 +24,11 @@ ENV DIAGNOSTIC_ONLY false
 ### Install System Packages ###
 COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 
-RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
+RUN pti container bootstrap \
+    && pti container syspkg upgrade --dist \
+    && pti container syspkg install -f /tmp/ubuntu2204_packages.txt \
     && rm -f /tmp/ubuntu2204_packages.txt \
-    && $SCRIPTS_DIR/apt.sh --clean
+    && pti container syspkg clean
 
 ### Install Workbench 2024.09.0+375.pro3 ###
 COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh

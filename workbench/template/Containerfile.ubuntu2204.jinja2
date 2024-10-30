@@ -1,12 +1,7 @@
-{% if not is_minimal -%}
-ARG PYTHON_VERSION="{{ python_version }}"
-ARG R_VERSION="{{ r_version }}"
-FROM cripittwood.azurecr.io/posit/base:ubuntu2204
-LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204"
-{%- else -%}
-FROM cripittwood.azurecr.io/posit/base:ubuntu2204-min
-LABEL org.opencontainers.image.base.name="cripittwood.azurecr.io/posit/base:ubuntu2204-min"
-{%- endif %}
+FROM docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+
+ADD --chmod=750 https://saipittwood.blob.core.windows.net/packages/pti /usr/local/bin/pti
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
@@ -35,14 +30,15 @@ COPY {{ rel_path }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 {% if not is_minimal -%}
 COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 {%- endif %}
-RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
+RUN pti container bootstrap \
+    && pti container syspkg upgrade --dist \
+    && pti container syspkg install -f /tmp/ubuntu2204_packages.txt \
     && rm -f /tmp/ubuntu2204_packages.txt \
     {%- if not is_minimal %}
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_optional_packages.txt) \
+    && pti container syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \
     {%- endif %}
-    && $SCRIPTS_DIR/apt.sh --clean
+    && pti container syspkg clean
 
 ### Install Workbench {{ image_version }} ###
 COPY {{ rel_path }}/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -53,10 +49,14 @@ RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 {% if not is_minimal -%}
 ### Install TinyTeX using Quarto ###
-RUN $SCRIPTS_DIR/install_quarto.sh --install-tinytex --add-path-tinytex
+RUN pti quarto install-tinytex --quarto-path /lib/rstudio-server/bin/quarto/bin/quarto --add-path-tinytex
 
-### Install Jupyter and extensions ###
-RUN $SCRIPTS_DIR/install_python.sh --install-jupyter --install-jupyter-kernel -- ${PYTHON_VERSION}
+### Install R versions ###
+RUN pti r install -V ${R_VERSION} --default --add-to-path
+
+### Install Python and install Jupyter and extensions ###
+RUN pti python install -V ${PYTHON_VERSION} --add-jupyter-kernel --default --add-to-path \
+    && pti python install-jupyter -V ${PYTHON_VERSION}
 {%- endif %}
 
 ### Copy startup scripts ###

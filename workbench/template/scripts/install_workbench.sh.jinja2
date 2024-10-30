@@ -12,7 +12,11 @@ WORKBENCH_URL_VERSION=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g')
 WORKBENCH_DOWNLOAD_URL=${WORKBENCH_DOWNLOAD_URL:-https://download2.rstudio.org/server/$OS_URL/amd64/$WORKBENCH_NAME-$WORKBENCH_URL_VERSION-amd64.deb}
 
 # Update apt repositories
-$SCRIPTS_DIR/apt.sh --update
+pti container syspkg install \
+  -p curl \
+  -p gpg \
+  -p dpkg-sig
+pti container syspkg update
 
 # Fetch Workbench debian package
 echo "$d Fetching Workbench package $d"
@@ -37,7 +41,11 @@ sed -i 's/$LAUNCHER_ADMIN_SCRIPT start/echo "Skipping launcher startup."/g' /var
 echo "$d Install Workbench $d"
 dpkg --configure rstudio-server
 apt-get install -yf
-rm -f /tmp/workbench.deb
 
 # Clean up
-$SCRIPTS_DIR/apt.sh --clean
+rm -f /tmp/workbench.deb
+pti container syspkg uninstall \
+  -p curl \
+  -p gpg \
+  -p dpkg-sig
+pti container syspkg clean
