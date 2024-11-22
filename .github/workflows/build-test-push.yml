@@ -18,10 +18,10 @@ jobs:
         uses: extractions/setup-just@v2
 
       - name: Install Posit Bakery
-        uses: rstudio/posit-images-shared/setup-posit-bakery@toml-manifest
+        uses: posit-dev/images-shared/setup-posit-bakery@main
 
       - name: Install goss and dgoss
-        uses: rstudio/posit-images-shared/setup-goss@toml-manifest
+        uses: posit-dev/images-shared/setup-goss@main
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
