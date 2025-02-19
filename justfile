@@ -24,3 +24,4 @@ download-pti:
       -H "Authorization: Bearer {{GITHUB_TOKEN}}" \
       https://api.github.com/repos/posit-dev/pti/releases/assets/220659328 \
       -o {{justfile_directory()}}/tools/pti
+  chmod +rx {{justfile_directory()}}/tools/pti
