@@ -1,10 +1,12 @@
-ARG BASE_IMAGE_REGISTRY=docker.io
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min"
+FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCRIPTS_DIR=/opt/posit/scripts
+ARG PTI_VERSION="0.0.1"
+ARG PTI_NO_COLOR="true"
+ARG PTI_LOG_FORMAT="json"
+
 ARG WORKBENCH_VERSION="2024.09.0+375.pro3"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
@@ -20,13 +22,29 @@ ENV DIAGNOSTIC_DIR /var/log/rstudio
 ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
+### Install Posit Tool Installer ###
+# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
+#ADD --chmod=0755 \
+#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
+#    /usr/local/bin/pti
+# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
+#                     pti is available publicly.
+COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+
+### Initialize PTI in container ###
+RUN pti init
+
 ### Install System Packages ###
 COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 
-RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
-    && rm -f /tmp/ubuntu2204_packages.txt \
-    && $SCRIPTS_DIR/apt.sh --clean
+RUN pti syspkg update \
+    && pti syspkg upgrade --dist \
+    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
+    
+    && rm -f /tmp/ubuntu2204_packages.txt
+
+### Install wait-for-it ###
+RUN pti wait-for-it install
 
 ### Install Workbench 2024.09.0+375.pro3 ###
 COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -42,7 +60,8 @@ COPY --chmod=0775 workbench/2024.09.0+375.pro3/scripts/startup.sh /usr/local/bin
 COPY workbench/2024.09.0+375.pro3/startup/launcher /startup/launcher
 COPY workbench/2024.09.0+375.pro3/startup/base /startup/base
 COPY workbench/2024.09.0+375.pro3/startup/supervisord.conf /etc/supervisor/supervisord.conf
-COPY workbench/2024.09.0+375.pro3/conf/rstudio /etc/rstudio
+
+COPY workbench/2024.09.0+375.pro3/conf/jupyter/* workbench/2024.09.0+375.pro3/conf/launcher/* workbench/2024.09.0+375.pro3/conf/rstudio/* workbench/2024.09.0+375.pro3/conf/vscode/* /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \

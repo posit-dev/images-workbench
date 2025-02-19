@@ -1,6 +1,7 @@
 cmake 
 default-jdk 
-gdal-bin 
+gdal-bin
+gdb
 git 
 gsfonts 
 imagemagick 
@@ -34,6 +35,7 @@ libudunits2-dev
 libxml2-dev 
 make
 python3
+strace
 tcl 
 tk 
 tk-dev 
