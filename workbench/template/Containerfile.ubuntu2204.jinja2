@@ -39,15 +39,14 @@ RUN pti init
 
 ### Install System Packages ###
 COPY {{ rel_path }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-{% if not image_type == "min" %}
+{% if not image_type == "min" -%}
 COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 {%- endif %}
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
-    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    {% if not image_type == "min" %}
+    {%- if not image_type == "min" %}
     && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
-    rm -f /tmp/ubuntu2204_optional_packages.txt \
+    && rm -f /tmp/ubuntu2204_optional_packages.txt \
     {%- endif %}
     && rm -f /tmp/ubuntu2204_packages.txt
 
@@ -61,7 +60,7 @@ RUN OS_URL=jammy /tmp/install_workbench.sh
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-{% if not image_type == "min" %}
+{%- if not image_type == "min" %}
 ### Install TinyTeX using Quarto ###
 RUN pti quarto tinytex install --add-to-path
 
@@ -78,15 +77,15 @@ RUN pti pro-drivers install --copy-odbcinst
 {%- endif %}
 
 ### Copy startup scripts ###
-COPY --chmod=0775 {{ rel_path }}/scripts/startup.sh /usr/local/bin/startup.sh
-COPY {{ rel_path }}/startup/launcher /startup/launcher
-COPY {{ rel_path }}/startup/base /startup/base
-COPY {{ rel_path }}/startup/supervisord.conf /etc/supervisor/supervisord.conf
-{% if not image_type == "min" %}
-COPY {{ rel_path }}/startup/user-provisioning /startup/user-provisioning
-COPY --chmod=600 {{ rel_path }}/conf/sssd/sssd.conf /etc/sssd/sssd.conf
+COPY --chmod=0775 "{{ rel_path }}/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "{{ rel_path }}/startup/launcher" /startup/launcher
+COPY "{{ rel_path }}/startup/base" /startup/base
+COPY "{{ rel_path }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+{%- if not image_type == "min" %}
+COPY "{{ rel_path }}/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "{{ rel_path }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
 {%- endif %}
-COPY {{ rel_path }}/conf/jupyter/* {{ rel_path }}/conf/launcher/* {{ rel_path }}/conf/rstudio/* {{ rel_path }}/conf/vscode/* /etc/rstudio
+COPY "{{ rel_path }}/conf/jupyter/*" "{{ rel_path }}/conf/launcher/*" "{{ rel_path }}/conf/rstudio/*" "{{ rel_path }}/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -96,7 +95,7 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
 
-{% if not image_type == "min" %}
+{%- if not image_type == "min" %}
 LABEL co.posit.image.tools.python="{{ python_version }}" \
       co.posit.image.tools.r="{{ r_version }}"
 {%- endif %}

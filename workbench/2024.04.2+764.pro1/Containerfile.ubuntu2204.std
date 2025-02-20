@@ -38,14 +38,11 @@ RUN pti init
 
 ### Install System Packages ###
 COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-
 COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
-    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    
     && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
-    rm -f /tmp/ubuntu2204_optional_packages.txt \
+    && rm -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
@@ -57,8 +54,6 @@ RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
-
-
 ### Install TinyTeX using Quarto ###
 RUN pti quarto tinytex install --add-to-path
 
@@ -74,14 +69,13 @@ RUN pti python install -V ${PYTHON_VERSION} --add-to-path --default \
 RUN pti pro-drivers install --copy-odbcinst
 
 ### Copy startup scripts ###
-COPY --chmod=0775 workbench/2024.04.2+764.pro1/scripts/startup.sh /usr/local/bin/startup.sh
-COPY workbench/2024.04.2+764.pro1/startup/launcher /startup/launcher
-COPY workbench/2024.04.2+764.pro1/startup/base /startup/base
-COPY workbench/2024.04.2+764.pro1/startup/supervisord.conf /etc/supervisor/supervisord.conf
-
-COPY workbench/2024.04.2+764.pro1/startup/user-provisioning /startup/user-provisioning
-COPY --chmod=600 workbench/2024.04.2+764.pro1/conf/sssd/sssd.conf /etc/sssd/sssd.conf
-COPY workbench/2024.04.2+764.pro1/conf/jupyter/* workbench/2024.04.2+764.pro1/conf/launcher/* workbench/2024.04.2+764.pro1/conf/rstudio/* workbench/2024.04.2+764.pro1/conf/vscode/* /etc/rstudio
+COPY --chmod=0775 "workbench/2024.04.2+764.pro1/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2024.04.2+764.pro1/startup/launcher" /startup/launcher
+COPY "workbench/2024.04.2+764.pro1/startup/base" /startup/base
+COPY "workbench/2024.04.2+764.pro1/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2024.04.2+764.pro1/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2024.04.2+764.pro1/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2024.04.2+764.pro1/conf/jupyter/*" "workbench/2024.04.2+764.pro1/conf/launcher/*" "workbench/2024.04.2+764.pro1/conf/rstudio/*" "workbench/2024.04.2+764.pro1/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -90,8 +84,6 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-
-
 LABEL co.posit.image.tools.python="3.12.1" \
       co.posit.image.tools.r="4.4.0"
 

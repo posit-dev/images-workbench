@@ -39,8 +39,6 @@ COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_p
 
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
-    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    
     && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
@@ -53,15 +51,12 @@ RUN OS_URL=jammy /tmp/install_workbench.sh
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-
-
 ### Copy startup scripts ###
-COPY --chmod=0775 workbench/2024.09.0+375.pro3/scripts/startup.sh /usr/local/bin/startup.sh
-COPY workbench/2024.09.0+375.pro3/startup/launcher /startup/launcher
-COPY workbench/2024.09.0+375.pro3/startup/base /startup/base
-COPY workbench/2024.09.0+375.pro3/startup/supervisord.conf /etc/supervisor/supervisord.conf
-
-COPY workbench/2024.09.0+375.pro3/conf/jupyter/* workbench/2024.09.0+375.pro3/conf/launcher/* workbench/2024.09.0+375.pro3/conf/rstudio/* workbench/2024.09.0+375.pro3/conf/vscode/* /etc/rstudio
+COPY --chmod=0775 "workbench/2024.09.0+375.pro3/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2024.09.0+375.pro3/startup/launcher" /startup/launcher
+COPY "workbench/2024.09.0+375.pro3/startup/base" /startup/base
+COPY "workbench/2024.09.0+375.pro3/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2024.09.0+375.pro3/conf/jupyter/*" "workbench/2024.09.0+375.pro3/conf/launcher/*" "workbench/2024.09.0+375.pro3/conf/rstudio/*" "workbench/2024.09.0+375.pro3/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -70,8 +65,6 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-
-
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
