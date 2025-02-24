@@ -44,6 +44,7 @@ COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_option
 {%- endif %}
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
+    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
     {%- if not image_type == "min" %}
     && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \

@@ -5,14 +5,14 @@ set -euo pipefail
 d="===="
 
 # Set variables
-SCRIPTS_DIR=${SCRIPTS_DIR:-/opt/positscripts}
 OS_URL=${OS_URL:-jammy}
 WORKBENCH_NAME=${WORKBENCH_NAME:-rstudio-workbench}
 WORKBENCH_URL_VERSION=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g')
 WORKBENCH_DOWNLOAD_URL=${WORKBENCH_DOWNLOAD_URL:-https://download2.rstudio.org/server/$OS_URL/amd64/$WORKBENCH_NAME-$WORKBENCH_URL_VERSION-amd64.deb}
 
 # Update apt repositories
-$SCRIPTS_DIR/apt.sh --update
+pti syspkg install -p curl -p gpg -p gpg-agent -p dpkg-sig
+pti syspkg update
 
 # Fetch Workbench debian package
 echo "$d Fetching Workbench package $d"
@@ -40,4 +40,5 @@ apt-get install -yf
 rm -f /tmp/workbench.deb
 
 # Clean up
-$SCRIPTS_DIR/apt.sh --clean
+pti syspkg uninstall -p curl -p gpg -p gpg-agent -p dpkg-sig
+pti syspkg clean

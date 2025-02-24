@@ -41,6 +41,7 @@ COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_p
 COPY workbench/2024.04.2+764.pro1/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
+    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
     && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_packages.txt
