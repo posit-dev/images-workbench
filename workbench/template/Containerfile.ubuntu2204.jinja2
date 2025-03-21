@@ -71,6 +71,7 @@ RUN pti r install --add-to-path --default "${R_VERSION}"
 ### Install Python and Jupyter ###
 RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
     && pti python jupyter install "${PYTHON_VERSION}" \
+    && ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter \
     && pti python jupyter add-kernel "${PYTHON_VERSION}"
 
 ### Install Pro Drivers ###
