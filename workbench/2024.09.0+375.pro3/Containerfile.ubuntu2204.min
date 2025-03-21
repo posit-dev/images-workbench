@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.1"
+ARG PTI_VERSION="0.0.3"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
 
@@ -43,7 +43,7 @@ RUN pti syspkg update \
     && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
-RUN pti wait-for-it install
+RUN pti container wait-for-it install
 
 ### Install Workbench 2024.09.0+375.pro3 ###
 COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh

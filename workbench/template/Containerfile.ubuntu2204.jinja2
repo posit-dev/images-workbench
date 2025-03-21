@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.1"
+ARG PTI_VERSION="0.0.3"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
 {% if not image_type == "min" %}
@@ -52,7 +52,7 @@ RUN pti syspkg update \
     && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
-RUN pti wait-for-it install
+RUN pti container wait-for-it install
 
 ### Install Workbench {{ image_version }} ###
 COPY {{ rel_path }}/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -66,12 +66,12 @@ RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 RUN pti quarto tinytex install --add-to-path
 
 ### Install R ###
-RUN pti r install -V ${R_VERSION} --add-to-path --default
+RUN pti r install --add-to-path --default "${R_VERSION}"
 
 ### Install Python and Jupyter ###
-RUN pti python install -V ${PYTHON_VERSION} --add-to-path --default \
-    && pti python jupyter -V ${PYTHON_VERSION} install \
-    && pti python jupyter -V ${PYTHON_VERSION} add-kernel
+RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
+    && pti python jupyter install "${PYTHON_VERSION}" \
+    && pti python jupyter add-kernel "${PYTHON_VERSION}"
 
 ### Install Pro Drivers ###
 RUN pti pro-drivers install --copy-odbcinst

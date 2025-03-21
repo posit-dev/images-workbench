@@ -11,8 +11,7 @@ WORKBENCH_URL_VERSION=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g')
 WORKBENCH_DOWNLOAD_URL=${WORKBENCH_DOWNLOAD_URL:-https://download2.rstudio.org/server/$OS_URL/amd64/$WORKBENCH_NAME-$WORKBENCH_URL_VERSION-amd64.deb}
 
 # Update apt repositories
-pti syspkg install -p curl -p gpg -p gpg-agent -p dpkg-sig
-pti syspkg update
+pti syspkg install --no-clean -p curl -p gpg -p gpg-agent -p dpkg-sig
 
 # Fetch Workbench debian package
 echo "$d Fetching Workbench package $d"
