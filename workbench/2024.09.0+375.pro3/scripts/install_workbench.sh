@@ -39,5 +39,5 @@ apt-get install -yf
 rm -f /tmp/workbench.deb
 
 # Clean up
-pti syspkg uninstall -p curl -p gpg -p gpg-agent -p dpkg-sig
+pti syspkg remove -p curl -p gpg -p gpg-agent -p dpkg-sig
 pti syspkg clean
