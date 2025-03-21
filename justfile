@@ -26,6 +26,7 @@ download-pti:
   release_version="${tag_name#v}"
   assets="$(gh --cache=1800s api $RELEASE_API_ENDPOINT --jq '.assets.[] | [{name: .name, asset_url: .url}]')"
 
+  PROJECT_DIR="$(pwd)"
   PTI_DST_DIR="$(pwd)/pti_${release_version}"
   mkdir -p "${PTI_DST_DIR}"
 
@@ -44,3 +45,10 @@ download-pti:
   cd "${PTI_DST_DIR}"
   shasum -c pti*checksums.txt
   chmod +rx pti*linux_amd64
+
+  cd "$PROJECT_DIR"
+  TOOLS_DIR="${PROJECT_DIR}/tools"
+  mkdir -p "${TOOLS_DIR}"
+  mv "${PTI_DST_DIR}/pti_linux_amd64" "${TOOLS_DIR}/pti"
+  rm "${PTI_DST_DIR}/pti_checksums.txt"
+  rmdir "${PTI_DST_DIR}"
