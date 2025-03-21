@@ -183,5 +183,5 @@ command:
     exec: quarto list tools
     exit-status: 0
     stderr:
-      - "/tinytex\\s+Up to date\\s+v\\d{4}\\.\\d{2}(\\.\\d{2})?\\s+v\\d{4}\\.\\d{2}(\\.\\d{2})?/"
+      - "/tinytex\\s+External Installation/"
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
