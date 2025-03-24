@@ -1,4 +1,5 @@
 tools/*
+results/
 .docker-bake.json
 .idea
 
