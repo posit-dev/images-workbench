@@ -1,0 +1,5 @@
+{
+      "terminal.integrated.shell.linux": "bash",
+      "extensions.autoUpdate": false,
+      "extensions.autoCheckUpdates": false
+}
