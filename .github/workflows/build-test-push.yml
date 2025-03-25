@@ -9,7 +9,7 @@ jobs:
   ubuntu:
     env:
       image-name: 'ubuntu'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4x
     steps:
 
       - name: GitHub App Token
@@ -20,7 +20,7 @@ jobs:
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: posit-dev
           repositories: |
-            images-package-manager
+            images-workbench
             images-shared
             pti
 
@@ -41,14 +41,6 @@ jobs:
 
       - name: Setup just
         uses: extractions/setup-just@v2
-
-      # TODO: replace with docker.io login in the future
-      - name: Azure Container Registry Login
-        uses: Azure/docker-login@v2
-        with:
-          login-server: '${{ secrets.ACR_REGISTRY }}'
-          username: '${{ secrets.ACR_USERNAME }}'
-          password: '${{ secrets.ACR_PASSWORD }}'
 
       - name: Build images
         env:
