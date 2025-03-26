@@ -3,7 +3,7 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.3"
+ARG PTI_VERSION="0.0.4"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
 
