@@ -1,0 +1,57 @@
+FROM docker.io/library/golang:{{ go_version }} AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG PTI_VERSION="0.0.3"
+ARG PTI_NO_COLOR="true"
+ARG PTI_LOG_FORMAT="json"
+ARG WORKBENCH_VERSION="{{ image_version }}"
+
+### Install Posit Tool Installer ###
+# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
+#ADD --chmod=0755 \
+#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
+#    /usr/local/bin/pti
+# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
+#                     pti is available publicly.
+COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+
+### Initialize PTI in container ###
+RUN pti init \
+    && pti syspkg install -p curl
+
+# Download the RStudio Workbench session components and install Go
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN mkdir -p /pwb-staging && \
+    WORKBENCH_VERSION_URL=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g') && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-${WORKBENCH_VERSION_URL}-x86_64.tar.gz" && \
+    mkdir -p /opt/session-components && \
+    tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
+    chmod 755 /opt/session-components && \
+    rm -rf /pwb-staging
+
+# Set the Go workspace
+WORKDIR /workspace
+
+# Copy the Go source code and download dependencies
+COPY {{ rel_path }}/entrypoint/go.mod {{ rel_path }}/entrypoint/go.sum ./
+RUN go mod download
+
+# Copy the Go source code and build the binary
+COPY {{ rel_path }}/entrypoint/main.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-s -w' -o entrypoint main.go
+
+# Create the final image
+FROM docker.io/library/ubuntu:22.04 AS build
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+
+ARG DEBIAN_FRONTEND=noninteractive
+COPY --from=builder --chmod=755 /usr/local/bin/pti /usr/local/bin/pti
+
+RUN pti init \
+    && pti syspkg install -p curl
+
+# Copy the compiled Go binary and session components from the builder stage
+COPY --from=builder --chmod=755 /workspace/entrypoint /usr/local/bin/entrypoint
+COPY --from=builder --chmod=755 /opt/session-components /opt/session-components
+
+CMD ["/usr/local/bin/entrypoint"]
