@@ -11,11 +11,11 @@ image_name = "workbench"
 # Define any variables used by subsequent targets and builds.
 [const]
 
-[build."2024.09.0+375.pro3"]
-latest = true
+[build."2024.12.1+563.pro5"]
 os = ["Ubuntu 22.04"]
+latest = true
 
-[build."2024.04.2+764.pro1"]
+[build."2024.12.0+467.pro1"]
 os = ["Ubuntu 22.04"]
 
 [target]
@@ -24,5 +24,5 @@ os = ["Ubuntu 22.04"]
 
 [target.std]
 [target.std.goss]
-wait = 10
+wait = 15
 command = "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf"  # Defaults to sleep infinity to run if not specified.

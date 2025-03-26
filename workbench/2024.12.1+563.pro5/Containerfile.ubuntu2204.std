@@ -3,13 +3,13 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.3"
+ARG PTI_VERSION="0.0.4"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
 
-ARG PYTHON_VERSION="3.12.6"
-ARG R_VERSION="4.4.1"
-ARG WORKBENCH_VERSION="2024.09.0+375.pro3"
+ARG PYTHON_VERSION="3.12.9"
+ARG R_VERSION="4.4.2"
+ARG WORKBENCH_VERSION="2024.12.1+563.pro5"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV STARTUP_DEBUG_MODE 0
@@ -37,8 +37,8 @@ COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
 RUN pti init
 
 ### Install System Packages ###
-COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
+COPY workbench/2024.12.1+563.pro5/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
+COPY workbench/2024.12.1+563.pro5/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
     && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
@@ -49,8 +49,8 @@ RUN pti syspkg update \
 ### Install wait-for-it ###
 RUN pti container wait-for-it install
 
-### Install Workbench 2024.09.0+375.pro3 ###
-COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh
+### Install Workbench 2024.12.1+563.pro5 ###
+COPY workbench/2024.12.1+563.pro5/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
@@ -71,13 +71,13 @@ RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
 RUN pti pro-drivers install --copy-odbcinst
 
 ### Copy startup scripts ###
-COPY --chmod=0775 "workbench/2024.09.0+375.pro3/scripts/startup.sh" /usr/local/bin/startup.sh
-COPY "workbench/2024.09.0+375.pro3/startup/launcher" /startup/launcher
-COPY "workbench/2024.09.0+375.pro3/startup/base" /startup/base
-COPY "workbench/2024.09.0+375.pro3/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-COPY "workbench/2024.09.0+375.pro3/startup/user-provisioning" /startup/user-provisioning
-COPY --chmod=600 "workbench/2024.09.0+375.pro3/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-COPY "workbench/2024.09.0+375.pro3/conf/jupyter/*" "workbench/2024.09.0+375.pro3/conf/launcher/*" "workbench/2024.09.0+375.pro3/conf/rstudio/*" "workbench/2024.09.0+375.pro3/conf/vscode/*" /etc/rstudio
+COPY --chmod=0775 "workbench/2024.12.1+563.pro5/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2024.12.1+563.pro5/startup/launcher" /startup/launcher
+COPY "workbench/2024.12.1+563.pro5/startup/base" /startup/base
+COPY "workbench/2024.12.1+563.pro5/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2024.12.1+563.pro5/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2024.12.1+563.pro5/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2024.12.1+563.pro5/conf/jupyter/*" "workbench/2024.12.1+563.pro5/conf/launcher/*" "workbench/2024.12.1+563.pro5/conf/rstudio/*" "workbench/2024.12.1+563.pro5/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -86,8 +86,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-LABEL co.posit.image.tools.python="3.12.6" \
-      co.posit.image.tools.r="4.4.1"
+LABEL co.posit.image.tools.python="3.12.9" \
+      co.posit.image.tools.r="4.4.2"
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp

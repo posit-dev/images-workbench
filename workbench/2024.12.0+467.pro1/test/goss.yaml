@@ -12,10 +12,10 @@ group:
 package:
   rstudio-server:
     installed: true
-  python-3.12.6:
+  python-3.12.9:
     installed: true
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  r-4.4.1:
+  r-4.4.2:
     installed: true
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
   {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_packages.txt" | splitList "\n" }}
@@ -73,7 +73,7 @@ file:
     owner: rstudio-server
     group: rstudio-server
   # Check for code-server executable (path varies based on RStudio Workbench version)
-  {{ $version_split := split "." "2024.09.0+375.pro3" }}
+  {{ $version_split := split "." "2024.12.0+467.pro1" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
   /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
     exists: true
@@ -111,7 +111,7 @@ file:
     exists: true
     filetype: symlink
   # Check for R installation
-  /opt/R/4.4.1/bin/R:
+  /opt/R/4.4.2/bin/R:
     exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
     filetype: file
   /opt/R/default/bin/R:
@@ -124,7 +124,7 @@ file:
     exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
     filetype: symlink
   # Check for Python installation
-  /opt/python/3.12.6/bin/python:
+  /opt/python/3.12.9/bin/python:
     exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
   /opt/python/default/bin/python:
     exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
@@ -147,29 +147,29 @@ command:
     exec: /usr/lib/rstudio-server/bin/rstudio-server version
     exit-status: 0
     stdout:
-      - "2024.09.0+375.pro3 Workbench"
+      - "2024.12.0+467.pro1 Workbench"
   "Verify Jupyter Notebook works":
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000
     exit-status: 0
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  "Verify R installation is version 4.4.1":
-    exec: /opt/R/4.4.1/bin/R --version
+  "Verify R installation is version 4.4.2":
+    exec: /opt/R/4.4.2/bin/R --version
     exit-status: 0
     stdout:
-      - "R version 4.4.1"
+      - "R version 4.4.2"
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  "Verify Python installation is version 3.12.6":
-    exec: /opt/python/3.12.6/bin/python --version
+  "Verify Python installation is version 3.12.9":
+    exec: /opt/python/3.12.9/bin/python --version
     exit-status: 0
     stdout:
-      - "3.12.6"
+      - "3.12.9"
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
     stdout:
-      - "3.12.6"
+      - "3.12.9"
     skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
   "Verify system OpenSSL":
     exec: which openssl
