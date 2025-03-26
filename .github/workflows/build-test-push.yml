@@ -6,9 +6,10 @@ on:
 
 name: Build, Test, and Push
 jobs:
-  ubuntu:
-    env:
-      image-name: 'ubuntu'
+  build-test-push:
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest-4x
     steps:
 
@@ -42,6 +43,13 @@ jobs:
       - name: Setup just
         uses: extractions/setup-just@v2
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build images
         env:
           GIT_SHA: ${{ github.sha }}
@@ -52,9 +60,8 @@ jobs:
       - name: Test images
         run: bakery run dgoss
 
-#      TODO: Reenable once we can use override repositories again
-#      - name: Push images
-#        env:
-#          GIT_SHA: ${{ github.sha }}
-#        if: github.event_name == 'push'
-#        run: bakery build --push
+      - name: Push images
+        env:
+          GIT_SHA: ${{ github.sha }}
+        if: github.event_name == 'push'
+        run: bakery build --push
