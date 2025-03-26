@@ -1,0 +1,20 @@
+#######################################################################################################################
+# BAKERY REPOSITORY CONFIG
+#
+# This file is used to define global properties for builds inside a repo managed by Posit's Bakery tool.
+#######################################################################################################################
+
+# Define properties of the local repository. This information will be used when labeling image builds.
+[repository]
+url = "github.com/posit-dev/images-workbench"
+vendor = "Posit Software, PBC"
+maintainer = "docker@posit.co"
+authors = [
+    "Ian H. Pittwood <ian.pittwood@posit.co>"
+]
+
+# Define image registries used by builds in this repository. Images will be tagged appropriately for each registry.
+# Logins for private registries should be managed independently of Bakery.
+[[registries]]
+host = "docker.io"
+namespace = "posit"

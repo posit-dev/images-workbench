@@ -1,18 +1,12 @@
-ARG BASE_IMAGE_REGISTRY=docker.io
-{% if not is_minimal -%}
-ARG PYTHON_VERSION="{{ python_version }}"
-ARG R_VERSION="{{ r_version }}"
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204"
-{%- else -%}
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204-min"
-{%- endif %}
+FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCRIPTS_DIR=/opt/posit/scripts
-{%- if not is_minimal %}
+ARG PTI_VERSION="0.0.3"
+ARG PTI_NO_COLOR="true"
+ARG PTI_LOG_FORMAT="json"
+{% if not image_type == "min" %}
 ARG PYTHON_VERSION="{{ python_version }}"
 ARG R_VERSION="{{ r_version }}"
 {%- endif %}
@@ -31,19 +25,34 @@ ENV DIAGNOSTIC_DIR /var/log/rstudio
 ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
+### Install Posit Tool Installer ###
+# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
+#ADD --chmod=0755 \
+#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
+#    /usr/local/bin/pti
+# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
+#                     pti is available publicly.
+COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+
+### Initialize PTI in container ###
+RUN pti init
+
 ### Install System Packages ###
 COPY {{ rel_path }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-{% if not is_minimal -%}
+{% if not image_type == "min" -%}
 COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 {%- endif %}
-RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
-    && rm -f /tmp/ubuntu2204_packages.txt \
-    {%- if not is_minimal %}
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_optional_packages.txt) \
+RUN pti syspkg update \
+    && pti syspkg upgrade --dist \
+    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
+    {%- if not image_type == "min" %}
+    && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \
     {%- endif %}
-    && $SCRIPTS_DIR/apt.sh --clean
+    && rm -f /tmp/ubuntu2204_packages.txt
+
+### Install wait-for-it ###
+RUN pti container wait-for-it install
 
 ### Install Workbench {{ image_version }} ###
 COPY {{ rel_path }}/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -52,24 +61,33 @@ RUN OS_URL=jammy /tmp/install_workbench.sh
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-{% if not is_minimal -%}
+{%- if not image_type == "min" %}
 ### Install TinyTeX using Quarto ###
-RUN $SCRIPTS_DIR/install_quarto.sh --install-tinytex --add-path-tinytex
+RUN pti quarto tinytex install --add-to-path
 
-### Install Jupyter and extensions ###
-RUN $SCRIPTS_DIR/install_python.sh --install-jupyter --install-jupyter-kernel -- ${PYTHON_VERSION}
+### Install R ###
+RUN pti r install --add-to-path --default "${R_VERSION}"
+
+### Install Python and Jupyter ###
+RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
+    && pti python jupyter install "${PYTHON_VERSION}" \
+    && ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter \
+    && pti python jupyter add-kernel "${PYTHON_VERSION}"
+
+### Install Pro Drivers ###
+RUN pti pro-drivers install --copy-odbcinst
 {%- endif %}
 
 ### Copy startup scripts ###
-COPY --chmod=0775 {{ rel_path }}/scripts/startup.sh /usr/local/bin/startup.sh
-COPY {{ rel_path }}/startup/launcher /startup/launcher
-COPY {{ rel_path }}/startup/base /startup/base
-COPY {{ rel_path }}/startup/supervisord.conf /etc/supervisor/supervisord.conf
-{%- if not is_minimal %}
-COPY {{ rel_path }}/startup/user-provisioning /startup/user-provisioning
-COPY --chmod=600 {{ rel_path }}/conf/sssd/sssd.conf /etc/sssd/sssd.conf
+COPY --chmod=0775 "{{ rel_path }}/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "{{ rel_path }}/startup/launcher" /startup/launcher
+COPY "{{ rel_path }}/startup/base" /startup/base
+COPY "{{ rel_path }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+{%- if not image_type == "min" %}
+COPY "{{ rel_path }}/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "{{ rel_path }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
 {%- endif %}
-COPY {{ rel_path }}/conf/rstudio /etc/rstudio
+COPY "{{ rel_path }}/conf/jupyter/*" "{{ rel_path }}/conf/launcher/*" "{{ rel_path }}/conf/rstudio/*" "{{ rel_path }}/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -79,7 +97,7 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
 
-{% if not is_minimal -%}
+{%- if not image_type == "min" %}
 LABEL co.posit.image.tools.python="{{ python_version }}" \
       co.posit.image.tools.r="{{ r_version }}"
 {%- endif %}

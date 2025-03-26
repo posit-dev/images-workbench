@@ -1,12 +1,12 @@
-ARG BASE_IMAGE_REGISTRY=docker.io
-ARG PYTHON_VERSION="3.12.6"
-ARG R_VERSION="4.4.1"
-FROM ${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204
-LABEL org.opencontainers.image.base.name="${BASE_IMAGE_REGISTRY}/posit/base:ubuntu2204"
+FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCRIPTS_DIR=/opt/posit/scripts
+ARG PTI_VERSION="0.0.3"
+ARG PTI_NO_COLOR="true"
+ARG PTI_LOG_FORMAT="json"
+
 ARG PYTHON_VERSION="3.12.6"
 ARG R_VERSION="4.4.1"
 ARG WORKBENCH_VERSION="2024.09.0+375.pro3"
@@ -24,15 +24,30 @@ ENV DIAGNOSTIC_DIR /var/log/rstudio
 ENV DIAGNOSTIC_ENABLE false
 ENV DIAGNOSTIC_ONLY false
 
+### Install Posit Tool Installer ###
+# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
+#ADD --chmod=0755 \
+#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
+#    /usr/local/bin/pti
+# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
+#                     pti is available publicly.
+COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+
+### Initialize PTI in container ###
+RUN pti init
+
 ### Install System Packages ###
 COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
 COPY workbench/2024.09.0+375.pro3/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
-RUN $SCRIPTS_DIR/apt.sh --update upgrade \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_packages.txt) \
-    && rm -f /tmp/ubuntu2204_packages.txt \
-    && $SCRIPTS_DIR/apt.sh install $(cat /tmp/ubuntu2204_optional_packages.txt) \
+RUN pti syspkg update \
+    && pti syspkg upgrade --dist \
+    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
+    && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \
-    && $SCRIPTS_DIR/apt.sh --clean
+    && rm -f /tmp/ubuntu2204_packages.txt
+
+### Install wait-for-it ###
+RUN pti container wait-for-it install
 
 ### Install Workbench 2024.09.0+375.pro3 ###
 COPY workbench/2024.09.0+375.pro3/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -40,21 +55,29 @@ RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
-
 ### Install TinyTeX using Quarto ###
-RUN $SCRIPTS_DIR/install_quarto.sh --install-tinytex --add-path-tinytex
+RUN pti quarto tinytex install --add-to-path
 
-### Install Jupyter and extensions ###
-RUN $SCRIPTS_DIR/install_python.sh --install-jupyter --install-jupyter-kernel -- ${PYTHON_VERSION}
+### Install R ###
+RUN pti r install --add-to-path --default "${R_VERSION}"
+
+### Install Python and Jupyter ###
+RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
+    && pti python jupyter install "${PYTHON_VERSION}" \
+    && ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter \
+    && pti python jupyter add-kernel "${PYTHON_VERSION}"
+
+### Install Pro Drivers ###
+RUN pti pro-drivers install --copy-odbcinst
 
 ### Copy startup scripts ###
-COPY --chmod=0775 workbench/2024.09.0+375.pro3/scripts/startup.sh /usr/local/bin/startup.sh
-COPY workbench/2024.09.0+375.pro3/startup/launcher /startup/launcher
-COPY workbench/2024.09.0+375.pro3/startup/base /startup/base
-COPY workbench/2024.09.0+375.pro3/startup/supervisord.conf /etc/supervisor/supervisord.conf
-COPY workbench/2024.09.0+375.pro3/startup/user-provisioning /startup/user-provisioning
-COPY --chmod=600 workbench/2024.09.0+375.pro3/conf/sssd/sssd.conf /etc/sssd/sssd.conf
-COPY workbench/2024.09.0+375.pro3/conf/rstudio /etc/rstudio
+COPY --chmod=0775 "workbench/2024.09.0+375.pro3/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2024.09.0+375.pro3/startup/launcher" /startup/launcher
+COPY "workbench/2024.09.0+375.pro3/startup/base" /startup/base
+COPY "workbench/2024.09.0+375.pro3/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2024.09.0+375.pro3/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2024.09.0+375.pro3/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2024.09.0+375.pro3/conf/jupyter/*" "workbench/2024.09.0+375.pro3/conf/launcher/*" "workbench/2024.09.0+375.pro3/conf/rstudio/*" "workbench/2024.09.0+375.pro3/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -63,7 +86,6 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-
 LABEL co.posit.image.tools.python="3.12.6" \
       co.posit.image.tools.r="4.4.1"
 

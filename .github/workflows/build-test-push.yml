@@ -9,45 +9,52 @@ jobs:
   ubuntu:
     env:
       image-name: 'ubuntu'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4x
     steps:
+
+      - name: GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: posit-dev
+          repositories: |
+            images-workbench
+            images-shared
+            pti
+
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup just
-        uses: extractions/setup-just@v2
-
       - name: Install Posit Bakery
-        uses: rstudio/posit-images-shared/setup-posit-bakery@main
+        run: |
+          gh auth login -p https --with-token <<< "${{ steps.app-token.outputs.token }}"
+          gh auth setup-git
+          pipx install 'git+https://github.com/posit-dev/images-shared.git@main#subdirectory=posit-bakery&egg=posit-bakery'
 
       - name: Install goss and dgoss
-        uses: rstudio/posit-images-shared/setup-goss@main
+        uses: posit-dev/images-shared/setup-goss@main
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # TODO: replace with docker.io login in the future
-      - name: Azure Container Registry Login
-        uses: Azure/docker-login@v2
-        with:
-          login-server: '${{ secrets.ACR_REGISTRY }}'
-          username: '${{ secrets.ACR_USERNAME }}'
-          password: '${{ secrets.ACR_PASSWORD }}'
-
-      # TODO: remove once publishing to docker hub
-      - name: Override registry
-        run: echo -ne "variable \"registry\" {\n  default = \"${{ secrets.ACR_REGISTRY }}\"\n}" > docker-bake.override.hcl
+      - name: Setup just
+        uses: extractions/setup-just@v2
 
       - name: Build images
         env:
           GIT_SHA: ${{ github.sha }}
-        run: bakery build --load
+        run: |
+          just download-pti
+          bakery build --load
 
       - name: Test images
-        run: bakery dgoss
+        run: bakery run dgoss
 
-      - name: Push images
-        env:
-          GIT_SHA: ${{ github.sha }}
-        if: github.event_name == 'push'
-        run: bakery build --push
+#      TODO: Reenable once we can use override repositories again
+#      - name: Push images
+#        env:
+#          GIT_SHA: ${{ github.sha }}
+#        if: github.event_name == 'push'
+#        run: bakery build --push

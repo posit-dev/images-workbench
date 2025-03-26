@@ -1,5 +1,6 @@
-tools/*goss
-docker-bake.override.hcl
+tools/*
+results/
+.docker-bake.json
 .idea
 
 ### Python template

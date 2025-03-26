@@ -1,15 +1,9 @@
 #!/usr/bin/env just --justfile
 
-init-venv:
-  #!/bin/bash
-  set -ex
-  rm -rf .venv
-  python3 -m venv .venv
-
-install-bakery:
+install-bakery *OPTS:
   #!/bin/bash
   # TODO: Update this after package is published somewhere
-  {{justfile_directory()}}/.venv/bin/pip3 install https://saipittwood.blob.core.windows.net/packages/posit_bakery-0.1.0-py3-none-any.whl
+  pipx install {{OPTS}} 'git+ssh://git@github.com/posit-dev/images-shared.git@main#egg=posit-bakery&subdirectory=posit-bakery'
 
 install-goss:
   #!/bin/bash
@@ -19,21 +13,42 @@ install-goss:
   curl -fsSL https://github.com/goss-org/goss/releases/latest/download/dgoss -o {{justfile_directory()}}/tools/dgoss
   chmod +rx {{justfile_directory()}}/tools/dgoss
 
-init: init-venv install-bakery install-goss
+init: install-bakery install-goss
 
-new product base_image="posit/base":
-  {{ justfile_directory() }}/.venv/bin/bakery new "{{product}}" --context {{ justfile_directory() }} --image-base {{base_image}} --image-type "product"
+download-pti:
+  #!/bin/bash
+  set -eo pipefail
 
-alias generate := render
-render product version r_version python_version *OPTS:
-  {{ justfile_directory() }}/.venv/bin/bakery render "{{product}}" "{{version}}" \
-    --value r_version={{r_version}} \
-    --value python_version={{python_version}} {{OPTS}}
+  RELEASE_API_ENDPOINT="/repos/posit-dev/pti/releases/latest"
+  GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token)}"
 
-alias bake := build
-build *OPTS:
-  {{ justfile_directory() }}/.venv/bin/bakery build --context {{ justfile_directory() }} {{OPTS}}
+  tag_name="$(gh --cache=1800s api $RELEASE_API_ENDPOINT --jq '.tag_name')"
+  release_version="${tag_name#v}"
+  assets="$(gh --cache=1800s api $RELEASE_API_ENDPOINT --jq '.assets.[] | [{name: .name, asset_url: .url}]')"
 
-alias dgoss := test
-test *OPTS:
-  {{ justfile_directory() }}/.venv/bin/bakery dgoss --context {{ justfile_directory() }} {{OPTS}}
+  PROJECT_DIR="$(pwd)"
+  PTI_DST_DIR="$(pwd)/pti_${release_version}"
+  mkdir -p "${PTI_DST_DIR}"
+
+
+  echo "$assets" | jq -c '.[]' | while read -r asset; do
+      name=$(echo "$asset" | jq -r ".name")
+      asset_url=$(echo "$asset" | jq -r ".asset_url")
+
+      curl -sSL \
+          -H 'Accept: application/octet-stream' \
+          -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+          "${asset_url}" \
+          -o "${PTI_DST_DIR}/${name}"
+  done
+
+  cd "${PTI_DST_DIR}"
+  shasum -c pti*checksums.txt
+  chmod +rx pti*linux_amd64
+
+  cd "$PROJECT_DIR"
+  TOOLS_DIR="${PROJECT_DIR}/tools"
+  mkdir -p "${TOOLS_DIR}"
+  mv "${PTI_DST_DIR}/pti_linux_amd64" "${TOOLS_DIR}/pti"
+  rm "${PTI_DST_DIR}/pti_checksums.txt"
+  rmdir "${PTI_DST_DIR}"
