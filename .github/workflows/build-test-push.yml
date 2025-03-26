@@ -6,9 +6,7 @@ on:
 
 name: Build, Test, and Push
 jobs:
-  ubuntu:
-    env:
-      image-name: 'ubuntu'
+  build-test-push:
     permissions:
       contents: read
       packages: write
