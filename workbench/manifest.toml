@@ -18,12 +18,6 @@ latest = true
 [build."2024.12.0+467.pro1"]
 os = ["Ubuntu 22.04"]
 
-[build."2024.09.0+375.pro3"]
-os = ["Ubuntu 22.04"]
-
-[build."2024.04.2+764.pro1"]
-os = ["Ubuntu 22.04"]
-
 [target]
 # Define the targets for each build. Each target should be a unique image build contained within each version.
 [target.min]
