@@ -58,7 +58,10 @@ jobs:
           bakery build --load
 
       - name: Test images
-        run: bakery run dgoss
+        run: |
+          GOSS_PATH=${GITHUB_WORKSPACE}/tools/goss \
+          DGOSS_PATH=${GITHUB_WORKSPACE}/tools/dgoss \
+          bakery run dgoss
 
       - name: Push images
         env:
