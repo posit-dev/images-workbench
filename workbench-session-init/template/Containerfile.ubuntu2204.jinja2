@@ -4,7 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG PTI_VERSION="0.0.3"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
-ARG WORKBENCH_VERSION="{{ image_version }}"
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
 
 ### Install Posit Tool Installer ###
 # FIXME(ianpittwood): Uncomment when PTI is available as a public repository
@@ -33,11 +33,11 @@ RUN mkdir -p /pwb-staging && \
 WORKDIR /workspace
 
 # Copy the Go source code and download dependencies
-COPY {{ rel_path }}/entrypoint/go.mod {{ rel_path }}/entrypoint/go.sum ./
+COPY {{ Path.Version }}/entrypoint/go.mod {{ Path.Version }}/entrypoint/go.sum ./
 RUN go mod download
 
 # Copy the Go source code and build the binary
-COPY {{ rel_path }}/entrypoint/main.go .
+COPY {{ Path.Version }}/entrypoint/main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-s -w' -o entrypoint main.go
 
 # Create the final image

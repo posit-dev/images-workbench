@@ -14,17 +14,17 @@ package:
     installed: true
   python-3.12.9:
     installed: true
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   r-4.4.2:
     installed: true
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
-  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_packages.txt" | splitList "\n" }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
   {{end}}
-  {{ if eq .Env.IMAGE_TYPE "std" }}
-  {{ $apt_package_list := readFile "/tmp/deps/ubuntu2204_optional_packages.txt" | splitList "\n" }}
+  {{ if eq .Env.IMAGE_VARIANT "Standard" }}
+  {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_optional_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
@@ -32,24 +32,27 @@ package:
   {{ end }}
 
 port:
+  # WARNING: This test may fail depending on how ipv6 is configured on the host
+  # Known Issue with goss: https://github.com/goss-org/goss/issues/149
   tcp:8787:
     listening: true
     ip:
     - 0.0.0.0
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   tcp:5559:
     listening: true
     ip:
     - 127.0.0.1
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
 process:
   rserver:
     running: true
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  # The output from `ps` is trucated to 16 characters, so we check for `rstudio-launche` instead of `rstudio-launcher`
   rstudio-launche:
     running: true
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
 file:
   # Check that license files were not accidentally included in build
@@ -96,7 +99,7 @@ file:
       - "session required pam_mkhomedir.so skel=/etc/skel umask=0077"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     owner: root
     group: root
     mode: "0600"
@@ -112,28 +115,28 @@ file:
     filetype: symlink
   # Check for R installation
   /opt/R/4.4.2/bin/R:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: file
   /opt/R/default/bin/R:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: file
   /usr/local/bin/R:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: symlink
   /usr/local/bin/Rscript:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: symlink
   # Check for Python installation
   /opt/python/3.12.9/bin/python:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /opt/python/default/bin/python:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /opt/python/jupyter/bin/python:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /opt/python/jupyter/bin/jupyter:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /usr/local/bin/jupyter:
-    exists: {{ if eq .Env.IMAGE_TYPE "std" }}true{{ else }}false{{ end }}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: symlink
 
 command:
@@ -152,25 +155,25 @@ command:
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000
     exit-status: 0
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify R installation is version 4.4.2":
     exec: /opt/R/4.4.2/bin/R --version
     exit-status: 0
     stdout:
       - "R version 4.4.2"
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify Python installation is version 3.12.9":
     exec: /opt/python/3.12.9/bin/python --version
     exit-status: 0
     stdout:
       - "3.12.9"
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
     stdout:
       - "3.12.9"
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify system OpenSSL":
     exec: which openssl
     exit-status: 0
@@ -184,4 +187,4 @@ command:
     exit-status: 0
     stderr:
       - "/tinytex\\s+External Installation/"
-    skip: {{ if eq .Env.IMAGE_TYPE "min" }}true{{ else }}false{{ end }}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}

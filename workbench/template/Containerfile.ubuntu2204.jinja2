@@ -6,24 +6,24 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG PTI_VERSION="0.0.4"
 ARG PTI_NO_COLOR="true"
 ARG PTI_LOG_FORMAT="json"
-{% if not image_type == "min" %}
+{% if not Image.Variant == "Minimal" %}
 ARG PYTHON_VERSION="{{ python_version }}"
 ARG R_VERSION="{{ r_version }}"
 {%- endif %}
-ARG WORKBENCH_VERSION="{{ image_version }}"
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
-ENV STARTUP_DEBUG_MODE 0
-ENV RSW_LICENSE ""
-ENV RSW_LICENSE_SERVER ""
-ENV RSW_TESTUSER rstudio
-ENV RSW_TESTUSER_PASSWD rstudio
-ENV RSW_TESTUSER_UID 10000
-ENV RSW_LAUNCHER true
-ENV RSW_LAUNCHER_TIMEOUT 10
-ENV DIAGNOSTIC_DIR /var/log/rstudio
-ENV DIAGNOSTIC_ENABLE false
-ENV DIAGNOSTIC_ONLY false
+ENV STARTUP_DEBUG_MODE=0
+ENV RSW_LICENSE=""
+ENV RSW_LICENSE_SERVER=""
+ENV RSW_TESTUSER=rstudio
+ENV RSW_TESTUSER_PASSWD=rstudio
+ENV RSW_TESTUSER_UID=10000
+ENV RSW_LAUNCHER=true
+ENV RSW_LAUNCHER_TIMEOUT=10
+ENV DIAGNOSTIC_DIR=/var/log/rstudio
+ENV DIAGNOSTIC_ENABLE=false
+ENV DIAGNOSTIC_ONLY=false
 
 ### Install Posit Tool Installer ###
 # FIXME(ianpittwood): Uncomment when PTI is available as a public repository
@@ -38,14 +38,14 @@ COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
 RUN pti init
 
 ### Install System Packages ###
-COPY {{ rel_path }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-{% if not image_type == "min" -%}
-COPY {{ rel_path }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
+COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
+{% if not Image.Variant == "Minimal" -%}
+COPY {{ Path.Version }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 {%- endif %}
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
     && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    {%- if not image_type == "min" %}
+    {%- if not Image.Variant == "Minimal" %}
     && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
     && rm -f /tmp/ubuntu2204_optional_packages.txt \
     {%- endif %}
@@ -54,14 +54,14 @@ RUN pti syspkg update \
 ### Install wait-for-it ###
 RUN pti container wait-for-it install
 
-### Install Workbench {{ image_version }} ###
-COPY {{ rel_path }}/scripts/install_workbench.sh /tmp/install_workbench.sh
+### Install Workbench {{ Image.Version }} ###
+COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-{%- if not image_type == "min" %}
+{%- if not Image.Variant == "Minimal" %}
 ### Install TinyTeX using Quarto ###
 RUN pti quarto tinytex install --add-to-path
 
@@ -79,15 +79,15 @@ RUN pti pro-drivers install --copy-odbcinst
 {%- endif %}
 
 ### Copy startup scripts ###
-COPY --chmod=0775 "{{ rel_path }}/scripts/startup.sh" /usr/local/bin/startup.sh
-COPY "{{ rel_path }}/startup/launcher" /startup/launcher
-COPY "{{ rel_path }}/startup/base" /startup/base
-COPY "{{ rel_path }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-{%- if not image_type == "min" %}
-COPY "{{ rel_path }}/startup/user-provisioning" /startup/user-provisioning
-COPY --chmod=600 "{{ rel_path }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
+COPY "{{ Path.Version }}/startup/base" /startup/base
+COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+{%- if not Image.Variant == "Minimal" %}
+COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
 {%- endif %}
-COPY "{{ rel_path }}/conf/jupyter/*" "{{ rel_path }}/conf/launcher/*" "{{ rel_path }}/conf/rstudio/*" "{{ rel_path }}/conf/vscode/*" /etc/rstudio
+COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -97,7 +97,7 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
 
-{%- if not image_type == "min" %}
+{%- if not Image.Variant == "Minimal" %}
 LABEL co.posit.image.tools.python="{{ python_version }}" \
       co.posit.image.tools.r="{{ r_version }}"
 {%- endif %}

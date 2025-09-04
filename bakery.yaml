@@ -1,0 +1,63 @@
+#######################################################################################################################
+# BAKERY REPOSITORY CONFIG
+#
+# This file is used to define global properties for builds inside a repo managed by Posit's Bakery tool.
+#######################################################################################################################
+
+# Define properties of the local repository. This information will be used when labeling image builds.
+repository:
+  url: "github.com/posit-dev/images-workbench"
+  vendor: "Posit Software, PBC"
+  maintainer: "Posit Docker Team <docker@posit.co>"
+  authors:
+    - name: Ian H. Pittwood
+      email: ian.pittwood@posit.co
+    - name: Ben Schwedler
+      email: ben@posit.co
+
+# Define image registries used by builds in this repository. Images will be tagged appropriately for each registry.
+# Logins for private registries should be managed independently of Bakery.
+registries:
+  - host: "docker.io"
+    namespace: "posit"
+  - host: "ghcr.io"
+    namespace: "posit-dev"
+
+images:
+  - name: workbench
+    displayName: "Posit Workbench"
+    description: "A containerized image of Posit Workbench (PWB). Posit Workbench
+      delivers RStudio, Jupyter, VS Code, and the new Positron IDE all in one place.
+      It gives data teams the IDEs they love, and IT the control and governance needed
+      for secure, compliant work."
+    documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    variants:
+      - name: Standard
+        extension: std
+        tagDisplayName: std
+        primary: true
+        options:
+          - tool: goss
+            wait: 15
+            command: "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf"
+      - name: Minimal
+        extension: min
+        tagDisplayName: min
+    versions:
+      - name: 2024.12.1+563.pro5
+        subpath: '2024.12'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
+  - name: workbench-session-init
+    displayName: "Posit Workbench Session Init"
+    description: "A containerized image for initializing Posit Workbench sessions."
+    documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    versions:
+      - name: 2024.12.1+563.pro5
+        subpath: '2024.12'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
