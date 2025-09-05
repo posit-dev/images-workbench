@@ -44,9 +44,14 @@ images:
         extension: min
         tagDisplayName: min
     versions:
+      - name: 2025.05.1+513.pro3
+        subpath: '2025.05'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
       - name: 2024.12.1+563.pro5
         subpath: '2024.12'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
@@ -55,9 +60,14 @@ images:
     description: "A containerized image for initializing Posit Workbench sessions."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
     versions:
+      - name: 2025.05.1+513.pro3
+        subpath: '2025.05'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
       - name: 2024.12.1+563.pro5
         subpath: '2024.12'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
