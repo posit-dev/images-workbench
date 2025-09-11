@@ -33,11 +33,11 @@ RUN mkdir -p /pwb-staging && \
 WORKDIR /workspace
 
 # Copy the Go source code and download dependencies
-COPY workbench-session-init/2024.12.1+563.pro5/entrypoint/go.mod workbench-session-init/2024.12.1+563.pro5/entrypoint/go.sum ./
+COPY workbench-session-init/2024.12/entrypoint/go.mod workbench-session-init/2024.12/entrypoint/go.sum ./
 RUN go mod download
 
 # Copy the Go source code and build the binary
-COPY workbench-session-init/2024.12.1+563.pro5/entrypoint/main.go .
+COPY workbench-session-init/2024.12/entrypoint/main.go .
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-s -w' -o entrypoint main.go
 
 # Create the final image

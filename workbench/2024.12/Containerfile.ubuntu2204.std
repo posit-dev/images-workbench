@@ -9,20 +9,20 @@ ARG PTI_LOG_FORMAT="json"
 
 ARG PYTHON_VERSION="3.12.9"
 ARG R_VERSION="4.4.2"
-ARG WORKBENCH_VERSION="2024.12.0+467.pro1"
+ARG WORKBENCH_VERSION="2024.12.1+563.pro5"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
-ENV STARTUP_DEBUG_MODE 0
-ENV RSW_LICENSE ""
-ENV RSW_LICENSE_SERVER ""
-ENV RSW_TESTUSER rstudio
-ENV RSW_TESTUSER_PASSWD rstudio
-ENV RSW_TESTUSER_UID 10000
-ENV RSW_LAUNCHER true
-ENV RSW_LAUNCHER_TIMEOUT 10
-ENV DIAGNOSTIC_DIR /var/log/rstudio
-ENV DIAGNOSTIC_ENABLE false
-ENV DIAGNOSTIC_ONLY false
+ENV STARTUP_DEBUG_MODE=0
+ENV RSW_LICENSE=""
+ENV RSW_LICENSE_SERVER=""
+ENV RSW_TESTUSER=rstudio
+ENV RSW_TESTUSER_PASSWD=rstudio
+ENV RSW_TESTUSER_UID=10000
+ENV RSW_LAUNCHER=true
+ENV RSW_LAUNCHER_TIMEOUT=10
+ENV DIAGNOSTIC_DIR=/var/log/rstudio
+ENV DIAGNOSTIC_ENABLE=false
+ENV DIAGNOSTIC_ONLY=false
 
 ### Install Posit Tool Installer ###
 # FIXME(ianpittwood): Uncomment when PTI is available as a public repository
@@ -37,8 +37,8 @@ COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
 RUN pti init
 
 ### Install System Packages ###
-COPY workbench/2024.12.0+467.pro1/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-COPY workbench/2024.12.0+467.pro1/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
+COPY workbench/2024.12/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
+COPY workbench/2024.12/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
 RUN pti syspkg update \
     && pti syspkg upgrade --dist \
     && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
@@ -49,8 +49,8 @@ RUN pti syspkg update \
 ### Install wait-for-it ###
 RUN pti container wait-for-it install
 
-### Install Workbench 2024.12.0+467.pro1 ###
-COPY workbench/2024.12.0+467.pro1/scripts/install_workbench.sh /tmp/install_workbench.sh
+### Install Workbench 2024.12.1+563.pro5 ###
+COPY --chmod=0755 workbench/2024.12/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN OS_URL=jammy /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
@@ -71,13 +71,13 @@ RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
 RUN pti pro-drivers install --copy-odbcinst
 
 ### Copy startup scripts ###
-COPY --chmod=0775 "workbench/2024.12.0+467.pro1/scripts/startup.sh" /usr/local/bin/startup.sh
-COPY "workbench/2024.12.0+467.pro1/startup/launcher" /startup/launcher
-COPY "workbench/2024.12.0+467.pro1/startup/base" /startup/base
-COPY "workbench/2024.12.0+467.pro1/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-COPY "workbench/2024.12.0+467.pro1/startup/user-provisioning" /startup/user-provisioning
-COPY --chmod=600 "workbench/2024.12.0+467.pro1/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-COPY "workbench/2024.12.0+467.pro1/conf/jupyter/*" "workbench/2024.12.0+467.pro1/conf/launcher/*" "workbench/2024.12.0+467.pro1/conf/rstudio/*" "workbench/2024.12.0+467.pro1/conf/vscode/*" /etc/rstudio
+COPY --chmod=0775 "workbench/2024.12/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2024.12/startup/launcher" /startup/launcher
+COPY "workbench/2024.12/startup/base" /startup/base
+COPY "workbench/2024.12/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2024.12/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2024.12/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2024.12/conf/jupyter/*" "workbench/2024.12/conf/launcher/*" "workbench/2024.12/conf/rstudio/*" "workbench/2024.12/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \

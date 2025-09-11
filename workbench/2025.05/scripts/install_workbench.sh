@@ -19,7 +19,6 @@ curl -fsSL -o /tmp/workbench.deb ${WORKBENCH_DOWNLOAD_URL}
 
 # Verify Workbench package
 echo "$d Verify Workbench package $d"
-
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 51C0B5BB19F92D60
 dpkg-sig --verify /tmp/workbench.deb
 
