@@ -1,15 +1,24 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+{%- import "python.j2" as python -%}
+{%- import "quarto.j2" as quarto -%}
+{%- import "r.j2" as r -%}
+{%- import "wait-for-it.j2" as waitforit -%}
+
+{%- if Image.Variant != "Minimal" -%}
+# Build Python using uv in a separate stage
+{{ python.build_stage(Dependencies.python) }}
+
+{% endif -%}
+
 FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.4"
-ARG PTI_NO_COLOR="true"
-ARG PTI_LOG_FORMAT="json"
-{% if not Image.Variant == "Minimal" %}
-ARG PYTHON_VERSION="{{ python_version }}"
-ARG R_VERSION="{{ r_version }}"
-{%- endif %}
 ARG WORKBENCH_VERSION="{{ Image.Version }}"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
@@ -25,57 +34,55 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
-### Install Posit Tool Installer ###
-# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
-#ADD --chmod=0755 \
-#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
-#    /usr/local/bin/pti
-# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
-#                     pti is available publicly.
-COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+### Setup environment ###
+{{ apt.run_setup() }}
 
-### Initialize PTI in container ###
-RUN pti init
-
-### Install System Packages ###
-COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
+## Install Apt Packages ###
 {% if not Image.Variant == "Minimal" -%}
-COPY {{ Path.Version }}/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
+COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
+COPY {{ Path.Version }}/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
+{{ apt.run_install(files = ['/tmp/packages.txt', '/tmp/packages.optional_packages']) }}
+{% else -%}
+COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
+{{ apt.run_install(files = ['/tmp/packages.txt']) }}
 {%- endif %}
-RUN pti syspkg update \
-    && pti syspkg upgrade --dist \
-    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    {%- if not Image.Variant == "Minimal" %}
-    && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
-    && rm -f /tmp/ubuntu2204_optional_packages.txt \
-    {%- endif %}
-    && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
-RUN pti container wait-for-it install
+{{ waitforit.run_install() }}
 
 ### Install Workbench {{ Image.Version }} ###
 COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
-RUN OS_URL=jammy /tmp/install_workbench.sh
+RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
+    /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-{%- if not Image.Variant == "Minimal" %}
+{% if not Image.Variant == "Minimal" -%}
 ### Install TinyTeX using Quarto ###
-RUN pti quarto tinytex install --add-to-path
+RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True) }}
 
 ### Install R ###
-RUN pti r install --add-to-path --default "${R_VERSION}"
+{{ r.run_install(Dependencies.R) }}
 
-### Install Python and Jupyter ###
-RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
-    && pti python jupyter install "${PYTHON_VERSION}" \
-    && ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter \
-    && pti python jupyter add-kernel "${PYTHON_VERSION}"
+### Install Python from previous stage ###
+{{ python.copy_from_build_stage() }}
+
+### Install Jupyter ###
+RUN {{ python.get_version_directory(Dependencies.python.0) }}/bin/python -m venv /opt/python/jupyter && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir jupyterlab<5 notebook pwb_jupyterlab<2 && \
+    ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
+
+### Install Jupyter kernels ###
+{% for python_version in Dependencies.python -%}
+RUN {{ python.get_version_directory(python_version) }}/bin/python -m ipykernel install --user --name python{{ python_version }} --display-name "Python {{ python_version }}"
+
+{% endfor -%}
 
 ### Install Pro Drivers ###
-RUN pti pro-drivers install --copy-odbcinst
+RUN apt-get install -yq rstudio-drivers && \
+    {{ apt.clean_command() }}
 {%- endif %}
 
 ### Copy startup scripts ###
@@ -94,13 +101,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
     && mkdir -p /startup/custom/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
-    && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
-    && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-
-{%- if not Image.Variant == "Minimal" %}
-LABEL co.posit.image.tools.python="{{ python_version }}" \
-      co.posit.image.tools.r="{{ r_version }}"
-{%- endif %}
+    && echo "RSPM={{ r.get_p3m_cran_repo(Image.OS) }}" > /etc/rstudio/repos.conf \
+    && echo "CRAN={{ r.get_p3m_cran_repo(Image.OS) }}" >> /etc/rstudio/repos.conf
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp

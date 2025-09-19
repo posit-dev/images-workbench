@@ -31,6 +31,13 @@ images:
       It gives data teams the IDEs they love, and IT the control and governance needed
       for secure, compliant work."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    dependencyConstraints:
+      - dependency: R
+        constraint:
+          latest: true
+      - dependency: python
+        constraint:
+          latest: true
     variants:
       - name: Standard
         extension: std
@@ -50,11 +57,21 @@ images:
         os:
           - name: Ubuntu 22.04
             primary: true
+        dependencies:
+          - dependency: R
+            version: 4.4.3
+          - dependency: python
+            version: 3.12.11
       - name: 2024.12.1+563.pro5
         subpath: '2024.12'
         os:
           - name: Ubuntu 22.04
             primary: true
+        dependencies:
+          - dependency: R
+            version: 4.4.2
+          - dependency: python
+            version: 3.12.9
   - name: workbench-session-init
     displayName: "Posit Workbench Session Init"
     description: "A containerized image for initializing Posit Workbench sessions."
