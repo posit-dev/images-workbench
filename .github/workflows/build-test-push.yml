@@ -23,7 +23,6 @@ jobs:
           repositories: |
             images-workbench
             images-shared
-            pti
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -60,7 +59,6 @@ jobs:
         env:
           GIT_SHA: ${{ github.sha }}
         run: |
-          just download-pti
           bakery build --load
 
       - name: Test images
