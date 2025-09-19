@@ -50,10 +50,27 @@ images:
       - name: Minimal
         extension: min
         tagDisplayName: min
+    devVersions:
+      - sourceType: stream
+        product: workbench
+        stream: daily
+        os:
+          - name: Ubuntu 22.04
+            primary: true
     versions:
+      - name: 2025.09.0+387.pro2
+        subpath: '2025.09'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
+        dependencies:
+          - dependency: R
+            version: 4.5.1
+          - dependency: python
+            version: 3.13.7
       - name: 2025.05.1+513.pro3
         subpath: '2025.05'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true

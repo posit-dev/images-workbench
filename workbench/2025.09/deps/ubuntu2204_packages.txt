@@ -1,0 +1,11 @@
+build-essential
+libclang-dev
+libpq5
+libssl-dev
+lsb-release
+psmisc
+oddjob-mkhomedir
+rrdtool
+sssd
+sudo
+supervisor
