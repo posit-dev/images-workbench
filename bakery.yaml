@@ -93,10 +93,22 @@ images:
     displayName: "Posit Workbench Session Init"
     description: "A containerized image for initializing Posit Workbench sessions."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    devVersions:
+      - sourceType: stream
+        product: workbench-session
+        stream: daily
+        os:
+          - name: Ubuntu 22.04
+            primary: true
     versions:
+      - name: 2025.09.0+387.pro2
+        subpath: '2025.09'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
       - name: 2025.05.1+513.pro3
         subpath: '2025.05'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
