@@ -1,29 +1,27 @@
 FROM docker.io/library/golang:1.22.2 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.3"
-ARG PTI_NO_COLOR="true"
-ARG PTI_LOG_FORMAT="json"
 ARG WORKBENCH_VERSION="2024.12.1+563.pro5"
 
-### Install Posit Tool Installer ###
-# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
-#ADD --chmod=0755 \
-#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
-#    /usr/local/bin/pti
-# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
-#                     pti is available publicly.
-COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
-
 ### Initialize PTI in container ###
-RUN pti init \
-    && pti syspkg install -p curl
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 # Download the RStudio Workbench session components and install Go
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p /pwb-staging && \
     WORKBENCH_VERSION_URL=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g') && \
-    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-${WORKBENCH_VERSION_URL}-x86_64.tar.gz" && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2024.12.1-563.pro5-x86_64.tar.gz" && \
     mkdir -p /opt/session-components && \
     tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
     chmod 755 /opt/session-components && \
@@ -45,10 +43,13 @@ FROM docker.io/library/ubuntu:22.04 AS build
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ARG DEBIAN_FRONTEND=noninteractive
-COPY --from=builder --chmod=755 /usr/local/bin/pti /usr/local/bin/pti
 
-RUN pti init \
-    && pti syspkg install -p curl
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the compiled Go binary and session components from the builder stage
 COPY --from=builder --chmod=755 /workspace/entrypoint /usr/local/bin/entrypoint
