@@ -46,7 +46,8 @@ RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.co
 ### Install Workbench 2024.12.1+563.pro5 ###
 COPY --chmod=0755 workbench/2024.12/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
-    /tmp/install_workbench.sh
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto

@@ -53,7 +53,8 @@ COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
 ### Install Workbench {{ Image.Version }} ###
 COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
-    /tmp/install_workbench.sh
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
