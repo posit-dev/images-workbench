@@ -41,7 +41,7 @@ ENV DIAGNOSTIC_ONLY=false
 {% if not Image.Variant == "Minimal" -%}
 COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
 COPY {{ Path.Version }}/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
-{{ apt.run_install(files = ['/tmp/packages.txt', '/tmp/packages.optional_packages']) }}
+{{ apt.run_install(files = ['/tmp/packages.txt', '/tmp/optional_packages.txt']) }}
 {% else -%}
 COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
 {{ apt.run_install(files = ['/tmp/packages.txt']) }}
@@ -71,12 +71,13 @@ RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto
 ### Install Jupyter ###
 RUN {{ python.get_version_directory(Dependencies.python.0) }}/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir jupyterlab<5 notebook pwb_jupyterlab<2 && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernels ###
 {% for python_version in Dependencies.python -%}
-RUN {{ python.get_version_directory(python_version) }}/bin/python -m ipykernel install --user --name python{{ python_version }} --display-name "Python {{ python_version }}"
+RUN {{ python.install_packages(python_version, "ipykernel") }} && \
+    {{ python.get_version_directory(python_version) }}/bin/python -m ipykernel install --user --name python{{ python_version }} --display-name "Python {{ python_version }}"
 
 {% endfor -%}
 

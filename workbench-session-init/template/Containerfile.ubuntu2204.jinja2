@@ -3,7 +3,7 @@ Below are imports for Bakery's macros. If any are unneeded, they can be removed.
 Bakery handles bootstrapping the files into template rendering.
 -#}
 {%- import "apt.j2" as apt -%}
-FROM docker.io/library/golang:{{ go_version }} AS builder
+FROM docker.io/library/golang:{{ go_version | default("1.25.1") }} AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG WORKBENCH_VERSION="{{ Image.Version }}"

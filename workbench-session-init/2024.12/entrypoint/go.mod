@@ -1,11 +1,10 @@
 module entrypoint
 
-go 1.25.1
+go 1.22.2
 
-require github.com/otiai10/copy v1.14.1
+require github.com/otiai10/copy v1.14.0
 
 require (
-	github.com/otiai10/mint v1.6.3 // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 )

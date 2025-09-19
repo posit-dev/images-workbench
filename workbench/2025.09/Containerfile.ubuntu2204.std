@@ -45,7 +45,7 @@ COPY workbench/2025.09/deps/ubuntu2204_packages.txt /tmp/packages.txt
 COPY workbench/2025.09/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
 RUN apt-get update -yqq && \
     xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
-    xargs -a /tmp/packages.optional_packages apt-get install -yqq --no-install-recommends && \
+    xargs -a /tmp/optional_packages.txt apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
@@ -75,11 +75,13 @@ COPY --from=python-builder /opt/python /opt/python
 ### Install Jupyter ###
 RUN /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir jupyterlab<5 notebook pwb_jupyterlab<2 && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernels ###
-RUN /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
+RUN /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/pip install --no-cache-dir --upgrade --break-system-packages \
+    ipykernel && \
+    /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
 
 ### Install Pro Drivers ###
 RUN apt-get install -yq rstudio-drivers && \
