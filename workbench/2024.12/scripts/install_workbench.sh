@@ -4,40 +4,14 @@ set -euo pipefail
 # Output delimiter
 d="===="
 
-# Set variables
-OS_URL=${OS_URL:-jammy}
-WORKBENCH_NAME=${WORKBENCH_NAME:-rstudio-workbench}
-WORKBENCH_URL_VERSION=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g')
-WORKBENCH_DOWNLOAD_URL=${WORKBENCH_DOWNLOAD_URL:-https://download2.rstudio.org/server/$OS_URL/amd64/$WORKBENCH_NAME-$WORKBENCH_URL_VERSION-amd64.deb}
-
 # Update apt repositories
-pti syspkg install --no-clean -p curl -p gpg -p gpg-agent -p dpkg-sig
+apt-get update -yq
 
-# Fetch Workbench debian package
-echo "$d Fetching Workbench package $d"
-curl -fsSL -o /tmp/workbench.deb ${WORKBENCH_DOWNLOAD_URL}
+echo "$d Install Posit Workbench 2024.12.1+563.pro5 $d"
 
-# Verify Workbench package
-echo "$d Verify Workbench package $d"
-gpg --keyserver hkps://keys.openpgp.org --recv-keys 51C0B5BB19F92D60
-dpkg-sig --verify /tmp/workbench.deb
-
-# Patch Workbench package to not attempt service startup
-echo "$d Patching Workbench package installation scripts $d"
-dpkg --unpack /tmp/workbench.deb
-# FIXME(ianpittwood): This should be fixed in the debian packages.
-# Workaround since RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
-sed -i 's/systemctl enable rstudio-server.service/#systemctl enable rstudio-server.service/g' /var/lib/dpkg/info/rstudio-server.postinst
-sed -i 's/systemctl enable rstudio-launcher.service/#systemctl enable rstudio-launcher.service/g' /var/lib/dpkg/info/rstudio-server.postinst
-sed -i 's/$RSERVER_ADMIN_SCRIPT start/echo "Skipping server startup."/g' /var/lib/dpkg/info/rstudio-server.postinst
-sed -i 's/$LAUNCHER_ADMIN_SCRIPT start/echo "Skipping launcher startup."/g' /var/lib/dpkg/info/rstudio-server.postinst
-
-# Install Workbench
-echo "$d Install Workbench $d"
-dpkg --configure rstudio-server
-apt-get install -yf
-rm -f /tmp/workbench.deb
+RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1 apt-get install -yf rstudio-server=2024.12.1+563.pro5
+apt-mark hold rstudio-server
 
 # Clean up
-pti syspkg remove -p curl -p gpg -p gpg-agent -p dpkg-sig
-pti syspkg clean
+apt-get clean -yqq && \
+rm -rf /var/lib/apt/lists/*

@@ -1,14 +1,16 @@
+# Build Python using uv in a separate stage
+FROM ghcr.io/astral-sh/uv:bookworm-slim AS python-builder
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+ENV UV_PYTHON_INSTALL_DIR=/opt/python
+ENV UV_PYTHON_PREFERENCE=only-managed
+RUN uv python install 3.12.11
+
 FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG PTI_VERSION="0.0.4"
-ARG PTI_NO_COLOR="true"
-ARG PTI_LOG_FORMAT="json"
-
-ARG PYTHON_VERSION="3.12.11"
-ARG R_VERSION="4.4.3"
 ARG WORKBENCH_VERSION="2025.05.1+513.pro3"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
@@ -24,51 +26,65 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
-### Install Posit Tool Installer ###
-# FIXME(ianpittwood): Uncomment when PTI is available as a public repository
-#ADD --chmod=0755 \
-#    https://github.com/posit-dev/pti/releases/download/v${PTI_VERSION}/pti_${PTI_VERSION}_linux_amd64 \
-#    /usr/local/bin/pti
-# FIXME(ianpittwood): This is a shim to get around Github private repo authentication. ADD is a better solution once
-#                     pti is available publicly.
-COPY --chmod=0755 ./tools/pti /usr/local/bin/pti
+### Setup environment ###
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
-### Initialize PTI in container ###
-RUN pti init
+## Install Apt Packages ###
+COPY workbench/2025.05/deps/ubuntu2204_packages.txt /tmp/packages.txt
+COPY workbench/2025.05/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
+RUN apt-get update -yqq && \
+    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
+    xargs -a /tmp/packages.optional_packages apt-get install -yqq --no-install-recommends && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
-### Install System Packages ###
-COPY workbench/2025.05/deps/ubuntu2204_packages.txt /tmp/ubuntu2204_packages.txt
-COPY workbench/2025.05/deps/ubuntu2204_optional_packages.txt /tmp/ubuntu2204_optional_packages.txt
-RUN pti syspkg update \
-    && pti syspkg upgrade --dist \
-    && pti syspkg install -f /tmp/ubuntu2204_packages.txt \
-    && pti syspkg install -f /tmp/ubuntu2204_optional_packages.txt \
-    && rm -f /tmp/ubuntu2204_optional_packages.txt \
-    && rm -f /tmp/ubuntu2204_packages.txt
 
 ### Install wait-for-it ###
-RUN pti container wait-for-it install
+RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench 2025.05.1+513.pro3 ###
 COPY --chmod=0755 workbench/2025.05/scripts/install_workbench.sh /tmp/install_workbench.sh
-RUN OS_URL=jammy /tmp/install_workbench.sh
+RUN \
+    /tmp/install_workbench.sh
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
+
 ### Install TinyTeX using Quarto ###
-RUN pti quarto tinytex install --add-to-path
+RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --update-path
 
 ### Install R ###
-RUN pti r install --add-to-path --default "${R_VERSION}"
+RUN RUN_UNATTENDED=1 R_VERSION=4.4.3 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
+    find . -type f -name '[rR]-4.4.3.*\.(deb|rpm)' -delete
 
-### Install Python and Jupyter ###
-RUN pti python install --add-to-path --default "${PYTHON_VERSION}" \
-    && pti python jupyter install "${PYTHON_VERSION}" \
-    && ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter \
-    && pti python jupyter add-kernel "${PYTHON_VERSION}"
+### Install Python from previous stage ###
+COPY --from=python-builder /opt/python /opt/python
+
+### Install Jupyter ###
+RUN /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python -m venv /opt/python/jupyter && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir jupyterlab<5 notebook pwb_jupyterlab<2 && \
+    ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
+
+### Install Jupyter kernels ###
+RUN /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python -m ipykernel install --user --name python3.12.11 --display-name "Python 3.12.11"
 
 ### Install Pro Drivers ###
-RUN pti pro-drivers install --copy-odbcinst
+RUN apt-get install -yq rstudio-drivers && \
+    apt-get clean -yqq && \
+rm -rf /var/lib/apt/lists/*
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2025.05/scripts/startup.sh" /usr/local/bin/startup.sh
@@ -84,10 +100,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
     && mkdir -p /startup/custom/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
-    && echo "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
-    && echo "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
-LABEL co.posit.image.tools.python="3.12.11" \
-      co.posit.image.tools.r="4.4.3"
+    && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
+    && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
