@@ -1,6 +1,8 @@
 tools/*
 results/
 .docker-bake.json
+.bakery-bake.json
+.dev-*
 .idea
 
 ### Python template

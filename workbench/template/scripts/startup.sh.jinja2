@@ -77,7 +77,7 @@ fi
 # Start Launcher
 if [ "$RSW_LAUNCHER" == "true" ]; then
   echo "Waiting for launcher to startup... to disable set RSW_LAUNCHER=false"
-  wait-for-it localhost:5559 -t $RSW_LAUNCHER_TIMEOUT
+  wait-for-it.sh localhost:5559 -t $RSW_LAUNCHER_TIMEOUT
 fi
 
 # Check diagnostic configurations

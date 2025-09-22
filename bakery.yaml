@@ -31,6 +31,13 @@ images:
       It gives data teams the IDEs they love, and IT the control and governance needed
       for secure, compliant work."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    dependencyConstraints:
+      - dependency: R
+        constraint:
+          latest: true
+      - dependency: python
+        constraint:
+          latest: true
     variants:
       - name: Standard
         extension: std
@@ -43,26 +50,65 @@ images:
       - name: Minimal
         extension: min
         tagDisplayName: min
+    devVersions:
+      - sourceType: stream
+        product: workbench
+        stream: daily
+        os:
+          - name: Ubuntu 22.04
+            primary: true
     versions:
-      - name: 2025.05.1+513.pro3
-        subpath: '2025.05'
+      - name: 2025.09.0+387.pro2
+        subpath: '2025.09'
         latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
+        dependencies:
+          - dependency: R
+            version: 4.5.1
+          - dependency: python
+            version: 3.13.7
+      - name: 2025.05.1+513.pro3
+        subpath: '2025.05'
+        os:
+          - name: Ubuntu 22.04
+            primary: true
+        dependencies:
+          - dependency: R
+            version: 4.4.3
+          - dependency: python
+            version: 3.12.11
       - name: 2024.12.1+563.pro5
         subpath: '2024.12'
         os:
           - name: Ubuntu 22.04
             primary: true
+        dependencies:
+          - dependency: R
+            version: 4.4.2
+          - dependency: python
+            version: 3.12.9
   - name: workbench-session-init
     displayName: "Posit Workbench Session Init"
     description: "A containerized image for initializing Posit Workbench sessions."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    devVersions:
+      - sourceType: stream
+        product: workbench-session
+        stream: daily
+        os:
+          - name: Ubuntu 22.04
+            primary: true
     versions:
+      - name: 2025.09.0+387.pro2
+        subpath: '2025.09'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+            primary: true
       - name: 2025.05.1+513.pro3
         subpath: '2025.05'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true

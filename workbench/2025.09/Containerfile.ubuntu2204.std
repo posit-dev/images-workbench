@@ -1,0 +1,111 @@
+# Build Python using uv in a separate stage
+FROM ghcr.io/astral-sh/uv:bookworm-slim AS python-builder
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+ENV UV_PYTHON_INSTALL_DIR=/opt/python
+ENV UV_PYTHON_PREFERENCE=only-managed
+RUN uv python install 3.13.7
+
+FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+ARG WORKBENCH_VERSION="2025.09.0+387.pro2"
+ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
+
+ENV STARTUP_DEBUG_MODE=0
+ENV RSW_LICENSE=""
+ENV RSW_LICENSE_SERVER=""
+ENV RSW_TESTUSER=rstudio
+ENV RSW_TESTUSER_PASSWD=rstudio
+ENV RSW_TESTUSER_UID=10000
+ENV RSW_LAUNCHER=true
+ENV RSW_LAUNCHER_TIMEOUT=10
+ENV DIAGNOSTIC_DIR=/var/log/rstudio
+ENV DIAGNOSTIC_ENABLE=false
+ENV DIAGNOSTIC_ONLY=false
+
+### Setup environment ###
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+## Install Apt Packages ###
+COPY workbench/2025.09/deps/ubuntu2204_packages.txt /tmp/packages.txt
+COPY workbench/2025.09/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
+RUN apt-get update -yqq && \
+    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
+    xargs -a /tmp/optional_packages.txt apt-get install -yqq --no-install-recommends && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+
+### Install wait-for-it ###
+RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
+
+### Install Workbench 2025.09.0+387.pro2 ###
+COPY --chmod=0755 workbench/2025.09/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN \
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Install Quarto to PATH ###
+RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
+
+### Install TinyTeX using Quarto ###
+RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --update-path
+
+### Install R ###
+RUN RUN_UNATTENDED=1 R_VERSION=4.5.1 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
+    find . -type f -name '[rR]-4.5.1.*\.(deb|rpm)' -delete
+
+### Install Python from previous stage ###
+COPY --from=python-builder /opt/python /opt/python
+
+### Install Jupyter ###
+RUN /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python -m venv /opt/python/jupyter && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
+    ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
+
+### Install Jupyter kernels ###
+RUN /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/pip install --no-cache-dir --upgrade --break-system-packages \
+    ipykernel && \
+    /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
+
+### Install Pro Drivers ###
+RUN apt-get install -yq rstudio-drivers && \
+    apt-get clean -yqq && \
+rm -rf /var/lib/apt/lists/*
+
+### Copy startup scripts ###
+COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2025.09/startup/launcher" /startup/launcher
+COPY "workbench/2025.09/startup/base" /startup/base
+COPY "workbench/2025.09/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2025.09/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2025.09/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio
+
+### Configure Workbench ###
+RUN mkdir -p /var/lib/rstudio-server/monitor/log \
+    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+    && mkdir -p /startup/custom/ \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
+    && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
+    && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+
+EXPOSE 8787/tcp
+EXPOSE 5559/tcp
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

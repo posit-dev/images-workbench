@@ -1,3 +1,9 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "python.j2" as python -%}
+{%- import "r.j2" as r -%}
 user:
   rstudio-server:
     exists: true
@@ -12,12 +18,11 @@ group:
 package:
   rstudio-server:
     installed: true
-  python-{{ python_version }}:
-    installed: true
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+  {% for r_version in Dependencies.R %}
   r-{{ r_version }}:
     installed: true
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+  {% endfor %}
   {% raw -%}
   {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
@@ -111,30 +116,25 @@ file:
   /etc/rstudio/repos.conf:
     exists: true
     contents:
-      - "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
-      - "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
+      {% raw -%}
+      - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
+      - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
+      {%- endraw %}
   # Check for symlinked Quarto executable
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
   # Check for R installation
-  /opt/R/{{ r_version }}/bin/R:
+  {% for r_version in Dependencies.R %}
+  {{ r.get_version_directory(r_version) }}/bin/R:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: file
-  /opt/R/default/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: file
-  /usr/local/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: symlink
-  /usr/local/bin/Rscript:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-    filetype: symlink
+  {% endfor %}
   # Check for Python installation
-  /opt/python/{{ python_version }}/bin/python:
+  {% for python_version in Dependencies.python %}
+  {{ python.get_version_directory(python_version) }}/bin/python:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-  /opt/python/default/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+  {% endfor %}
   /opt/python/jupyter/bin/python:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
   /opt/python/jupyter/bin/jupyter:
@@ -160,23 +160,27 @@ command:
     timeout: 60000
     exit-status: 0
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+  {% for r_version in Dependencies.R -%}
   "Verify R installation is version {{ r_version }}":
-    exec: /opt/R/{{ r_version }}/bin/R --version
+    exec: {{ r.get_version_directory(r_version) }}/bin/R --version
     exit-status: 0
     stdout:
       - "R version {{ r_version }}"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+  {%- endfor %}
+  {% for python_version in Dependencies.python %}
   "Verify Python installation is version {{ python_version }}":
-    exec: /opt/python/{{ python_version }}/bin/python --version
+    exec: {{ python.get_version_directory(python_version) }}/bin/python --version
     exit-status: 0
     stdout:
       - "{{ python_version }}"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+  {% endfor %}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
     stdout:
-      - "{{ python_version }}"
+      - "{{ Dependencies.python.0 }}"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
   "Verify system OpenSSL":
     exec: which openssl
@@ -190,5 +194,5 @@ command:
     exec: quarto list tools
     exit-status: 0
     stderr:
-      - "/tinytex\\s+External Installation/"
+      - "/tinytex\\s+Up to date/"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}

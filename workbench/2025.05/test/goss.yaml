@@ -12,12 +12,11 @@ group:
 package:
   rstudio-server:
     installed: true
-  python-3.12.11:
-    installed: true
-    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   r-4.4.3:
     installed: true
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_packages.txt" | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
@@ -107,30 +106,23 @@ file:
   /etc/rstudio/repos.conf:
     exists: true
     contents:
-      - "RSPM=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
-      - "CRAN=https://packagemanager.posit.co/cran/__linux__/jammy/latest"
+      - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
+      - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
   # Check for symlinked Quarto executable
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
   # Check for R installation
+  
   /opt/R/4.4.3/bin/R:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: file
-  /opt/R/default/bin/R:
-    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
-    filetype: file
-  /usr/local/bin/R:
-    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
-    filetype: symlink
-  /usr/local/bin/Rscript:
-    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
-    filetype: symlink
+  
   # Check for Python installation
-  /opt/python/3.12.11/bin/python:
+  
+  /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
-  /opt/python/default/bin/python:
-    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+  
   /opt/python/jupyter/bin/python:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /opt/python/jupyter/bin/jupyter:
@@ -162,12 +154,14 @@ command:
     stdout:
       - "R version 4.4.3"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   "Verify Python installation is version 3.12.11":
-    exec: /opt/python/3.12.11/bin/python --version
+    exec: /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python --version
     exit-status: 0
     stdout:
       - "3.12.11"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
@@ -186,5 +180,5 @@ command:
     exec: quarto list tools
     exit-status: 0
     stderr:
-      - "/tinytex\\s+External Installation/"
+      - "/tinytex\\s+Up to date/"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
