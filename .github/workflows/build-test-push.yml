@@ -16,7 +16,7 @@ jobs:
       contents: read
       packages: write
     runs-on: ubuntu-latest-4x
-    name: ${{ matrix.product }}${{ matrix.devVersionStrategy == 'only' && '-dev' || '' }} Image Builds
+    name: ${{ matrix.product }}${{ matrix.devVersionStrategy == 'only' && ' Development' || '' }} Image Builds
     steps:
 
       - name: GitHub App Token
