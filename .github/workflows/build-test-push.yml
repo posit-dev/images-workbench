@@ -7,10 +7,16 @@ on:
 name: Build, Test, and Push
 jobs:
   build-test-push:
+    strategy:
+      fail-fast: false
+      matrix:
+        product: ["workbench", "workbench-session-init"]
+        devVersionStrategy: ["only", "exclude"]
     permissions:
       contents: read
       packages: write
     runs-on: ubuntu-latest-4x
+    name: ${{ matrix.product }}${{ matrix.devVersionStrategy == 'only' && ' Development' || '' }} Image Builds
     steps:
 
       - name: GitHub App Token
@@ -59,16 +65,16 @@ jobs:
         env:
           GIT_SHA: ${{ github.sha }}
         run: |
-          bakery build --load
+          bakery build --image-name ${{ matrix.product }} --dev-versions ${{ matrix.devVersionStrategy }}
 
       - name: Test images
         run: |
           GOSS_PATH=${GITHUB_WORKSPACE}/tools/goss \
           DGOSS_PATH=${GITHUB_WORKSPACE}/tools/dgoss \
-          bakery run dgoss
+          bakery run dgoss --image-name ${{ matrix.product }} --dev-versions ${{ matrix.devVersionStrategy }}
 
       - name: Push images
         env:
           GIT_SHA: ${{ github.sha }}
         if: github.event_name == 'push'
-        run: bakery build --push
+        run: bakery build --push --image-name ${{ matrix.product }} --dev-versions ${{ matrix.devVersionStrategy }}
