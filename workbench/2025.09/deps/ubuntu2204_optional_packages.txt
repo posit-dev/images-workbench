@@ -33,8 +33,10 @@ libtiff-dev
 libudunits2-dev
 libxml2-dev
 make
+oddjob-mkhomedir
 python3
 strace
+sssd
 tcl
 tk
 tk-dev
