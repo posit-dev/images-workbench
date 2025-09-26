@@ -64,7 +64,7 @@ RUN \
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 ### Install TinyTeX using Quarto ###
-RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --update-path
+RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path
 
 ### Install R ###
 RUN RUN_UNATTENDED=1 R_VERSION=4.5.1 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
@@ -102,6 +102,7 @@ COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "wor
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
     && mkdir -p /startup/custom/ \
+    && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
