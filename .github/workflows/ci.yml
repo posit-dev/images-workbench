@@ -37,6 +37,16 @@ jobs:
       - uses: re-actors/alls-green@release/v1
         with:
           jobs: ${{ toJSON(needs) }}
+          allowed-skips: ${{
+              (
+                github.event_name == 'schedule' &&
+                (
+                  github.event.schedule != '15 3 * * 0' && '["build"]'
+                  ||
+                  github.event.schedule != '45 4 * * 0' && '["dev"]'
+                )
+              ) || '[]'
+            }}
 
   build:
     name: Build
