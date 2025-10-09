@@ -58,7 +58,7 @@ images:
           - name: Ubuntu 22.04
             primary: true
     versions:
-      - name: 2025.09.0+387.pro2
+      - name: 2025.09.1+401.pro2
         subpath: '2025.09'
         latest: true
         os:
