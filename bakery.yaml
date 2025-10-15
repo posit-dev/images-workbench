@@ -58,7 +58,7 @@ images:
           - name: Ubuntu 22.04
             primary: true
     versions:
-      - name: 2025.09.0+387.pro2
+      - name: 2025.09.1+401.pro2
         subpath: '2025.09'
         latest: true
         os:
@@ -100,20 +100,28 @@ images:
         os:
           - name: Ubuntu 22.04
             primary: true
+        values:
+          go_version: 1.25.3
     versions:
-      - name: 2025.09.0+387.pro2
+      - name: 2025.09.1+401.pro2
         subpath: '2025.09'
         latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
+        values:
+          go_version: 1.25.1
       - name: 2025.05.1+513.pro3
         subpath: '2025.05'
         os:
           - name: Ubuntu 22.04
             primary: true
+        values:
+          go_version: 1.24.7
       - name: 2024.12.1+563.pro5
         subpath: '2024.12'
         os:
           - name: Ubuntu 22.04
             primary: true
+        values:
+          go_version: 1.22.2
