@@ -60,9 +60,6 @@ RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" 
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 {% if not Image.Variant == "Minimal" -%}
-### Install TinyTeX using Quarto ###
-RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True) }}
-
 ### Install R ###
 {{ r.run_install(Dependencies.R) }}
 
@@ -106,6 +103,16 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM={{ r.get_p3m_cran_repo(Image.OS) }}" > /etc/rstudio/repos.conf \
     && echo "CRAN={{ r.get_p3m_cran_repo(Image.OS) }}" >> /etc/rstudio/repos.conf
+
+{%- if Image.Variant != "Minimal" %}
+
+### Install TinyTeX using Quarto ###
+# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
+# the cache on new releases.
+ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True) }} \
+    && rm -f /tmp/tinytex-release.json
+{%- endif %}
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
