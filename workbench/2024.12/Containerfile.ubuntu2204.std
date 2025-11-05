@@ -63,9 +63,6 @@ RUN \
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
-### Install TinyTeX using Quarto ###
-RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path
-
 ### Install R ###
 RUN RUN_UNATTENDED=1 R_VERSION=4.4.2 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
     find . -type f -name '[rR]-4.4.2.*\.(deb|rpm)' -delete
@@ -106,6 +103,13 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+
+### Install TinyTeX using Quarto ###
+# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
+# the cache on new releases.
+ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path \
+    && rm -f /tmp/tinytex-release.json
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
