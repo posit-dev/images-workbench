@@ -60,7 +60,7 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@ci-native-multiplatform"
     secrets:
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       APP_ID: ${{ secrets.APP_ID }}
@@ -68,6 +68,7 @@ jobs:
     with:
       runs-on: ubuntu-latest-4x
       dev-versions: "exclude"
+      version: "ci-native-multiplatform"
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '15 3 * * 0' }}
 
@@ -84,13 +85,14 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@ci-native-multiplatform"
     secrets:
       APP_ID: ${{ secrets.APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
     with:
       runs-on: ubuntu-latest-4x
       dev-versions: "only"
+      version: "ci-native-multiplatform"
       # Push images only for merges into main and hourly schduled re-builds.
       # TODO: Override image registry before enabling pushing
       # push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '45 4 * * *' }}
