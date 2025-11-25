@@ -6,7 +6,7 @@ ENV UV_PYTHON_INSTALL_DIR=/opt/python
 ENV UV_PYTHON_PREFERENCE=only-managed
 RUN uv python install 3.12.11
 
-FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
