@@ -83,15 +83,16 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write  # Required for AWS OIDC login
 
     uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
     secrets:
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}
       APP_ID: ${{ secrets.APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
     with:
       runs-on: ubuntu-latest-4x
       dev-versions: "only"
+      aws-region: us-west-2
       # Push images only for merges into main and hourly schduled re-builds.
-      # TODO: Override image registry before enabling pushing
-      # push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '45 4 * * *' }}
-      push: false
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '45 4 * * *' }}
