@@ -55,8 +55,9 @@ images:
         product: workbench
         stream: daily
         os:
-          - name: Ubuntu 22.04
+          - name: Ubuntu 24.04
             primary: true
+          - name: Ubuntu 22.04
         overrideRegistries:
           - host: "749683154838.dkr.ecr.us-west-2.amazonaws.com"
             repository: "workbench-preview"
@@ -67,6 +68,7 @@ images:
         os:
           - name: Ubuntu 22.04
             primary: true
+          - name: Ubuntu 24.04
         dependencies:
           - dependency: R
             version: 4.5.1
@@ -77,6 +79,7 @@ images:
         os:
           - name: Ubuntu 22.04
             primary: true
+          - name: Ubuntu 24.04
         dependencies:
           - dependency: R
             version: 4.4.3
@@ -87,6 +90,7 @@ images:
         os:
           - name: Ubuntu 22.04
             primary: true
+          - name: Ubuntu 24.04
         dependencies:
           - dependency: R
             version: 4.4.2
