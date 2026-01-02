@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 docker.io/library/ubuntu:24.04
+FROM docker.io/library/ubuntu:24.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ### ARG declarations ###
@@ -33,7 +33,7 @@ RUN apt-get update -yqq --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 ## Install Apt Packages ###
-COPY workbench/2025.09/deps/ubuntu2404_packages.txt /tmp/packages.txt
+COPY workbench/2025.09/deps/ubuntu-24.04_packages.txt /tmp/packages.txt
 RUN apt-get update -yqq && \
     xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \

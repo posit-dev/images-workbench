@@ -5,8 +5,10 @@ ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/opt/python
 ENV UV_PYTHON_PREFERENCE=only-managed
 RUN uv python install 3.12.11
+RUN mv /opt/python/cpython-3.12.11-linux-*/ /opt/python/3.12.11
 
-FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+
+FROM docker.io/library/ubuntu:22.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
@@ -41,8 +43,8 @@ RUN apt-get update -yqq --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 ## Install Apt Packages ###
-COPY workbench/2025.05/deps/ubuntu2204_packages.txt /tmp/packages.txt
-COPY workbench/2025.05/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
+COPY workbench/2025.05/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
+COPY workbench/2025.05/deps/ubuntu-22.04_optional_packages.txt /tmp/optional_packages.txt
 RUN apt-get update -yqq && \
     xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
     xargs -a /tmp/optional_packages.txt apt-get install -yqq --no-install-recommends && \
@@ -71,15 +73,15 @@ RUN RUN_UNATTENDED=1 R_VERSION=4.4.3 bash -c "$(curl -fsSL https://rstd.io/r-ins
 COPY --from=python-builder /opt/python /opt/python
 
 ### Install Jupyter ###
-RUN /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python -m venv /opt/python/jupyter && \
+RUN /opt/python/3.12.11/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
     /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernels ###
-RUN /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/pip install --no-cache-dir --upgrade --break-system-packages \
+RUN /opt/python/3.12.11/bin/pip install --no-cache-dir --upgrade --break-system-packages \
     ipykernel && \
-    /opt/python/cpython-3.12.11-linux-x86_64-gnu/bin/python -m ipykernel install --user --name python3.12.11 --display-name "Python 3.12.11"
+    /opt/python/3.12.11/bin/python -m ipykernel install --user --name python3.12.11 --display-name "Python 3.12.11"
 
 ### Install Pro Drivers ###
 RUN apt-get install -yq rstudio-drivers && \

@@ -14,7 +14,7 @@ Bakery handles bootstrapping the files into template rendering.
 
 {% endif -%}
 
-FROM --platform=linux/amd64 docker.io/library/ubuntu:22.04
+FROM docker.io/library/ubuntu:22.04
 LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
@@ -39,11 +39,11 @@ ENV DIAGNOSTIC_ONLY=false
 
 ## Install Apt Packages ###
 {% if not Image.Variant == "Minimal" -%}
-COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
-COPY {{ Path.Version }}/deps/ubuntu2204_optional_packages.txt /tmp/optional_packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-22.04_optional_packages.txt /tmp/optional_packages.txt
 {{ apt.run_install(files = ['/tmp/packages.txt', '/tmp/optional_packages.txt']) }}
 {% else -%}
-COPY {{ Path.Version }}/deps/ubuntu2204_packages.txt /tmp/packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 {{ apt.run_install(files = ['/tmp/packages.txt']) }}
 {%- endif %}
 
