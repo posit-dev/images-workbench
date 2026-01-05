@@ -2,12 +2,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: 999
+    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
+    groups:
+      - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: 999
+    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
 
 package:
   rstudio-server:
@@ -17,14 +19,17 @@ package:
     installed: true
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   
-  {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_packages.txt" | splitList "\n" }}
+  {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
   {{- range $apt_package_list }}
   {{.}}:
     installed: true
   {{end}}
   {{ if eq .Env.IMAGE_VARIANT "Standard" }}
-  {{ $apt_package_list := readFile "/tmp/version/deps/ubuntu2204_optional_packages.txt" | splitList "\n" }}
-  {{- range $apt_package_list }}
+
+  {{ $apt_optional_package_list_path := printf "/tmp/version/deps/%s-%s_optional_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_optional_package_list := readFile $apt_optional_package_list_path | splitList "\n" }}
+  {{- range $apt_optional_package_list }}
   {{.}}:
     installed: true
   {{end}}
@@ -120,7 +125,7 @@ file:
   
   # Check for Python installation
   
-  /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python:
+  /opt/python/3.13.7/bin/python:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   
   /opt/python/jupyter/bin/python:
@@ -156,7 +161,7 @@ command:
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   
   "Verify Python installation is version 3.13.7":
-    exec: /opt/python/cpython-3.13.7-linux-x86_64-gnu/bin/python --version
+    exec: /opt/python/3.13.7/bin/python --version
     exit-status: 0
     stdout:
       - "3.13.7"

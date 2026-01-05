@@ -1,0 +1,47 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+FROM docker.io/library/golang:{{ go_version | default("1.25.1") }} AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
+
+### Initialize PTI in container ###
+{{ apt.run_setup() }}
+
+# Download the RStudio Workbench session components and install Go
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN mkdir -p /pwb-staging && \
+    WORKBENCH_VERSION_URL=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g') && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-{{ Image.Version | replace('+', '-') }}-x86_64.tar.gz" && \
+    mkdir -p /opt/session-components && \
+    tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
+    chmod 755 /opt/session-components && \
+    rm -rf /pwb-staging
+
+# Set the Go workspace
+WORKDIR /workspace
+
+# Copy the Go source code and download dependencies
+COPY {{ Path.Version }}/entrypoint/go.mod {{ Path.Version }}/entrypoint/go.sum ./
+RUN go mod download
+
+# Copy the Go source code and build the binary
+COPY {{ Path.Version }}/entrypoint/main.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-s -w' -o entrypoint main.go
+
+# Create the final image
+FROM docker.io/library/ubuntu:24.04 AS build
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+{{ apt.run_update_upgrade() }}
+
+# Copy the compiled Go binary and session components from the builder stage
+COPY --from=builder --chmod=755 /workspace/entrypoint /usr/local/bin/entrypoint
+COPY --from=builder --chmod=755 /opt/session-components /opt/session-components
+
+CMD ["/usr/local/bin/entrypoint"]

@@ -1,5 +1,5 @@
-FROM docker.io/library/ubuntu:22.04
-LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+FROM docker.io/library/ubuntu:24.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
@@ -33,7 +33,7 @@ RUN apt-get update -yqq --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 ## Install Apt Packages ###
-COPY workbench/2025.09/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
+COPY workbench/2025.09/deps/ubuntu-24.04_packages.txt /tmp/packages.txt
 RUN apt-get update -yqq && \
     xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
@@ -67,8 +67,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && mkdir -p /startup/custom/ \
     && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
-    && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
-    && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+    && echo "RSPM=https://p3m.dev/cran/__linux__/noble/latest" > /etc/rstudio/repos.conf \
+    && echo "CRAN=https://p3m.dev/cran/__linux__/noble/latest" >> /etc/rstudio/repos.conf
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
