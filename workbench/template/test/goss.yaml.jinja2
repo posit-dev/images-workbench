@@ -8,12 +8,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: 999
+    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
+    groups:
+      - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: 999
+    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
 
 package:
   rstudio-server:
