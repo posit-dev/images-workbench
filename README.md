@@ -2,6 +2,11 @@
 
 Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
 
+> [!IMPORTANT]
+> These images are under active development and testing and are not yet supported by Posit.
+>
+> Please see [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) for officially supported images.
+
 ## Images
 
 | Image | Docker Hub | GitHub Container Registry |
@@ -17,7 +22,7 @@ You can interact with this repository in multiple ways:
 
 * [Build container images directly](#build) from the Containerfile.
 * [Use the `bakery` CLI](#using-bakery) to manage and build container images.
-* Extend the functionality by using the Minimal base image (see [examples](/posit-dev/images-examples)).
+* Extend the functionality by using the Minimal base image (see [examples](https://github.com/posit-dev/images-examples)).
 
 ## Build
 
@@ -30,7 +35,7 @@ The root of the bakery project is used as the build context for each Containerfi
 Here, the `bakery.yaml` file, or project, is in the root of this repository.
 
 ```shell
-PWB_VERSION="2025.05"
+PWB_VERSION="2025.09"
 
 # Build the standard Workbench image using docker
 docker buildx build \
@@ -43,11 +48,17 @@ buildah build \
     --tag workbench:${PWB_VERSION} \
     --file workbench/${PWB_VERSION}/Containerfile.ubuntu2204.min \
     .
+
+# Build the minimal Workbench image using podman
+podman build \
+    --tag workbench:${PWB_VERSION} \
+    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2204.min \
+    .
 ```
 
 ## Using `bakery`
 
-The structure and contents of this reposity were created following the steps in [bakery usage](/posit-dev/images-shared/tree/main/posit-bakery#usage).
+The structure and contents of this repository were created following the steps in [bakery usage](https://github.com/posit-dev/images-shared/tree/main/posit-bakery#usage).
 
 ### Prerequisites
 
@@ -92,9 +103,13 @@ bakery run dgoss
 
 You can use CLI flags to limit the tests to run against a subset of images.
 
+## Share your Feedback
+
+We invite you to join us on [GitHub Discussions](https://github.com/posit-dev/images/discussions) to ask questions and share feedback.
+
 ## Issues
 
-If you encounter any issues or have any questions, please [open an issue](/posit-dev/images-workbench/issues). We appreciate your feedback.
+If you encounter any issues or have any questions, please [open an issue](https://github.com/posit-dev/images-workbench/issues). We appreciate your feedback.
 
 ## Code of Conduct
 
