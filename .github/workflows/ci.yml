@@ -95,7 +95,7 @@ jobs:
 
   clean:
     name: Clean
-    if: github.ref == 'refs/heads/main'
+    if: always() && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
