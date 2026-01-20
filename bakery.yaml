@@ -135,3 +135,20 @@ images:
             primary: true
         values:
           go_version: 1.22.2
+  - name: workbench-session
+    matrix:
+      dependencyConstraints:
+        - dependency: R
+          constraint:
+            min: "4.0"
+            latest: true
+        - dependency: python
+          constraint:
+            min: "3.10"
+            latest: true
+        - dependency: quarto
+          constraint:
+            latest: true
+      os:
+        - name: Ubuntu 24.04
+          primary: true

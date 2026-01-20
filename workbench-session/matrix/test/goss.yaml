@@ -1,0 +1,47 @@
+package:
+  {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
+  {{- range $apt_package_list }}
+  {{.}}:
+    installed: true
+  {{end}}
+
+file:
+  python-{{ .Env.BUILD_ARG_PYTHON_VERSION }}:
+    exists: true
+    path: /opt/python/{{ .Env.BUILD_ARG_PYTHON_VERSION }}
+  r-{{ .Env.BUILD_ARG_R_VERSION }}:
+    exists: true
+    path: /opt/R/{{ .Env.BUILD_ARG_R_VERSION }}
+  quarto-{{ .Env.BUILD_ARG_QUARTO_VERSION }}:
+    exists: true
+    path: /opt/quarto/{{ .Env.BUILD_ARG_QUARTO_VERSION }}
+
+command:
+  "Verify Jupyter Notebook works":
+    exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
+    timeout: 60000
+    exit-status: 0
+  "Verify R installation is version {{ .Env.BUILD_ARG_R_VERSION }}":
+    exec: /opt/R/{{ .Env.BUILD_ARG_R_VERSION }}/bin/R --version
+    exit-status: 0
+    stdout:
+      - "R version {{ .Env.BUILD_ARG_R_VERSION }}"
+  "Verify Python installation is version {{ .Env.BUILD_ARG_PYTHON_VERSION }}":
+    exec: /opt/python/{{ .Env.BUILD_ARG_PYTHON_VERSION }}/bin/python --version
+    exit-status: 0
+    stdout:
+      - "{{ .Env.BUILD_ARG_PYTHON_VERSION }}"
+  "Verify Jupyter installation Python version":
+    exec: /opt/python/jupyter/bin/python --version
+    exit-status: 0
+    stdout:
+      - "{{ .Env.BUILD_ARG_PYTHON_VERSION }}"
+  "Verify Quarto":
+    exec: /usr/local/bin/quarto check --quiet
+    exit-status: 0
+  "Verify Quarto has TinyTeX installed":
+    exec: quarto list tools
+    exit-status: 0
+    stderr:
+      - "/tinytex\\s+Up to date/"
