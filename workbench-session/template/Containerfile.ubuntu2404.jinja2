@@ -48,6 +48,12 @@ ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/t
 {{ quarto.run_install(quarto.build_arg(), True) }} \
     && rm -f /tmp/tinytex-release.json
 
+### Install Quarto and TinyTeX ###
+ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN {{ quarto.install(quarto.build_arg(), True, True) | indent(4) }} && \
+    {{ quarto.symlink_binary(quarto.build_arg(), "quarto", "/usr/local/bin/quarto") | indent(4) }} && \
+    rm -f /tmp/tinytex-release.json
+
 COPY {{ Path.Version }}/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf
 COPY {{ Path.Version }}/conf/positron.extensions.conf /etc/rstudio/positron.extensions.conf
 
