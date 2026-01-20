@@ -30,12 +30,11 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@matrix-build-tooling-impl"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
     secrets:
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
     with:
       runs-on: ubuntu-latest
-      version: 'matrix-build-tooling-impl'
       matrix-versions: only
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '15 3 * * 0' }}
