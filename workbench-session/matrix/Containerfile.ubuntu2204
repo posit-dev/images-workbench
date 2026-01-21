@@ -10,8 +10,8 @@ RUN uv python install $PYTHON_VERSION
 RUN mv /opt/python/cpython-$PYTHON_VERSION-linux-*/ /opt/python/$PYTHON_VERSION
 
 
-FROM docker.io/library/ubuntu:24.04
-LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
+FROM docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
@@ -33,9 +33,9 @@ RUN apt-get update -yqq --fix-missing && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
-COPY workbench-session/matrix/deps/ubuntu-24.04_packages.txt /tmp/ubuntu-24.04_packages.txt
+COPY workbench-session/matrix/deps/ubuntu-22.04_packages.txt /tmp/ubuntu-22.04_packages.txt
 RUN apt-get update -yqq && \
-    xargs -a /tmp/ubuntu-24.04_packages.txt apt-get install -yqq --no-install-recommends && \
+    xargs -a /tmp/ubuntu-22.04_packages.txt apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 

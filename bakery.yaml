@@ -152,3 +152,4 @@ images:
       os:
         - name: Ubuntu 24.04
           primary: true
+        - name: Ubuntu 22.04
