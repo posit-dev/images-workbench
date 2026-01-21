@@ -10,8 +10,8 @@ Bakery handles bootstrapping the files into template rendering.
 # Build Python using uv in a separate stage
 {{ python.build_stage(python.build_arg(), prerun=python.declare_build_arg()) }}
 
-FROM docker.io/library/ubuntu:22.04
-LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+FROM docker.io/library/ubuntu:24.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
