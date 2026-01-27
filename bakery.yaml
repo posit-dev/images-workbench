@@ -62,9 +62,20 @@ images:
           - host: "749683154838.dkr.ecr.us-west-2.amazonaws.com"
             repository: "workbench-preview"
     versions:
+      - name: 2026.01.0+392.pro5
+        subpath: '2026.01'
+        latest: true
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+          - name: Ubuntu 22.04
+        dependencies:
+          - dependency: R
+            version: 4.5.2
+          - dependency: python
+            version: 3.14.2
       - name: 2025.09.2+418.pro4
         subpath: '2025.09'
-        latest: true
         os:
           - name: Ubuntu 22.04
             primary: true
@@ -112,9 +123,17 @@ images:
         values:
           go_version: 1.25.5
     versions:
+      - name: 2026.01.0+392.pro5
+        subpath: '2026.01'
+        latest: true
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+          - name: Ubuntu 22.04
+        values:
+          go_version: 1.25.6
       - name: 2025.09.2+418.pro4
         subpath: '2025.09'
-        latest: true
         os:
           - name: Ubuntu 24.04
           - name: Ubuntu 22.04
