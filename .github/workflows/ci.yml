@@ -95,7 +95,7 @@ jobs:
 
   clean:
     name: Clean
-    if: github.ref == 'refs/heads/main'
+    if: always() && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
@@ -110,3 +110,4 @@ jobs:
       # FIXME: re-enable temporary image cleanup after moving to native platform workflow
       # remove-dangling-temporary-images: false
       # remove-temporary-images-older-than: 3
+      clean-temporary-images: false
