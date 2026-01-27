@@ -137,14 +137,15 @@ images:
           go_version: 1.22.2
   - name: workbench-session
     matrix:
+      namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"
       dependencyConstraints:
         - dependency: R
           constraint:
-            min: "4.0"
+            min: "4.3"
             latest: true
         - dependency: python
           constraint:
-            min: "3.10"
+            min: "3.11"
             latest: true
         - dependency: quarto
           constraint:
