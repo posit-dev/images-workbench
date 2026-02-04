@@ -1,0 +1,54 @@
+{%- import "goss.j2" as goss -%}
+{%- import "python.j2" as python -%}
+{%- import "quarto.j2" as quarto -%}
+{%- import "r.j2" as r -%}
+
+package:
+  {% raw -%}
+  {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
+  {{- range $apt_package_list }}
+  {{.}}:
+    installed: true
+  {{end}}
+  {%- endraw %}
+
+file:
+  python-{{ goss.build_arg_env_var("PYTHON_VERSION") }}:
+    exists: true
+    path: {{ python.get_version_directory(goss.build_arg_env_var("PYTHON_VERSION")) }}
+  r-{{ goss.build_arg_env_var("R_VERSION") }}:
+    exists: true
+    path: {{ r.get_version_directory(goss.build_arg_env_var("R_VERSION")) }}
+  quarto-{{ goss.build_arg_env_var("QUARTO_VERSION") }}:
+    exists: true
+    path: {{ quarto.get_version_directory(goss.build_arg_env_var("QUARTO_VERSION")) }}
+
+command:
+  "Verify Jupyter Notebook works":
+    exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
+    timeout: 60000
+    exit-status: 0
+  "Verify R installation is version {{ goss.build_arg_env_var("R_VERSION") }}":
+    exec: {{ r.get_version_directory(goss.build_arg_env_var("R_VERSION")) }}/bin/R --version
+    exit-status: 0
+    stdout:
+      - "R version {{ goss.build_arg_env_var("R_VERSION") }}"
+  "Verify Python installation is version {{ goss.build_arg_env_var("PYTHON_VERSION") }}":
+    exec: {{ python.get_version_directory(goss.build_arg_env_var("PYTHON_VERSION")) }}/bin/python --version
+    exit-status: 0
+    stdout:
+      - "{{ goss.build_arg_env_var("PYTHON_VERSION") }}"
+  "Verify Jupyter installation Python version":
+    exec: /opt/python/jupyter/bin/python --version
+    exit-status: 0
+    stdout:
+      - "{{ goss.build_arg_env_var("PYTHON_VERSION") }}"
+  "Verify Quarto":
+    exec: /usr/local/bin/quarto check --quiet
+    exit-status: 0
+  "Verify Quarto has TinyTeX installed":
+    exec: quarto list tools
+    exit-status: 0
+    stderr:
+      - "/tinytex\\s+Up to date/"
