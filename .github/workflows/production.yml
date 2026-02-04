@@ -1,10 +1,8 @@
-name: Product Images
+name: Production Images
 on:
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 3 * * 0" # At 03:15 on Sunday
-    # Hourly rebuild of dev images
-    - cron: "45 4 * * *" # At 04:45 every day
 
   pull_request:
 
@@ -31,22 +29,11 @@ jobs:
     timeout-minutes: 10
     needs:
       - build
-      - dev
 
     steps:
       - uses: re-actors/alls-green@release/v1
         with:
           jobs: ${{ toJSON(needs) }}
-          allowed-skips: ${{
-              (
-                github.event_name == 'schedule' &&
-                (
-                  github.event.schedule != '15 3 * * 0' && '["build"]'
-                  ||
-                  github.event.schedule != '45 4 * * 0' && '["dev"]'
-                )
-              ) || '[]'
-            }}
 
   build:
     name: Build
@@ -55,7 +42,6 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
-    if: contains(fromJSON('["push", "pull_request"]'), github.event_name) || github.event.schedule == '15 3 * * 0'
     permissions:
       contents: read
       packages: write
@@ -68,32 +54,7 @@ jobs:
       dev-versions: "exclude"
       matrix-versions: "exclude"
       # Push images only for merges into main and weekly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '15 3 * * 0' }}
-
-  dev:
-    name: Dev Build
-    # Dev Build
-    #
-    # Builds all development versions of each image in parallel.
-    #
-    # Run on merges to main, or on hourly scheduled re-builds.
-    if: contains(fromJSON('["push", "pull_request"]'), github.event_name) || github.event.schedule == '45 4 * * *'
-
-    permissions:
-      contents: read
-      packages: write
-      id-token: write  # Required for AWS OIDC login
-
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
-    secrets:
-      AWS_ROLE: ${{ secrets.AWS_ROLE }}
-    with:
-      runs-on: ubuntu-latest-4x
-      dev-versions: "only"
-      matrix-versions: "exclude"
-      aws-region: us-west-2
-      # Push images only for merges into main and hourly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '45 4 * * *' }}
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
 
   clean:
     name: Clean
@@ -103,13 +64,9 @@ jobs:
       packages: write
     needs:
       - build
-      - dev
 
     uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
     with:
       remove-dangling-caches: true
       remove-caches-older-than: 14
-      # FIXME: re-enable temporary image cleanup after moving to native platform workflow
-      # remove-dangling-temporary-images: false
-      # remove-temporary-images-older-than: 3
       clean-temporary-images: false

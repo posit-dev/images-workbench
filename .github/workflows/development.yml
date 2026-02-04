@@ -1,0 +1,74 @@
+name: Development Images
+on:
+  schedule:
+    # Hourly rebuild of dev images
+    - cron: "45 4 * * *" # At 04:45 every day
+
+  pull_request:
+
+  push:
+    branches:
+      - main
+
+concurrency:
+  # Only cancel in-progress runs for pull_request events, this prevents cancelling workflows against main or tags
+  # A pull_request will reuse the same group thus enabling cancelation, all others receive a unique run_id
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI
+    # This should be the only action checked as required in the repo settings.
+    #
+    # This is a meta-job, here to express the conditions we require
+    # in order to consider a CI run to be successful.
+    if: always()
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - dev
+
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
+  dev:
+    name: Dev Build
+    # Dev Build
+    #
+    # Builds all development versions of each image in parallel.
+    #
+    # Run on merges to main, or on hourly scheduled re-builds.
+    permissions:
+      contents: read
+      packages: write
+      id-token: write  # Required for AWS OIDC login
+
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
+    secrets:
+      AWS_ROLE: ${{ secrets.AWS_ROLE }}
+    with:
+      runs-on: ubuntu-latest-4x
+      dev-versions: "only"
+      matrix-versions: "exclude"
+      aws-region: us-west-2
+      # Push images only for merges into main and hourly schduled re-builds.
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
+
+  clean:
+    name: Clean
+    if: always() && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    needs:
+      - dev
+
+    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
+    with:
+      remove-dangling-caches: true
+      remove-caches-older-than: 14
+      clean-temporary-images: false
