@@ -1,0 +1,58 @@
+FROM docker.io/library/golang:1.25.6 AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG WORKBENCH_VERSION="2026.01.0+392.pro5"
+
+### Initialize PTI in container ###
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+# Download the RStudio Workbench session components and install Go
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN mkdir -p /pwb-staging && \
+    WORKBENCH_VERSION_URL=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g') && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2026.01.0-392.pro5-x86_64.tar.gz" && \
+    mkdir -p /opt/session-components && \
+    tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
+    chmod 755 /opt/session-components && \
+    rm -rf /pwb-staging
+
+# Set the Go workspace
+WORKDIR /workspace
+
+# Copy the Go source code and download dependencies
+COPY workbench-session-init/2026.01/entrypoint/go.mod workbench-session-init/2026.01/entrypoint/go.sum ./
+RUN go mod download
+
+# Copy the Go source code and build the binary
+COPY workbench-session-init/2026.01/entrypoint/main.go .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags '-s -w' -o entrypoint main.go
+
+# Create the final image
+FROM docker.io/library/ubuntu:24.04 AS build
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy the compiled Go binary and session components from the builder stage
+COPY --from=builder --chmod=755 /workspace/entrypoint /usr/local/bin/entrypoint
+COPY --from=builder --chmod=755 /opt/session-components /opt/session-components
+
+CMD ["/usr/local/bin/entrypoint"]

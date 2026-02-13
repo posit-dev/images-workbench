@@ -1,31 +1,24 @@
-{#-
-Below are imports for Bakery's macros. If any are unneeded, they can be removed.
-Bakery handles bootstrapping the files into template rendering.
--#}
-{%- import "python.j2" as python -%}
-{%- import "r.j2" as r -%}
 user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
+    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
+    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
 
 package:
   rstudio-server:
     installed: true
-  {% for r_version in Dependencies.R %}
-  r-{{ r_version }}:
+  
+  r-4.5.2:
     installed: true
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
-  {% raw -%}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
   {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
   {{- range $apt_package_list }}
@@ -41,7 +34,6 @@ package:
     installed: true
   {{end}}
   {{ end }}
-  {%- endraw %}
 
 port:
   # WARNING: This test may fail depending on how ipv6 is configured on the host
@@ -50,21 +42,21 @@ port:
     listening: true
     ip:
     - 0.0.0.0
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   tcp:5559:
     listening: true
     ip:
     - 127.0.0.1
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
 process:
   rserver:
     running: true
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   # The output from `ps` is trucated to 16 characters, so we check for `rstudio-launche` instead of `rstudio-launcher`
   rstudio-launche:
     running: true
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
 file:
   # Check that license files were not accidentally included in build
@@ -88,8 +80,7 @@ file:
     owner: rstudio-server
     group: rstudio-server
   # Check for code-server executable (path varies based on RStudio Workbench version)
-  {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
-  {% raw -%}
+  {{ $version_split := split "." "2026.01.0+392.pro5" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
   /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
     exists: true
@@ -97,7 +88,6 @@ file:
   /usr/lib/rstudio-server/bin/code-server/bin/code-server:
     exists: true
   {{ end }}
-  {%- endraw %}
   # Check that launcher jobs did not already initialize during build
   /var/lib/rstudio-launcher/Local/jobs/buildkitsandbox:
     exists: false
@@ -113,7 +103,7 @@ file:
       - "session required pam_mkhomedir.so skel=/etc/skel umask=0077"
   # Check for sssd.conf
   /etc/sssd/sssd.conf:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     owner: root
     group: root
     mode: "0600"
@@ -121,31 +111,29 @@ file:
   /etc/rstudio/repos.conf:
     exists: true
     contents:
-      {% raw -%}
       - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
       - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
-      {%- endraw %}
   # Check for symlinked Quarto executable
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
   # Check for R installation
-  {% for r_version in Dependencies.R %}
-  {{ r.get_version_directory(r_version) }}/bin/R:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+  
+  /opt/R/4.5.2/bin/R:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: file
-  {% endfor %}
+  
   # Check for Python installation
-  {% for python_version in Dependencies.python %}
-  {{ python.get_version_directory(python_version) }}/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
+  
+  /opt/python/3.14.2/bin/python:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+  
   /opt/python/jupyter/bin/python:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /opt/python/jupyter/bin/jupyter:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
   /usr/local/bin/jupyter:
-    exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: symlink
 
 command:
@@ -159,34 +147,32 @@ command:
     exec: /usr/lib/rstudio-server/bin/rstudio-server version
     exit-status: 0
     stdout:
-      - "{{ Image.Version }} Workbench"
+      - "2026.01.0+392.pro5 Workbench"
   "Verify Jupyter Notebook works":
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000
     exit-status: 0
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {% for r_version in Dependencies.R -%}
-  "Verify R installation is version {{ r_version }}":
-    exec: {{ r.get_version_directory(r_version) }}/bin/R --version
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  "Verify R installation is version 4.5.2":
+    exec: /opt/R/4.5.2/bin/R --version
     exit-status: 0
     stdout:
-      - "R version {{ r_version }}"
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {%- endfor %}
-  {% for python_version in Dependencies.python %}
-  "Verify Python installation is version {{ python_version }}":
-    exec: {{ python.get_version_directory(python_version) }}/bin/python --version
+      - "R version 4.5.2"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
+  "Verify Python installation is version 3.14.2":
+    exec: /opt/python/3.14.2/bin/python --version
     exit-status: 0
     stdout:
-      - "{{ python_version }}"
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
+      - "3.14.2"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
     stdout:
-      - "{{ Dependencies.python.0 }}"
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+      - "3.14.2"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify system OpenSSL":
     exec: which openssl
     exit-status: 0
@@ -201,4 +187,4 @@ command:
     exit-status: 0
     stderr:
       - "/tinytex\\s+Up to date/"
-    skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
