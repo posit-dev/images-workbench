@@ -32,7 +32,7 @@ You can build OCI container images from the defitions in this repository using o
 * [docker buildx](https://github.com/docker/buildx#installing)
 
 The root of the bakery project is used as the build context for each Containerfile.
-Here, the `bakery.yaml` file, or project, is in the root of this repository.
+Here, the [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) file, or project, is in the root of this repository.
 
 ```shell
 PWB_VERSION="2025.09"
@@ -59,6 +59,11 @@ podman build \
 ## Using `bakery`
 
 The structure and contents of this repository were created following the steps in [bakery usage](https://github.com/posit-dev/images-shared/tree/main/posit-bakery#usage).
+
+Additional documentation:
+- [Configuration Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md) — `bakery.yaml` schema and options
+- [Templating Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/TEMPLATING.md) — Jinja2 macros for Containerfile templates
+- [CI Workflows](https://github.com/posit-dev/images-shared/blob/main/CI.md) — Shared GitHub Actions workflows for building and pushing images
 
 ### Prerequisites
 
@@ -102,6 +107,10 @@ bakery run dgoss
 ```
 
 You can use CLI flags to limit the tests to run against a subset of images.
+
+## Related Repositories
+
+This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. To extend the Minimal image with additional languages or system dependencies, see the [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending). For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
 
 ## Share your Feedback
 
