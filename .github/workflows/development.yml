@@ -1,4 +1,4 @@
-name: Development Images
+name: Development
 on:
   schedule:
     # Hourly rebuild of dev images

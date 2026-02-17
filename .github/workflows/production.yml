@@ -1,4 +1,4 @@
-name: Production Images
+name: Production
 on:
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
