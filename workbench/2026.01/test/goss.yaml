@@ -80,7 +80,7 @@ file:
     owner: rstudio-server
     group: rstudio-server
   # Check for code-server executable (path varies based on RStudio Workbench version)
-  {{ $version_split := split "." "2026.01.0+392.pro5" }}
+  {{ $version_split := split "." "2026.01.1+403.pro11" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
   /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
     exists: true
@@ -147,7 +147,7 @@ command:
     exec: /usr/lib/rstudio-server/bin/rstudio-server version
     exit-status: 0
     stdout:
-      - "2026.01.0+392.pro5 Workbench"
+      - "2026.01.1+403.pro11 Workbench"
   "Verify Jupyter Notebook works":
     exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
     timeout: 60000

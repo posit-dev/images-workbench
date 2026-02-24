@@ -13,7 +13,7 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
-ARG WORKBENCH_VERSION="2026.01.0+392.pro5"
+ARG WORKBENCH_VERSION="2026.01.1+403.pro11"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV STARTUP_DEBUG_MODE=0
@@ -56,7 +56,7 @@ RUN apt-get update -yqq && \
 RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
     chmod +x /usr/local/bin/wait-for-it.sh
 
-### Install Workbench 2026.01.0+392.pro5 ###
+### Install Workbench 2026.01.1+403.pro11 ###
 COPY --chmod=0755 workbench/2026.01/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \
