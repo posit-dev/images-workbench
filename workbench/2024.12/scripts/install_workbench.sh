@@ -14,7 +14,7 @@ apt-get download "${package_name}=2024.12.1+563.pro5"
 deb_file="$(pwd)/$(ls ${package_name}*.deb)"
 
 # Install dependencies
-dpkg -I "${deb_file}" | grep '^ Depends:'
+apt-get install -yq $(dpkg -I $deb_file | grep '^ Depends:' | sed 's/^ Depends: //' | tr ',' '\n' | awk '{print $1}' | tr -d '(')
 
 # Patch the installer to not activate the service
 echo "$d Patching ${deb_file} $d"
