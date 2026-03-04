@@ -88,9 +88,6 @@ file:
   /usr/lib/rstudio-server/bin/code-server/bin/code-server:
     exists: true
   {{ end }}
-  # Check that launcher jobs did not already initialize during build
-  /var/lib/rstudio-launcher/Local/jobs/buildkitsandbox:
-    exists: false
   # Check for vscode.conf and ensure VS Code is enabled
   /etc/rstudio/vscode.conf:
     exists: true
@@ -136,9 +133,26 @@ file:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     filetype: symlink
 
-  # Check that startup files were not accidentally included in build
+  # Check that job nodes are not created for the builder
   /var/lib/rstudio-launcher/Local/jobs/buildkitsystem:
     exists: false
+  /var/lib/rstudio-launcher/Local/jobs/buildkitsandbox:
+    exists: false
+
+  # Check that startup files were not accidentally included in build
+  # These can only be reliably checked for minimal variant for now, see #372
+  
+  {{ if eq .Env.IMAGE_VARIANT "Minimal" }}
+  /etc/rstudio/launcher.pem:
+    exists: false
+  /etc/rstudio/launcher.pub:
+    exists: false
+  /var/lib/rstudio-server/secure-cookie-key:
+    exists: false
+  /var/lib/rstudio-server/session-rpc-key:
+    exists: false
+  {{ end }}
+  
 
 command:
   "Ensure rstudio-server has permissions to log directory":
