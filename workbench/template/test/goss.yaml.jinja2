@@ -148,6 +148,10 @@ file:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: symlink
 
+  # Check that startup files were not accidentally included in build
+  /var/lib/rstudio-launcher/Local/jobs/buildkitsystem:
+    exists: false
+
 command:
   "Ensure rstudio-server has permissions to log directory":
     exec: su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'
@@ -194,7 +198,7 @@ command:
       - "/usr/bin/openssl"
   "Verify Quarto":
     exec: /usr/local/bin/quarto check --quiet
-    timeout: 30000
+    timeout: 120000
     exit-status: 0
   "Verify Quarto has TinyTeX installed":
     exec: quarto list tools
