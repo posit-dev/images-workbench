@@ -1,7 +1,7 @@
 FROM docker.io/library/golang:1.25.6 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG WORKBENCH_VERSION="2026.01.0+392.pro5"
+ARG WORKBENCH_VERSION="2026.01.1+403.pro11"
 
 ### Initialize PTI in container ###
 RUN apt-get update -yqq --fix-missing && \
@@ -21,7 +21,7 @@ RUN apt-get update -yqq --fix-missing && \
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p /pwb-staging && \
     WORKBENCH_VERSION_URL=$(echo -n "${WORKBENCH_VERSION}" | sed 's/+/-/g') && \
-    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2026.01.0-392.pro5-x86_64.tar.gz" && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2026.01.1-403.pro11-x86_64.tar.gz" && \
     mkdir -p /opt/session-components && \
     tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
     chmod 755 /opt/session-components && \
