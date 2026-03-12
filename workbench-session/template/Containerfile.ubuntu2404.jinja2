@@ -15,6 +15,8 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
 {{ r.declare_build_arg() }}
 {{ python.declare_build_arg() }}
 {{ quarto.declare_build_arg() }}

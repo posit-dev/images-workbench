@@ -1,5 +1,5 @@
 # Build Python using uv in a separate stage
-FROM ghcr.io/astral-sh/uv:bookworm-slim AS python-builder
+FROM ghcr.io/astral-sh/uv:debian-slim AS python-builder
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/opt/python
@@ -13,6 +13,8 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
 ARG WORKBENCH_VERSION="2026.01.1+403.pro11"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
