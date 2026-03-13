@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "../images-shared",
+      "../images",
+      "../images-examples",
+      "../helm"
+    ]
+  }
+}

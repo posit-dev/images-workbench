@@ -3,6 +3,11 @@ results/
 .docker-bake.json
 .bakery-bake.json
 .dev-*
+
+# Claude
+.claude/settings.local.json
+.claude/worktrees/
+.claude/plans/
 .idea
 
 ### Python template
