@@ -68,17 +68,17 @@ unset RSW_LICENSE
 unset RSW_LICENSE_SERVER
 
 # Create one user
-if [ $(getent passwd $RSW_TESTUSER_UID) ] ; then
-    echo "UID $RSW_TESTUSER_UID already exists, not creating $RSW_TESTUSER test user";
+if [ $(getent passwd $PWB_TESTUSER_UID) ] ; then
+    echo "UID $PWB_TESTUSER_UID already exists, not creating $PWB_TESTUSER test user";
 else
-    if [ -z "$RSW_TESTUSER" ]; then
-        echo "Empty 'RSW_TESTUSER' variables, not creating test user";
+    if [ -z "$PWB_TESTUSER" ]; then
+        echo "Empty 'PWB_TESTUSER' variables, not creating test user";
     else
-        if [ -z "$RSW_TESTUSER_UID" ]; then
-            RSW_TESTUSER_UID=10000
+        if [ -z "$PWB_TESTUSER_UID" ]; then
+            PWB_TESTUSER_UID=10000
         fi
-        useradd -m -s /bin/bash -u $RSW_TESTUSER_UID -U $RSW_TESTUSER
-        echo "$RSW_TESTUSER:$RSW_TESTUSER_PASSWD" | sudo chpasswd
+        useradd -m -s /bin/bash -u $PWB_TESTUSER_UID -U $PWB_TESTUSER
+        echo "$PWB_TESTUSER:$PWB_TESTUSER_PASSWD" | sudo chpasswd
     fi
 fi
 
