@@ -25,6 +25,7 @@ RUN mkdir -p /pwb-staging && \
     chmod 755 /opt/session-components && \
     rm -rf /pwb-staging
 
-FROM scratch
+FROM docker.io/library/ubuntu:24.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 COPY --from=builder /opt/session-components /opt/session-components
 CMD ["/opt/session-components/bin/session-init"]
