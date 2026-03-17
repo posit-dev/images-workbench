@@ -85,26 +85,6 @@ images:
             version: 4.5.1
           - dependency: python
             version: 3.13.7
-      - name: 2025.05.1+513.pro3
-        subpath: '2025.05'
-        os:
-          - name: Ubuntu 22.04
-            primary: true
-        dependencies:
-          - dependency: R
-            version: 4.4.3
-          - dependency: python
-            version: 3.12.11
-      - name: 2024.12.1+563.pro5
-        subpath: '2024.12'
-        os:
-          - name: Ubuntu 22.04
-            primary: true
-        dependencies:
-          - dependency: R
-            version: 4.4.2
-          - dependency: python
-            version: 3.12.9
   - name: workbench-session-init
     displayName: "Posit Workbench Session Init"
     description: "A containerized image for initializing Posit Workbench sessions."
@@ -116,44 +96,21 @@ images:
         os:
           - name: Ubuntu 24.04
             primary: true
-          - name: Ubuntu 22.04
         overrideRegistries:
           - host: "749683154838.dkr.ecr.us-west-2.amazonaws.com"
             repository: "workbench-session-init-preview"
-        values:
-          go_version: 1.25.5
     versions:
       - name: 2026.01.1+403.pro11
         subpath: '2026.01'
         latest: true
         os:
-          - name: Ubuntu 22.04
           - name: Ubuntu 24.04
             primary: true
-        values:
-          go_version: 1.25.6
       - name: 2025.09.2+418.pro4
         subpath: '2025.09'
         os:
           - name: Ubuntu 24.04
-          - name: Ubuntu 22.04
             primary: true
-        values:
-          go_version: 1.25.1
-      - name: 2025.05.1+513.pro3
-        subpath: '2025.05'
-        os:
-          - name: Ubuntu 22.04
-            primary: true
-        values:
-          go_version: 1.24.7
-      - name: 2024.12.1+563.pro5
-        subpath: '2024.12'
-        os:
-          - name: Ubuntu 22.04
-            primary: true
-        values:
-          go_version: 1.22.2
   - name: workbench-session
     matrix:
       namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"
