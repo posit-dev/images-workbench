@@ -1,13 +1,19 @@
-{#-
-Below are imports for Bakery's macros. If any are unneeded, they can be removed.
-Bakery handles bootstrapping the files into template rendering.
--#}
-{%- import "apt.j2" as apt -%}
 FROM docker.io/library/ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-{{ apt.run_setup() }}
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y jq unzip && \
@@ -17,14 +23,14 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Download positron-server tarball from CDN
 RUN mkdir -p /opt/positron/bin/positron-server && \
-    curl -fsSL -o /tmp/positron.tar.gz "https://cdn.posit.co/positron/releases/pwb/x86_64/positron-workbench-linux-x64-{{ positron_version }}.tar.gz" && \
+    curl -fsSL -o /tmp/positron.tar.gz "https://cdn.posit.co/positron/releases/pwb/x86_64/positron-workbench-linux-x64-2026.03.0-212.tar.gz" && \
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
     mv /tmp/vscode-reh-web-linux-* /opt/positron/bin/positron-server/bundled && \
     rm /tmp/positron.tar.gz
 
 # Download positron docs from CDN
 RUN mkdir -p /opt/positron/docs/positron && \
-    curl -fsSL -o /tmp/docs.zip "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-{{ positron_version }}.zip" && \
+    curl -fsSL -o /tmp/docs.zip "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-2026.03.0-212.zip" && \
     unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
     rm /tmp/docs.zip
 
@@ -42,7 +48,12 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-{{ apt.run_update_upgrade() }}
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder --chmod=755 /usr/local/bin/positron-session-init /usr/local/bin/positron-session-init
 COPY --from=builder --chmod=755 /opt/positron /opt/positron

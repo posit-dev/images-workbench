@@ -6,7 +6,7 @@ file:
   /opt/positron/bin/positron-server/bundled/:
     exists: true
     filetype: directory
-  /opt/positron/docs/positron/bundled/:
+  /opt/positron/docs/positron/:
     exists: true
     filetype: directory
   /usr/local/bin/positron-session-init:
