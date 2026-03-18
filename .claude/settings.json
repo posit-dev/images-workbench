@@ -27,8 +27,20 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh run watch:*)",
+      "Bash(bakery *)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)"
+    ],
+    "deny": [
+      "Bash(* --push)",
+      "Bash(* --push *)",
+      "Bash(* --force)",
+      "Bash(* --force *)",
+      "Bash(* --temp-registry *)",
+      "Bash(* --cache-registry *)",
+      "Bash(bakery clean *)",
+      "Bash(bakery ci merge *)",
+      "Bash(bakery remove *)"
     ]
   }
 }
