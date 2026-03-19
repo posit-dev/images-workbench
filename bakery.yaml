@@ -111,6 +111,20 @@ images:
         os:
           - name: Ubuntu 24.04
             primary: true
+  - name: workbench-positron-init
+    displayName: "Posit Workbench Positron Init"
+    description: "A containerized image for initializing Positron IDE sessions in Posit Workbench."
+    documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    matrix:
+      namePattern: "{{ Dependencies.positron }}"
+      dependencyConstraints:
+        - dependency: positron
+          constraint:
+            latest: true
+            count: 6
+      os:
+        - name: Ubuntu 24.04
+          primary: true
   - name: workbench-session
     matrix:
       namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"

@@ -1,0 +1,60 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+FROM docker.io/library/ubuntu:24.04 AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG TARGETARCH
+ARG POSITRON_VERSION
+
+{{ apt.run_setup() }}
+
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y jq unzip && \
+    rm -rf /var/lib/apt/lists/*
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Map TARGETARCH to CDN architecture names
+#   amd64 -> CDN path: x86_64, tarball: x64, session-init: linux-x86_64
+#   arm64 -> CDN path: arm64,  tarball: arm64, session-init: linux-arm64
+RUN case ${TARGETARCH} in \
+      amd64) CDN_ARCH=x86_64; PKG_ARCH=x64; INIT_ARTIFACT=linux-x86_64 ;; \
+      arm64) CDN_ARCH=arm64;  PKG_ARCH=arm64; INIT_ARTIFACT=linux-arm64 ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    # Download positron-server tarball from CDN
+    mkdir -p /opt/positron/bin/positron-server && \
+    curl -fsSL -o /tmp/positron.tar.gz \
+      "https://cdn.posit.co/positron/releases/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
+    tar -xzf /tmp/positron.tar.gz -C /tmp && \
+    mv /tmp/vscode-reh-web-linux-* /opt/positron/bin/positron-server/bundled && \
+    rm /tmp/positron.tar.gz && \
+    # Download positron docs from CDN
+    mkdir -p /opt/positron/docs/positron && \
+    curl -fsSL -o /tmp/docs.zip \
+      "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-${POSITRON_VERSION}.zip" && \
+    unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
+    rm /tmp/docs.zip && \
+    # Download latest positron-session-init binary from CDN
+    BINARY_URL=$(curl -fsSL "https://cdn.posit.co/pwb-components/positron-session-init/latest.json" \
+      | jq -r ".artifacts[\"${INIT_ARTIFACT}\"].url") && \
+    curl -fsSL -o /tmp/positron-session-init.tar.gz "$BINARY_URL" && \
+    tar -xzf /tmp/positron-session-init.tar.gz -C /usr/local/bin && \
+    chmod 755 /usr/local/bin/positron-session-init && \
+    rm /tmp/positron-session-init.tar.gz
+
+# Final image
+FROM docker.io/library/ubuntu:24.04 AS build
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+{{ apt.run_update_upgrade() }}
+
+COPY --from=builder --chmod=755 /usr/local/bin/positron-session-init /usr/local/bin/positron-session-init
+COPY --from=builder --chmod=755 /opt/positron /opt/positron
+
+CMD ["/usr/local/bin/positron-session-init"]
