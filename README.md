@@ -136,7 +136,7 @@ Additional documentation:
 Build prerequisites
 
 * [python](https://docs.astral.sh/uv/guides/install-python/)
-* [pipx](https://pipx.pypa.io/stable/installation/)
+* [pipx](https://pipx.pypa.io/stable/how-to/install-pipx/)
 * [docker buildx bake](https://github.com/docker/buildx#installing)
 * [just](https://just.systems/man/en/prerequisites.html)
 * [gh](https://github.com/cli/cli#installation) (required while repositories are private)
