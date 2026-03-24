@@ -2,21 +2,87 @@
 
 Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
 
-> [!IMPORTANT]
-> These images are under active development and testing and are not yet supported by Posit.
->
-> Please see [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) for officially supported images.
+> [!NOTE]
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
+
+## Prerequisites
+
+| Tool | Required for | Install |
+|------|-------------|---------|
+| [Docker](https://docs.docker.com/get-docker/) | Running containers locally | [Get Docker](https://docs.docker.com/get-docker/) |
+| [Helm](https://helm.sh/docs/intro/install/) | Deploying on Kubernetes | [Install Helm](https://helm.sh/docs/intro/install/) |
+| [kubectl](https://kubernetes.io/docs/tasks/tools/) | Deploying on Kubernetes | [Install kubectl](https://kubernetes.io/docs/tasks/tools/) |
+| Product license | Running Posit Workbench | [Licensing FAQ](https://docs.posit.co/licensing/licensing-faq.html) |
 
 ## Images
 
 | Image | Docker Hub | GitHub Container Registry |
 |:------|:-----------|:--------------------------|
-| [workbench](./workbench/) | [`docker.io/posit/workbench`](https://hub.docker.com/repository/docker/posit/workbench/tags) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
-| [workbench-session-init](./workbench-session-init/) | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/repository/docker/posit/workbench-session-init/tags) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| [workbench](./workbench/) | [`docker.io/posit/workbench`](https://hub.docker.com/r/posit/workbench) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
+| [workbench-session](./workbench-session/) | [`docker.io/posit/workbench-session`](https://hub.docker.com/r/posit/workbench-session) | [`ghcr.io/posit-dev/workbench-session`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
+| [workbench-session-init](./workbench-session-init/) | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| [workbench-positron-init](./workbench-positron-init/) | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
 Additional Posit container images are published to [Docker Hub](https://hub.docker.com/u/posit) and [GitHub Container Registry](https://github.com/orgs/posit-dev/packages).
 
-## Getting Started
+## Running the Images
+
+The fastest way to get started is to pull and run a pre-built image. See each image's documentation for Quick Start examples, configuration, and environment variables.
+
+- [Posit Workbench](./workbench/) — The Workbench server
+- [Workbench Session](./workbench-session/) — Session images for Kubernetes
+- [Workbench Session Init](./workbench-session-init/) — Init container for Kubernetes session deployments
+- [Workbench Positron Init](./workbench-positron-init/) — Init container for Positron IDE in Kubernetes
+
+See the [Workbench installation guide](https://docs.posit.co/ide/server-pro/getting_started/installation/) for full setup instructions.
+
+## Deploying on Kubernetes
+
+Use the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) to deploy on Kubernetes.
+
+```bash
+helm repo add rstudio https://helm.rstudio.com
+helm repo update
+```
+
+Create a Kubernetes secret from your license file, then configure the chart in your `values.yaml`:
+
+```bash
+kubectl create secret generic posit-workbench-license \
+  --from-file=license.lic=/path/to/license.lic
+```
+
+```yaml
+image:
+  repository: ghcr.io/posit-dev/workbench
+  tag: "2026.01.1"
+
+license:
+  file:
+    secret: posit-workbench-license
+
+session:
+  image:
+    repository: ghcr.io/posit-dev/workbench-session
+    tag: "R4.5.2-python3.14.3-ubuntu-24.04"
+
+config:
+  server:
+    rserver.conf:
+      launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
+      launcher-sessions-init-container-image-tag: "2026.01.1"
+```
+
+The `rserver.conf` entries configure Workbench to use the new session init container image.
+
+Install command:
+```bash
+helm upgrade --install workbench rstudio/rstudio-workbench --values values.yaml
+```
+
+See the [full chart documentation](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) for all available values.
+
+## Building from Source
 
 You can interact with this repository in multiple ways:
 
@@ -26,7 +92,7 @@ You can interact with this repository in multiple ways:
 
 ## Build
 
-You can build OCI container images from the defitions in this repository using one of the following container build tools:
+You can build OCI container images from the definitions in this repository using one of the following container build tools:
 
 * [buildah](https://github.com/containers/buildah/blob/main/install.md)
 * [docker buildx](https://github.com/docker/buildx#installing)
@@ -35,24 +101,24 @@ The root of the bakery project is used as the build context for each Containerfi
 Here, the [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) file, or project, is in the root of this repository.
 
 ```shell
-PWB_VERSION="2025.09"
+PWB_VERSION="2026.01"
 
 # Build the standard Workbench image using docker
 docker buildx build \
     --tag workbench:${PWB_VERSION} \
-    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2204.std \
+    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2404.std \
     .
 
 # Build the minimal Workbench image using buildah
 buildah build \
     --tag workbench:${PWB_VERSION} \
-    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2204.min \
+    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2404.min \
     .
 
 # Build the minimal Workbench image using podman
 podman build \
     --tag workbench:${PWB_VERSION} \
-    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2204.min \
+    --file workbench/${PWB_VERSION}/Containerfile.ubuntu2404.min \
     .
 ```
 
@@ -88,7 +154,7 @@ Build prerequisites
 
 ### Build with `bakery`
 
-By default, bakery creates a ephemeral JSON [bakefile](https://docs.bakefile.org/en/latest/language.html) to render all containers in parallel.
+By default, bakery creates an ephemeral JSON [bakefile](https://docs.bakefile.org/en/latest/language.html) to render all containers in parallel.
 
 ```shell
 bakery build

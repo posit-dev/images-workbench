@@ -2,23 +2,28 @@
 
 This container image provides [Posit Workbench](https://docs.posit.co/ide/server-pro/) (PWB), an integrated development environment for data science teams that supports R, Python, and VS Code.
 
-> [!IMPORTANT]
-> This image is under active development and testing and is not yet supported by Posit.
->
-> Please see [rstudio-workbench image](https://github.com/rstudio/rstudio-docker-products/tree/main/workbench) in `rstudio/rstudio-docker-products` for the officially supported image.
+> [!NOTE]
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
 
 ## Quick Start
 
 ```bash
-PWB_VERSION="2025.09.2-418.pro4"
+PWB_VERSION="2026.01.1"
+PWB_IMAGE="ghcr.io/posit-dev/workbench"  # or docker.io/posit/workbench
+PWB_LICENSE="/path/to/license.lic"
 docker run -d \
   --name workbench \
   -p 8787:8787 \
-  -v /path/to/license.lic:/etc/rstudio-server/license.lic \
-  posit/workbench:${PWB_VERSION}-ubuntu-22.04
+  -e PWB_TESTUSER=posit \
+  -e PWB_TESTUSER_PASSWD=posit \
+  -v ${PWB_LICENSE}:/etc/rstudio-server/license.lic \
+  ${PWB_IMAGE}:${PWB_VERSION}
 ```
 
-Access Workbench at `http://localhost:8787`.
+Access Workbench at `http://localhost:8787`. Log in with username `posit` and password `posit`.
+
+> [!NOTE]
+> This example does not mount a data volume. Session data will not persist when the container stops. See [Volume Mounts](#volume-mounts) for persistent storage.
 
 ## Image Variants
 
@@ -37,17 +42,20 @@ Images are published to:
 - Docker Hub: `docker.io/posit/workbench`
 - GitHub Container Registry: `ghcr.io/posit-dev/workbench`
 
+Ubuntu 24.04 is the default OS.
+
 Tag formats:
-- `2025.09.2-418.pro4` - Full version (standard variant, Ubuntu 22.04)
-- `2025.09.2-418.pro4-ubuntu-22.04-std` - Explicit OS and variant
-- `2025.09.2-418.pro4-ubuntu-24.04-min` - Ubuntu 24.04 minimal variant
-- `latest` - Latest stable release (standard variant, Ubuntu 22.04)
+- `2026.01.1` - Latest OS, standard variant
+- `2026.01.1-ubuntu-24.04` - Explicit OS, standard variant
+- `2026.01.1-ubuntu-24.04-std` - Explicit OS and variant
+- `2026.01.1-ubuntu-24.04-min` - Minimal variant
+- `latest` - Latest version, default OS, standard variant
 
 ## Configuration
 
 ### License Activation
 
-A valid license is required. Choose one method:
+A [product license](https://docs.posit.co/licensing/licensing-faq.html) is required. Posit recommends license file activation. Choose one method:
 
 **Option 1: License File (Recommended)**
 ```bash
@@ -72,9 +80,9 @@ docker run -e PWB_LICENSE_SERVER="http://license-server:8989" ...
 | `PWB_LICENSE_SERVER`  | URL of floating license server                                      |
 | `PWB_LAUNCHER`        | Enable the Job Launcher (default: `true`)                           |
 | `PWB_LAUNCHER_TIMEOUT`| Launcher startup timeout in seconds (default: `10`)                 |
-| `PWB_TESTUSER`        | Test user name (default: `rstudio`)                                 |
-| `PWB_TESTUSER_PASSWD` | Test user password (default: `rstudio`)                             |
-| `PWB_TESTUSER_UID`    | Test user UID (default: `10000`)                                    |
+| `PWB_TESTUSER`        | Test user name. If empty, no test user is created.                  |
+| `PWB_TESTUSER_PASSWD` | Test user password                                                  |
+| `PWB_TESTUSER_UID`    | Test user UID (default: `10000` when `PWB_TESTUSER` is set)         |
 | `STARTUP_DEBUG_MODE`  | Set to `1` for verbose startup logging                              |
 | `DIAGNOSTIC_ENABLE`   | Enable diagnostic logging (default: `false`)                        |
 | `DIAGNOSTIC_DIR`      | Directory for diagnostic logs (default: `/var/log/rstudio`)         |
