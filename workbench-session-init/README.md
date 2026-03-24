@@ -7,12 +7,16 @@ This init container image provides the session runtime components for [Posit Wor
 
 ## Overview
 
-This image is intended to be used as an init container in conjunction with:
+The `workbench-session-init` container copies session runtime components to a shared volume, which is then mounted into the session container. It is used as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images extended with Workbench session components.
 
-- [Posit Workbench](https://hub.docker.com/r/posit/workbench) - The main Workbench server
-- Custom session images - Your own images extended with Workbench session components
+| Image | Description | Docker Hub | GHCR |
+|:------|:------------|:-----------|:-----|
+| `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
+| `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
+| `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-The init container copies the session runtime components to a shared volume, which is then mounted into the session container.
+See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
 ## Quick Start
 

@@ -7,7 +7,16 @@ These container images provide the session runtime environments for [Posit Workb
 
 ## Overview
 
-When Posit Workbench runs on Kubernetes with the Job Launcher, user sessions execute inside session containers. Each session image provides a specific R and Python version pair.
+When [Posit Workbench](https://docs.posit.co/ide/server-pro/) runs on Kubernetes with the Job Launcher, user sessions execute inside session containers. Each `workbench-session` image provides a specific R and Python version pair.
+
+| Image | Description | Docker Hub | GHCR |
+|:------|:------------|:-----------|:-----|
+| `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
+| `workbench-session` | Session images for Kubernetes | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
+| `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
+
+See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
 ## Image Tags
 
