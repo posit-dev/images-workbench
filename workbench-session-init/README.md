@@ -2,10 +2,8 @@
 
 This init container image provides the session runtime components for [Posit Workbench](https://docs.posit.co/ide/server-pro/). It can be used to pull the session runtime components into another base session image, which can then be used to run Workbench sessions in Kubernetes environments.
 
-> [!IMPORTANT]
-> This image is under active development and testing and is not yet supported by Posit.
->
-> Please see [workbench-session-init](https://github.com/rstudio/rstudio-docker-products/tree/main/workbench-session-init) in `rstudio/rstudio-docker-products` for the officially supported image.
+> [!NOTE]
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
 
 ## Overview
 
@@ -23,7 +21,7 @@ Use as an init container in your Kubernetes pod specification:
 ```yaml
 initContainers:
   - name: session-init
-    image: posit/workbench-session-init:2025.09.2-418.pro4-ubuntu-22.04
+    image: ghcr.io/posit-dev/workbench-session-init:2026.01.1-ubuntu-24.04
     volumeMounts:
       - name: session-components
         mountPath: /opt/session-components
@@ -49,10 +47,10 @@ Images are published to:
 
 Tag formats:
 
-- `2025.09.2-418.pro4` - Full version (Ubuntu 22.04)
-- `2025.09.2-418.pro4-ubuntu-22.04` - Explicit OS
-- `2025.09.2-418.pro4-ubuntu-24.04` - Ubuntu 24.04
-- `latest` - Latest stable release (Ubuntu 22.04)
+- `2026.01.1` - Full version (Ubuntu 24.04)
+- `2026.01.1-ubuntu-24.04` - Explicit OS
+- `2026.01.1-ubuntu-22.04` - Ubuntu 22.04
+- `latest` - Latest stable release (Ubuntu 24.04)
 
 ## Session Components
 

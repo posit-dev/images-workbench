@@ -2,8 +2,8 @@
 
 This init container image provides the Positron IDE components for [Posit Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments. It bundles the Positron IDE server, documentation, and a session-init binary that copies selected components into a shared volume at runtime.
 
-> [!IMPORTANT]
-> This image is under active development and testing and is not yet supported by Posit.
+> [!NOTE]
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
 
 ## Overview
 
