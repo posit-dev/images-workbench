@@ -1,0 +1,143 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Product version (e.g. 2026.02.1+500.pro12)"
+        required: true
+        type: string
+
+# Versioned (non-matrix) images in this repo.
+env:
+  IMAGES: "workbench workbench-session-init"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: GitHub App Token
+        uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+
+      - name: Install bakery
+        uses: posit-dev/images-shared/setup-bakery@main
+
+      - name: Parse version
+        id: parse
+        run: |
+          VERSION="${{ inputs.version }}"
+          DISPLAY_VERSION="${VERSION%%[+-]*}"
+          EDITION="${DISPLAY_VERSION%.*}"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "display_version=$DISPLAY_VERSION" >> "$GITHUB_OUTPUT"
+          echo "edition=$EDITION" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update versions
+        id: release
+        env:
+          VERSION: ${{ steps.parse.outputs.version }}
+          DISPLAY_VERSION: ${{ steps.parse.outputs.display_version }}
+          EDITION: ${{ steps.parse.outputs.edition }}
+        run: |
+          LATEST_CHANGED=false
+          OLD_DISPLAY_VERSION=""
+
+          for IMAGE in $IMAGES; do
+            EXISTING=$(bakery get version "$IMAGE" "$VERSION" 2>/dev/null || true)
+
+            if [ -n "$EXISTING" ]; then
+              echo "Patching $IMAGE: $EXISTING -> $VERSION"
+              bakery update version "$IMAGE" "$VERSION"
+            else
+              # Determine whether this edition should become latest.
+              CURRENT_LATEST=$(bakery get version "$IMAGE" --latest 2>/dev/null || true)
+              if [ -z "$CURRENT_LATEST" ]; then
+                MARK_LATEST="--mark-latest"
+              else
+                CURRENT_DISPLAY="${CURRENT_LATEST%%[+-]*}"
+                CURRENT_EDITION="${CURRENT_DISPLAY%.*}"
+                if [[ "$EDITION" > "$CURRENT_EDITION" ]]; then
+                  MARK_LATEST="--mark-latest"
+                else
+                  MARK_LATEST="--no-mark-latest"
+                fi
+              fi
+
+              echo "Creating $IMAGE: $VERSION (subpath=$EDITION, $MARK_LATEST)"
+              bakery create version "$IMAGE" "$VERSION" --subpath "$EDITION" $MARK_LATEST
+            fi
+          done
+
+          # Check if latest changed by comparing before/after.
+          FIRST_IMAGE=$(echo "$IMAGES" | awk '{print $1}')
+          NEW_LATEST=$(bakery get version "$FIRST_IMAGE" --latest 2>/dev/null || true)
+          NEW_LATEST_DISPLAY="${NEW_LATEST%%[+-]*}"
+
+          if [ "$NEW_LATEST_DISPLAY" = "$DISPLAY_VERSION" ]; then
+            LATEST_CHANGED=true
+            # Find the old latest from git diff of bakery.yaml.
+            OLD_LATEST=$(git diff bakery.yaml | grep -E '^\-.*latest: true' -B5 | grep '^\-.*name:' | head -1 | sed 's/.*name: //')
+            if [ -n "$OLD_LATEST" ]; then
+              OLD_DISPLAY_VERSION="${OLD_LATEST%%[+-]*}"
+            fi
+          fi
+
+          echo "latest_changed=$LATEST_CHANGED" >> "$GITHUB_OUTPUT"
+          echo "old_display_version=$OLD_DISPLAY_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Update READMEs
+        if: steps.release.outputs.latest_changed == 'true' && steps.release.outputs.old_display_version != ''
+        env:
+          DISPLAY_VERSION: ${{ steps.parse.outputs.display_version }}
+          EDITION: ${{ steps.parse.outputs.edition }}
+          OLD_DISPLAY_VERSION: ${{ steps.release.outputs.old_display_version }}
+        run: |
+          OLD_EDITION="${OLD_DISPLAY_VERSION%.*}"
+
+          # Pass 1: Replace full display version (e.g. 2026.01.1 -> 2026.02.1)
+          find . -name 'README.md' -not -path './.git/*' \
+            -exec sed -i "s/${OLD_DISPLAY_VERSION}/${DISPLAY_VERSION}/g" {} +
+
+          # Pass 2: Replace edition/subpath (e.g. 2026.01 -> 2026.02)
+          # Only when the edition actually changed.
+          if [ "$OLD_EDITION" != "$EDITION" ]; then
+            find . -name 'README.md' -not -path './.git/*' \
+              -exec sed -i "s/${OLD_EDITION}/${EDITION}/g" {} +
+          fi
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ steps.parse.outputs.version }}
+          DISPLAY_VERSION: ${{ steps.parse.outputs.display_version }}
+        run: |
+          BRANCH="release/${DISPLAY_VERSION}"
+          git checkout -B "$BRANCH"
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Release ${DISPLAY_VERSION}"
+          git push -u origin "$BRANCH" --force-with-lease
+
+          BODY="Updates images to version \`${VERSION}\`."
+          BODY+=$'\n\n'"**Images:** $(echo $IMAGES | tr ' ' ', ')"
+          if [ "${{ steps.release.outputs.latest_changed }}" = "true" ]; then
+            BODY+=$'\n'"**Latest changed:** \`${{ steps.release.outputs.old_display_version }}\` → \`${DISPLAY_VERSION}\`"
+          fi
+
+          gh pr create \
+            --title "Release ${DISPLAY_VERSION}" \
+            --body "$BODY" \
+            --base main \
+            --head "$BRANCH" || echo "PR already exists"
