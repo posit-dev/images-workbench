@@ -3,7 +3,7 @@
 install-bakery *OPTS:
   #!/bin/bash
   # TODO: Update this after package is published somewhere
-  pipx install {{OPTS}} 'git+ssh://git@github.com/posit-dev/images-shared.git@main#egg=posit-bakery&subdirectory=posit-bakery'
+  uv tool install {{OPTS}} 'git+ssh://git@github.com/posit-dev/images-shared.git@main#egg=posit-bakery&subdirectory=posit-bakery'
 
 install-goss:
   #!/bin/bash
