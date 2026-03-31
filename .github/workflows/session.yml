@@ -1,5 +1,7 @@
 name: Session Images
 on:
+  workflow_dispatch:
+
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 4 * * 0" # At 04:15 on Sunday

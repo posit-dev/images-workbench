@@ -1,5 +1,7 @@
 name: Production
 on:
+  workflow_dispatch:
+
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 3 * * 0" # At 03:15 on Sunday
@@ -34,6 +36,7 @@ jobs:
       - uses: re-actors/alls-green@release/v1
         with:
           jobs: ${{ toJSON(needs) }}
+          allowed-skips: notify-helm
 
   build:
     name: Build
@@ -55,8 +58,44 @@ jobs:
       runs-on: ubuntu-latest-4x
       dev-versions: "exclude"
       matrix-versions: "exclude"
-      # Push images only for merges into main and weekly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
+  notify-helm:
+    name: Notify Helm
+    if: ${{ needs.build.result == 'success' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+    needs:
+      - build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Get latest version
+        id: version
+        run: |
+          APP_VERSION=$(yq '.images[] | select(.name == "workbench") | .versions[] | select(.latest == true) | .name' bakery.yaml)
+          # Strip build metadata for helm appVersion (e.g. 2026.01.1+403.pro11 → 2026.01.1)
+          APP_VERSION="${APP_VERSION%%+*}"
+          echo "app-version=$APP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: posit-dev
+          repositories: helm
+
+      - name: Dispatch Helm update
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh workflow run update-images.yml \
+            --repo posit-dev/helm \
+            --field product=workbench \
+            --field app-version=${{ steps.version.outputs.app-version }}
 
   clean:
     name: Clean
