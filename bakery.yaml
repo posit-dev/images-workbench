@@ -59,7 +59,8 @@ images:
             primary: true
           - name: Ubuntu 22.04
         overrideRegistries:
-          - host: "749683154838.dkr.ecr.us-west-2.amazonaws.com"
+          - host: "ghcr.io"
+            namespace: "posit-dev"
             repository: "workbench-preview"
     versions:
       - name: 2026.01.1+403.pro11
@@ -97,7 +98,8 @@ images:
           - name: Ubuntu 24.04
             primary: true
         overrideRegistries:
-          - host: "749683154838.dkr.ecr.us-west-2.amazonaws.com"
+          - host: "ghcr.io"
+            namespace: "posit-dev"
             repository: "workbench-session-init-preview"
     versions:
       - name: 2026.01.1+403.pro11
