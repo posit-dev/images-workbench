@@ -20,7 +20,7 @@ RUN case ${TARGETARCH} in \
       *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     mkdir -p /pwb-staging && \
-    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-{{ Image.Version | replace('+', '-') }}-$CDN_ARCH.tar.gz" && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/$CDN_ARCH/rsp-session-multi-linux-{{ Image.Version | replace('+', '-') }}-$CDN_ARCH.tar.gz" && \
     mkdir -p /opt/session-components && \
     tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
     chmod 755 /opt/session-components && \
