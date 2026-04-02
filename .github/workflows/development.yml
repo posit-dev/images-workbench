@@ -46,9 +46,8 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
     with:
-      runs-on: ubuntu-latest-4x
       dev-versions: "only"
       matrix-versions: "exclude"
       # Push images only for merges into main and hourly schduled re-builds.
