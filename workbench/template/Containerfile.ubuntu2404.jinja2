@@ -82,8 +82,12 @@ RUN {{ python.install_packages(python_version, "ipykernel") }} && \
 {% endfor -%}
 
 ### Install Pro Drivers ###
-RUN apt-get install -yq rstudio-drivers && \
-    {{ apt.clean_command() }}
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        {{ apt.install(packages="rstudio-drivers") | indent(8) }} && \
+        cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini; \
+    else \
+        echo "Pro Drivers will not be installed for architecture: $TARGETARCH"; \
+    fi
 {%- endif %}
 
 ### Copy startup scripts ###
