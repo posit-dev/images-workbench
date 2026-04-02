@@ -54,14 +54,14 @@ jobs:
           OLD_DISPLAY_VERSION=""
 
           for IMAGE in $IMAGES; do
-            EXISTING=$(bakery get version "$IMAGE" "$VERSION" 2>/dev/null || true)
+            EXISTING=$(bakery get version "$IMAGE" --subpath "$EDITION" 2>/dev/null || true)
 
             if [ -n "$EXISTING" ]; then
               echo "Patching $IMAGE: $EXISTING -> $VERSION"
-              bakery update version "$IMAGE" "$VERSION"
+              bakery update version "$IMAGE" "$VERSION" --target-version "$EXISTING"
             else
               # Determine whether this edition should become latest.
-              CURRENT_LATEST=$(bakery get version "$IMAGE" --latest 2>/dev/null || true)
+              CURRENT_LATEST=$(bakery get version "$IMAGE" 2>/dev/null || true)
               if [ -z "$CURRENT_LATEST" ]; then
                 MARK_LATEST="--mark-latest"
               else
@@ -81,7 +81,7 @@ jobs:
 
           # Check if latest changed by comparing before/after.
           FIRST_IMAGE=$(echo "$IMAGES" | awk '{print $1}')
-          NEW_LATEST=$(bakery get version "$FIRST_IMAGE" --latest 2>/dev/null || true)
+          NEW_LATEST=$(bakery get version "$FIRST_IMAGE" 2>/dev/null || true)
           NEW_LATEST_DISPLAY="${NEW_LATEST%%[+-]*}"
 
           if [ "$NEW_LATEST_DISPLAY" = "$DISPLAY_VERSION" ]; then
