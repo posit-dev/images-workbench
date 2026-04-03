@@ -31,6 +31,7 @@ jobs:
     timeout-minutes: 10
     needs:
       - build
+      - update-helm
 
     steps:
       - uses: re-actors/alls-green@release/v1
@@ -94,11 +95,12 @@ jobs:
       - name: Dispatch Helm update
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_VERSION: ${{ steps.version.outputs.app-version }}
         run: |
           gh workflow run product-release.yml \
             --repo rstudio/helm \
             --field product=workbench \
-            --field app-version=${{ steps.version.outputs.app-version }}
+            --field app-version="$APP_VERSION"
 
   clean:
     name: Clean
