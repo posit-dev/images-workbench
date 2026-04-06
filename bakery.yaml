@@ -63,7 +63,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-preview"
     versions:
-      - name: 2026.01.1+403.pro11
+      - name: 2026.01.2+418.pro1
         subpath: '2026.01'
         latest: true
         os:
@@ -102,7 +102,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-session-init-preview"
     versions:
-      - name: 2026.01.1+403.pro11
+      - name: 2026.01.2+418.pro1
         subpath: '2026.01'
         latest: true
         os:
@@ -115,7 +115,8 @@ images:
             primary: true
   - name: workbench-positron-init
     displayName: "Posit Workbench Positron Init"
-    description: "A containerized image for initializing Positron IDE sessions in Posit Workbench."
+    description: "A containerized image for initializing Positron IDE sessions in
+      Posit Workbench."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
     matrix:
       namePattern: "{{ Dependencies.positron }}"
