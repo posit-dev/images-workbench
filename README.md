@@ -55,7 +55,7 @@ kubectl create secret generic posit-workbench-license \
 ```yaml
 image:
   repository: ghcr.io/posit-dev/workbench
-  tag: "2026.01.1"
+  tag: "2026.01.2"
 
 license:
   file:
@@ -70,7 +70,7 @@ config:
   server:
     rserver.conf:
       launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
-      launcher-sessions-init-container-image-tag: "2026.01.1"
+      launcher-sessions-init-container-image-tag: "2026.01.2"
 ```
 
 The `rserver.conf` entries configure Workbench to use the new session init container image.
