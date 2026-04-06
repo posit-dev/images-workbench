@@ -1,5 +1,9 @@
 # Posit Workbench Container Images
 
+[![Build](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
+[![Session](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
+[![Latest](https://img.shields.io/docker/v/posit/workbench?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench/tags)
+
 Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
 
 > [!NOTE]
