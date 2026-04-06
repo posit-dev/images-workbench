@@ -27,6 +27,14 @@ ARG TARGETARCH=${BUILDARCH}
 COPY {{ Path.Version }}/deps/ubuntu-24.04_packages.txt /tmp/ubuntu-24.04_packages.txt
 {{ apt.run_install(files = '/tmp/ubuntu-24.04_packages.txt') }}
 
+### Install Pro Drivers ###
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        {{ apt.install(packages="rstudio-drivers") | indent(8) }} && \
+        cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini; \
+    else \
+        echo "Pro Drivers will not be installed for architecture: $TARGETARCH"; \
+    fi
+
 # Install Python from previous stage
 {{ python.copy_from_build_stage() }}
 
@@ -46,11 +54,6 @@ RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
 ### Install Quarto and TinyTeX ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
-ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-{{ quarto.run_install(quarto.build_arg(), True) }} \
-    && rm -f /tmp/tinytex-release.json
-
-### Install Quarto and TinyTeX ###
 ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
 RUN {{ quarto.install(quarto.build_arg(), True, True) | indent(4) }} && \
     {{ quarto.symlink_binary(quarto.build_arg(), "quarto", "/usr/local/bin/quarto") | indent(4) }} && \

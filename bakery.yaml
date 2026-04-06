@@ -57,6 +57,9 @@ images:
         os:
           - name: Ubuntu 24.04
             primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 22.04
         overrideRegistries:
           - host: "ghcr.io"
@@ -97,6 +100,9 @@ images:
         os:
           - name: Ubuntu 24.04
             primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
         overrideRegistries:
           - host: "ghcr.io"
             namespace: "posit-dev"
@@ -127,6 +133,9 @@ images:
       os:
         - name: Ubuntu 24.04
           primary: true
+          platforms:
+            - linux/amd64
+            - linux/arm64
   - name: workbench-session
     matrix:
       namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"
@@ -145,4 +154,7 @@ images:
       os:
         - name: Ubuntu 24.04
           primary: true
+          platforms:
+            - linux/amd64
+            - linux/arm64
         - name: Ubuntu 22.04
