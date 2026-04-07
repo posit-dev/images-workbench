@@ -60,15 +60,8 @@ RUN RUN_UNATTENDED=1 R_VERSION=$R_VERSION bash -c "$(curl -fsSL https://rstd.io/
     find . -type f -name '[rR]-$R_VERSION.*\.(deb|rpm)' -delete
 
 ### Install Quarto and TinyTeX ###
-# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
-# the cache on new releases.
-ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN mkdir -p /opt/quarto/$QUARTO_VERSION && \
-    curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-${TARGETARCH}.tar.gz" | tar xzf - -C "/opt/quarto/$QUARTO_VERSION" --strip-components=1 && \
-    /opt/quarto/$QUARTO_VERSION/bin/quarto install tinytex --no-prompt --quiet \
-    && rm -f /tmp/tinytex-release.json
-
-### Install Quarto and TinyTeX ###
+# Caches won't invalidate correctly on new releases for TinyTeX installs.
+# This ADD instruction is a workaround to bust the cache on new releases.
 ADD https://api.github.com/repos/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
 RUN mkdir -p /opt/quarto/$QUARTO_VERSION && \
     curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-${TARGETARCH}.tar.gz" | tar xzf - -C "/opt/quarto/$QUARTO_VERSION" --strip-components=1 && \
