@@ -61,7 +61,7 @@ COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.
 COPY "workbench/2025.09/startup/launcher" /startup/launcher
 COPY "workbench/2025.09/startup/base" /startup/base
 COPY "workbench/2025.09/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio
+COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio/
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
