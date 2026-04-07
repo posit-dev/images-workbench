@@ -1,5 +1,7 @@
 name: Production
 on:
+  workflow_dispatch:
+
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 3 * * 0" # At 03:15 on Sunday
@@ -62,7 +64,7 @@ jobs:
       dev-versions: "exclude"
       matrix-versions: "exclude"
       # Push images only for merges into main and weekly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
 
   clean:
     name: Clean
