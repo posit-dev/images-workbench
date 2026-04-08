@@ -31,6 +31,7 @@ jobs:
           jobs: ${{ toJSON(needs) }}
           allowed-skips: clean
       - if: always() && github.ref == 'refs/heads/main'
+        continue-on-error: true
         uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
         with:
           result: ${{ steps.alls-green.outcome }}
