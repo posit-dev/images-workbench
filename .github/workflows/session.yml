@@ -17,6 +17,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    name: CI
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs:
+      - build
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        id: alls-green
+        with:
+          jobs: ${{ toJSON(needs) }}
+          allowed-skips: clean
+      - if: always() && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
+        with:
+          result: ${{ steps.alls-green.outcome }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   build:
     name: Build
