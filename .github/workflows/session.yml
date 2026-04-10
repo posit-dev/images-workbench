@@ -44,7 +44,7 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
-    if: contains(fromJSON('["push", "pull_request"]'), github.event_name) || github.event.schedule == '15 3 * * 0'
+    if: github.event_name == 'push' || github.event_name == 'schedule'
     permissions:
       contents: read
       packages: write
