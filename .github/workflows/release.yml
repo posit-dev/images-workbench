@@ -7,6 +7,8 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 jobs:
   release:
     uses: posit-dev/images-shared/.github/workflows/product-release.yml@main
