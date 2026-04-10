@@ -51,12 +51,15 @@ RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
 # Install R
 {{ r.run_install(r.build_arg()) }}
 
-### Install Quarto and TinyTeX ###
+### Install Quarto ###
+RUN {{ quarto.install(quarto.build_arg()) | indent(4) }} && \
+    {{ quarto.symlink_binary(quarto.build_arg(), "quarto", "/usr/local/bin/quarto") | indent(4) }}
+
+### Install TinyTeX ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ quarto.install(quarto.build_arg(), True, True) | indent(4) }} && \
-    {{ quarto.symlink_binary(quarto.build_arg(), "quarto", "/usr/local/bin/quarto") | indent(4) }} && \
+RUN {{ quarto.install_tinytex_command(quarto.get_version_directory(quarto.build_arg() | trim) + "/bin/quarto", True) | indent(4) }} && \
     rm -f /tmp/tinytex-release.json
 
 COPY {{ Path.Version }}/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf

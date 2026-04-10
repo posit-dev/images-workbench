@@ -59,14 +59,16 @@ RUN /opt/python/$PYTHON_VERSION/bin/pip install --no-cache-dir --upgrade --break
 RUN RUN_UNATTENDED=1 R_VERSION=$R_VERSION bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
     find . -type f -name '[rR]-$R_VERSION.*\.(deb|rpm)' -delete
 
-### Install Quarto and TinyTeX ###
+### Install Quarto ###
+RUN mkdir -p /opt/quarto/$QUARTO_VERSION && \
+    curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-${TARGETARCH}.tar.gz" | tar xzf - -C "/opt/quarto/$QUARTO_VERSION" --strip-components=1 && \
+    ln -s /opt/quarto/$QUARTO_VERSION/bin/quarto /usr/local/bin/quarto
+
+### Install TinyTeX ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN mkdir -p /opt/quarto/$QUARTO_VERSION && \
-    curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-${TARGETARCH}.tar.gz" | tar xzf - -C "/opt/quarto/$QUARTO_VERSION" --strip-components=1 && \
-    /opt/quarto/$QUARTO_VERSION/bin/quarto install tinytex --no-prompt --quiet --update-path && \
-    ln -s /opt/quarto/$QUARTO_VERSION/bin/quarto /usr/local/bin/quarto && \
+RUN /opt/quarto/$QUARTO_VERSION/bin/quarto install tinytex --no-prompt --quiet --update-path && \
     rm -f /tmp/tinytex-release.json
 
 COPY workbench-session/matrix/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf
