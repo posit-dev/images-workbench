@@ -71,6 +71,7 @@ jobs:
 
     uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
     with:
+      dev-versions: "only"
       remove-dangling-caches: true
       remove-caches-older-than: 14
       clean-temporary-images: false
