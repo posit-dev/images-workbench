@@ -15,8 +15,6 @@ on:
     # Hourly rebuild of dev images
     - cron: "45 4 * * *" # At 04:45 every day
 
-  pull_request:
-
   push:
     branches:
       - main
