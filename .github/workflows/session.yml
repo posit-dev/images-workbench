@@ -8,6 +8,8 @@ on:
     branches:
       - main
 
+permissions: {}
+
 concurrency:
   # Only cancel in-progress runs for pull_request events, this prevents cancelling workflows against main or tags
   # A pull_request will reuse the same group thus enabling cancelation, all others receive a unique run_id
@@ -19,6 +21,7 @@ jobs:
     name: CI
     if: always()
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 10
     needs:
       - build

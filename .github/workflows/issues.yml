@@ -4,11 +4,14 @@ on:
     types:
       - opened
 
+permissions: {}
+
 jobs:
   issue:
     # only run in posit-dev/images-workbench.
     if: github.repository == 'posit-dev/images-workbench'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
 
       - name: GitHub App Token
