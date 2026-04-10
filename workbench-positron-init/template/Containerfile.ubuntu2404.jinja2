@@ -31,7 +31,7 @@ RUN case ${TARGETARCH} in \
     curl -fsSL -o /tmp/positron.tar.gz \
       "https://cdn.posit.co/positron/releases/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
-    mv /tmp/vscode-reh-web-linux-* /opt/positron/bin/positron-server/bundled && \
+    mv /tmp/vscode-reh-web-*linux-* /opt/positron/bin/positron-server/bundled && \
     rm /tmp/positron.tar.gz && \
     # Download positron docs from CDN
     mkdir -p /opt/positron/docs/positron && \
