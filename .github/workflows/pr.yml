@@ -1,0 +1,54 @@
+name: Pull Request
+on:
+  pull_request:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    timeout-minutes: 10
+    needs:
+      - production
+      - development
+      - session
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
+  production:
+    name: Production
+    permissions:
+      contents: read
+      packages: write
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    with:
+      dev-versions: "exclude"
+      matrix-versions: "exclude"
+
+  development:
+    name: Development
+    permissions:
+      contents: read
+      packages: write
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    with:
+      dev-versions: "only"
+      matrix-versions: "exclude"
+
+  session:
+    name: Session
+    permissions:
+      contents: read
+      packages: write
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    with:
+      matrix-versions: "only"
