@@ -4,11 +4,10 @@ on:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 4 * * 0" # At 04:15 on Sunday
 
-  pull_request:
-
   push:
     branches:
       - main
+
 
 concurrency:
   # Only cancel in-progress runs for pull_request events, this prevents cancelling workflows against main or tags
@@ -21,11 +20,12 @@ jobs:
     name: CI
     if: always()
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 10
     needs:
       - build
     steps:
-      - uses: re-actors/alls-green@release/v1
+      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe  # v1.2.2
         id: alls-green
         with:
           jobs: ${{ toJSON(needs) }}
@@ -44,7 +44,7 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
-    if: contains(fromJSON('["push", "pull_request"]'), github.event_name) || github.event.schedule == '15 3 * * 0'
+    if: github.event_name == 'push' || github.event_name == 'schedule'
     permissions:
       contents: read
       packages: write
@@ -57,7 +57,7 @@ jobs:
     with:
       matrix-versions: only
       # Push images only for merges into main and weekly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '15 3 * * 0' }}
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
 
   clean:
     name: Clean
