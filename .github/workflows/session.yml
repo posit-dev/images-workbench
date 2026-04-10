@@ -42,7 +42,7 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
-    if: contains(fromJSON('["push", "pull_request"]'), github.event_name) || github.event.schedule == '15 3 * * 0'
+    if: github.event_name == 'push' || github.event_name == 'schedule'
     permissions:
       contents: read
       packages: write
@@ -55,7 +55,7 @@ jobs:
     with:
       matrix-versions: only
       # Push images only for merges into main and weekly schduled re-builds.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event.schedule == '15 3 * * 0' }}
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
 
   clean:
     name: Clean
