@@ -1,0 +1,9 @@
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        # Shared workflows and composite actions from images-shared
+        # are kept at @main intentionally.
+        "posit-dev/images-shared/*": ref-pin
+        "*": hash-pin
+
