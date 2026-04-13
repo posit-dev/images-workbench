@@ -28,7 +28,7 @@ jobs:
     name: Production
     permissions:
       contents: read
-      packages: write
+      packages: read
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
       dev-versions: "exclude"
@@ -38,7 +38,7 @@ jobs:
     name: Development
     permissions:
       contents: read
-      packages: write
+      packages: read
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
       dev-versions: "only"
@@ -48,7 +48,7 @@ jobs:
     name: Session
     permissions:
       contents: read
-      packages: write
+      packages: read
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
       matrix-versions: "only"
@@ -58,6 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
