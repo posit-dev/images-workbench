@@ -20,6 +20,8 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Setup environment ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \

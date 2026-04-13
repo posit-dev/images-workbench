@@ -2,6 +2,8 @@ FROM docker.io/library/ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Initialize PTI in container ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
@@ -17,7 +19,6 @@ RUN apt-get update -yqq --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 # Download the RStudio Workbench session components
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir -p /pwb-staging && \
     curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2026.01.2-418.pro1-x86_64.tar.gz" && \
     mkdir -p /opt/session-components && \

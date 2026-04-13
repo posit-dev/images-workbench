@@ -9,11 +9,12 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Initialize PTI in container ###
 {{ apt.run_setup() }}
 
 # Download the RStudio Workbench session components
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN case ${TARGETARCH} in \
       amd64) CDN_ARCH=x86_64 ;; \
       arm64) CDN_ARCH=arm64 ;; \

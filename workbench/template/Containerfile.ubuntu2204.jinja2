@@ -36,6 +36,8 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Setup environment ###
 {{ apt.run_setup() }}
 
@@ -83,7 +85,7 @@ RUN {{ python.install_packages(python_version, "ipykernel") }} && \
 
 ### Install Pro Drivers ###
 RUN apt-get install -yq rstudio-drivers && \
-    {{ apt.clean_command() }}
+    {{ apt.clean_command() | indent(4) }}
 {%- endif %}
 
 ### Copy startup scripts ###

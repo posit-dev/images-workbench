@@ -10,6 +10,8 @@ ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 ARG POSITRON_VERSION
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 {{ apt.run_setup() }}
 
 RUN apt-get update -qq && \

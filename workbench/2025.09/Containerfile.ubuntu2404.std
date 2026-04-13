@@ -30,6 +30,8 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Setup environment ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
@@ -88,7 +90,7 @@ RUN /opt/python/3.13.7/bin/pip install --no-cache-dir --upgrade --break-system-p
 ### Install Pro Drivers ###
 RUN apt-get install -yq rstudio-drivers && \
     apt-get clean -yqq && \
-rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.sh
