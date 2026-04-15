@@ -21,6 +21,8 @@ ARG R_VERSION
 ARG PYTHON_VERSION
 ARG QUARTO_VERSION
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Install Apt Packages ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \

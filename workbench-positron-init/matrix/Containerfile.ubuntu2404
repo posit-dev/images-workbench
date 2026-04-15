@@ -1,8 +1,11 @@
 FROM docker.io/library/ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
-ARG TARGETARCH
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
 ARG POSITRON_VERSION
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
