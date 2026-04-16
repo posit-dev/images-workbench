@@ -152,6 +152,12 @@ Build prerequisites
     just install-goss
     ```
 
+* [`pre-commit`](https://pre-commit.com/) hooks (for contributors)
+
+    ```shell
+    just setup
+    ```
+
 ### Build with `bakery`
 
 By default, bakery creates an ephemeral JSON [bakefile](https://docs.bakefile.org/en/latest/language.html) to render all containers in parallel.
