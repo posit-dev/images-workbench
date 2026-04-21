@@ -14,5 +14,5 @@ jobs:
       version: ${{ inputs.version }}
       images: "workbench workbench-session-init"
     secrets:
-      APP_ID: ${{ secrets.APP_ID }}
-      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+      APP_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
