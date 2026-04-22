@@ -81,13 +81,19 @@ RUN bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
 ### Install TinyTeX ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
+#
+# TinyTeX is installed under HOME="/opt" so the install lands at /opt/.TinyTeX,
+# which is readable by non-root runtime users. `--update-path` makes tlmgr
+# symlink the TinyTeX binaries into /usr/local/bin.
+# TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
+# for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
 RUN apt-get update -yqq && \
     apt-get install -yqq --no-install-recommends \
         xz-utils && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/* && \
-    /opt/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path && \
+    HOME="/opt" /opt/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path && \
     rm -f /tmp/tinytex-release.json
 
 COPY workbench-session/matrix/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf
