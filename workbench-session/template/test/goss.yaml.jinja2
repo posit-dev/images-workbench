@@ -73,10 +73,20 @@ command:
       # install location, see https://github.com/quarto-dev/quarto-cli/issues/11800.
       - "/tinytex\\s+External Installation/"
   "Verify TinyTeX is readable and executable by a non-root user":
-    # Runs tlmgr (via the /usr/local/bin symlink, so PATH resolution also covered)
-    # as `nobody` to confirm the /opt/.TinyTeX install is accessible to non-root.
-    # Guards against regressions in placement or permissions.
-    exec: su -s /bin/sh -c 'tlmgr --version' nobody
+    # Runs tlmgr and pdflatex as `nobody` to confirm the /opt/.TinyTeX install
+    # is accessible to non-root. `command -v` also forces PATH resolution,
+    # not just direct invocation — proves the /usr/local/bin symlinks are on
+    # the user's PATH. Guards against regressions in placement, permissions,
+    # or PATH setup.
+    exec: su -s /bin/sh -c 'command -v tlmgr && command -v pdflatex && tlmgr --version && pdflatex --version' nobody
     exit-status: 0
     stdout:
       - "tlmgr"
+      - "pdfTeX"
+  "Verify quarto package is held":
+    # Guards against apt upgrade inside the container drifting quarto off
+    # the pinned version the image is labeled with.
+    exec: apt-mark showhold
+    exit-status: 0
+    stdout:
+      - "/^quarto$/"

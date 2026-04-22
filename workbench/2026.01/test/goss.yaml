@@ -229,11 +229,14 @@ command:
       - "/tinytex\\s+External Installation/"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify TinyTeX is readable and executable by a non-root user":
-    # Runs tlmgr (via the /usr/local/bin symlink, so PATH resolution also covered)
-    # as `nobody` to confirm the /opt/.TinyTeX install is accessible to non-root.
-    # Guards against regressions in placement or permissions.
-    exec: su -s /bin/sh -c 'tlmgr --version' nobody
+    # Runs tlmgr and pdflatex as `nobody` to confirm the /opt/.TinyTeX install
+    # is accessible to non-root. `command -v` also forces PATH resolution,
+    # not just direct invocation — proves the /usr/local/bin symlinks are on
+    # the user's PATH. Guards against regressions in placement, permissions,
+    # or PATH setup.
+    exec: su -s /bin/sh -c 'command -v tlmgr && command -v pdflatex && tlmgr --version && pdflatex --version' nobody
     exit-status: 0
     stdout:
       - "tlmgr"
+      - "pdfTeX"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
