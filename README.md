@@ -55,7 +55,7 @@ kubectl create secret generic posit-workbench-license \
 ```yaml
 image:
   repository: ghcr.io/posit-dev/workbench
-  tag: "2026.01.2"
+  tag: "2026.04.0"
 
 license:
   file:
@@ -70,7 +70,7 @@ config:
   server:
     rserver.conf:
       launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
-      launcher-sessions-init-container-image-tag: "2026.01.2"
+      launcher-sessions-init-container-image-tag: "2026.04.0"
 ```
 
 The `rserver.conf` entries configure Workbench to use the new session init container image.
@@ -101,7 +101,7 @@ The root of the bakery project is used as the build context for each Containerfi
 Here, the [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) file, or project, is in the root of this repository.
 
 ```shell
-PWB_VERSION="2026.01"
+PWB_VERSION="2026.04"
 
 # Build the standard Workbench image using docker
 docker buildx build \
