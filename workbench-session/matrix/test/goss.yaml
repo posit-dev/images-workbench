@@ -5,6 +5,10 @@ package:
   {{.}}:
     installed: true
   {{end}}
+  quarto:
+    installed: true
+    versions:
+      - {{ .Env.BUILD_ARG_QUARTO_VERSION }}
 
 file:
   python-{{ .Env.BUILD_ARG_PYTHON_VERSION }}:
@@ -13,9 +17,9 @@ file:
   r-{{ .Env.BUILD_ARG_R_VERSION }}:
     exists: true
     path: /opt/R/{{ .Env.BUILD_ARG_R_VERSION }}
-  quarto-{{ .Env.BUILD_ARG_QUARTO_VERSION }}:
+  quarto:
     exists: true
-    path: /opt/quarto/{{ .Env.BUILD_ARG_QUARTO_VERSION }}
+    path: /opt/quarto/bin/quarto
 
 command:
   "Verify Jupyter Notebook works":
