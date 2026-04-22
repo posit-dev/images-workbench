@@ -63,6 +63,7 @@ RUN RUN_UNATTENDED=1 R_VERSION=$R_VERSION bash -c "$(curl -fsSL https://rstd.io/
 RUN bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
     apt-get install -yqq --no-install-recommends \
         quarto=$QUARTO_VERSION && \
+    apt-mark hold quarto && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
