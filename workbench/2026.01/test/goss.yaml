@@ -114,6 +114,18 @@ file:
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
+  # TinyTeX is installed under /opt/.TinyTeX (via HOME="/opt") so non-root runtime
+  # users can read the install; tlmgr path add symlinks the binaries into
+  # /usr/local/bin so they are on PATH.
+  /opt/.TinyTeX:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: directory
+  /usr/local/bin/tlmgr:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: symlink
+  /usr/local/bin/pdflatex:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: symlink
   # Check for R installation
   
   /opt/R/4.5.2/bin/R:
@@ -210,5 +222,18 @@ command:
     exec: quarto list tools
     exit-status: 0
     stderr:
-      - "/tinytex\\s+Up to date/"
+      # "External Installation" is reported because TinyTeX is installed under
+      # HOME="/opt" so Quarto does not consider it one of its managed installs.
+      # TODO: Switch back to "Up to date" once Quarto supports a custom TinyTeX
+      # install location, see https://github.com/quarto-dev/quarto-cli/issues/11800.
+      - "/tinytex\\s+External Installation/"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  "Verify TinyTeX is readable and executable by a non-root user":
+    # Runs tlmgr (via the /usr/local/bin symlink, so PATH resolution also covered)
+    # as `nobody` to confirm the /opt/.TinyTeX install is accessible to non-root.
+    # Guards against regressions in placement or permissions.
+    exec: su -s /bin/sh -c 'tlmgr --version' nobody
+    exit-status: 0
+    stdout:
+      - "tlmgr"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
