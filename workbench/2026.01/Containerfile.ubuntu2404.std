@@ -79,10 +79,10 @@ COPY --from=python-builder /opt/python /opt/python
 ### Install Jupyter ###
 RUN /opt/python/3.14.2/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade --break-system-packages \
-        jupyterlab<5 \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade \
+        "jupyterlab<5" \
         notebook \
-        pwb_jupyterlab<2 && \
+        "pwb_jupyterlab<2" && \
     rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/tests && \
     rm -f /opt/python/jupyter/lib/python*/site-packages/jupyterlab/staging/yarn.lock && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
