@@ -54,6 +54,7 @@ RUN /opt/python/$PYTHON_VERSION/bin/python -m venv /opt/python/jupyter && \
         notebook \
         "pwb_jupyterlab<2" && \
     rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/tests && \
+    rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/galata && \
     rm -f /opt/python/jupyter/lib/python*/site-packages/jupyterlab/staging/yarn.lock && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
