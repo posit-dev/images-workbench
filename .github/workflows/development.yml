@@ -1,6 +1,15 @@
 name: Development
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Product version to build (e.g. 2026.01.2+418.pro1)"
+        required: false
+        type: string
+      stream:
+        description: "Dev stream to build (e.g. 'daily')"
+        required: false
+        type: string
 
   schedule:
     # Hourly rebuild of dev images
@@ -59,7 +68,9 @@ jobs:
     with:
       dev-versions: "only"
       matrix-versions: "exclude"
-      # Push images only for merges into main and hourly schduled re-builds.
+      image-version: ${{ inputs.version }}
+      dev-stream: ${{ inputs.stream }}
+      # Push on merges to main, scheduled rebuilds, and dispatches targeting main.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
 
   clean:
