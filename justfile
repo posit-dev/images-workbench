@@ -1,5 +1,9 @@
 #!/usr/bin/env just --justfile
 
+setup:
+  pre-commit --version || (echo "pre-commit not found, install with: uv tool install pre-commit" && exit 1)
+  pre-commit install --install-hooks
+
 install-bakery *OPTS:
   #!/bin/bash
   # TODO: Update this after package is published somewhere

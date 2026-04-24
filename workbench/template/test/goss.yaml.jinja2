@@ -20,11 +20,11 @@ group:
 package:
   rstudio-server:
     installed: true
-  {% for r_version in Dependencies.R %}
+{% for r_version in Dependencies.R %}
   r-{{ r_version }}:
     installed: true
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
+{% endfor %}
   {% raw -%}
   {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
   {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
@@ -127,16 +127,16 @@ file:
     exists: true
     filetype: symlink
   # Check for R installation
-  {% for r_version in Dependencies.R %}
+{% for r_version in Dependencies.R %}
   {{ r.get_version_directory(r_version) }}/bin/R:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: file
-  {% endfor %}
+{% endfor %}
   # Check for Python installation
-  {% for python_version in Dependencies.python %}
+{% for python_version in Dependencies.python %}
   {{ python.get_version_directory(python_version) }}/bin/python:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
+{% endfor %}
   /opt/python/jupyter/bin/python:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
   /opt/python/jupyter/bin/jupyter:
@@ -153,7 +153,7 @@ file:
 
   # Check that startup files were not accidentally included in build
   # These can only be reliably checked for minimal variant for now, see #372
-  {% raw %}
+{% raw %}
   {{ if eq .Env.IMAGE_VARIANT "Minimal" }}
   /etc/rstudio/launcher.pem:
     exists: false
@@ -170,7 +170,7 @@ file:
   /var/lib/rstudio-server/rstudio.sqlite:
     exists: false
   {{ end }}
-  {% endraw %}
+{% endraw %}
 
 command:
   "Ensure rstudio-server has permissions to log directory":
@@ -197,14 +197,14 @@ command:
       - "R version {{ r_version }}"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
   {%- endfor %}
-  {% for python_version in Dependencies.python %}
+{% for python_version in Dependencies.python %}
   "Verify Python installation is version {{ python_version }}":
     exec: {{ python.get_version_directory(python_version) }}/bin/python --version
     exit-status: 0
     stdout:
       - "{{ python_version }}"
     skip: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}{% endraw %}
-  {% endfor %}
+{% endfor %}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
