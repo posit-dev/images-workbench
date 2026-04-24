@@ -46,7 +46,7 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
-    if: github.event_name == 'push' || github.event_name == 'schedule'
+    if: github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
       packages: write
