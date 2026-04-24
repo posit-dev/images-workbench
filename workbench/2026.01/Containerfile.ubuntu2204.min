@@ -42,8 +42,7 @@ RUN apt-get update -yqq && \
     rm -rf /var/lib/apt/lists/*
 
 ### Install wait-for-it ###
-RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
-    chmod +x /usr/local/bin/wait-for-it.sh
+COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench 2026.01.2+418.pro1 ###
 COPY --chmod=0755 workbench/2026.01/scripts/install_workbench.sh /tmp/install_workbench.sh

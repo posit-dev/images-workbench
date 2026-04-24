@@ -6,8 +6,6 @@ Bakery handles bootstrapping the files into template rendering.
 {%- import "python.j2" as python -%}
 {%- import "quarto.j2" as quarto -%}
 {%- import "r.j2" as r -%}
-{%- import "wait-for-it.j2" as waitforit -%}
-
 {%- if Image.Variant != "Minimal" -%}
 # Build Python using uv in a separate stage
 {{ python.build_stage(Dependencies.python) }}
@@ -50,7 +48,7 @@ COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 {%- endif %}
 
 ### Install wait-for-it ###
-{{ waitforit.run_install() }}
+COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench {{ Image.Version }} ###
 COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh

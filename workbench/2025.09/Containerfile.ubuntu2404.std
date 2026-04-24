@@ -55,8 +55,7 @@ RUN apt-get update -yqq && \
 
 
 ### Install wait-for-it ###
-RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
-    chmod +x /usr/local/bin/wait-for-it.sh
+COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench 2025.09.2+418.pro4 ###
 COPY --chmod=0755 workbench/2025.09/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -86,9 +85,16 @@ RUN /opt/python/3.13.7/bin/pip install --no-cache-dir --upgrade --break-system-p
     /opt/python/3.13.7/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
 
 ### Install Pro Drivers ###
-RUN apt-get install -yq rstudio-drivers && \
-    apt-get clean -yqq && \
-rm -rf /var/lib/apt/lists/*
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        apt-get update -yqq && \
+        apt-get install -yqq --no-install-recommends \
+            rstudio-drivers && \
+        apt-get clean -yqq && \
+        rm -rf /var/lib/apt/lists/* && \
+        cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini; \
+    else \
+        echo "Pro Drivers will not be installed for architecture: $TARGETARCH"; \
+    fi
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.sh
