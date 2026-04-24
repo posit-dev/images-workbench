@@ -18,7 +18,7 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 ## Quick Start
 
 ```bash
-PWB_VERSION="2026.01.2"
+PWB_VERSION="2026.04.0"
 PWB_IMAGE="ghcr.io/posit-dev/workbench"  # or docker.io/posit/workbench
 PWB_LICENSE="/path/to/license.lic"
 docker run -d \
@@ -55,10 +55,10 @@ Images are published to:
 Ubuntu 24.04 is the default OS.
 
 Tag formats:
-- `2026.01.2` - Latest OS, standard variant
-- `2026.01.2-ubuntu-24.04` - Explicit OS, standard variant
-- `2026.01.2-ubuntu-24.04-std` - Explicit OS and variant
-- `2026.01.2-ubuntu-24.04-min` - Minimal variant
+- `2026.04.0` - Latest OS, standard variant
+- `2026.04.0-ubuntu-24.04` - Explicit OS, standard variant
+- `2026.04.0-ubuntu-24.04-std` - Explicit OS and variant
+- `2026.04.0-ubuntu-24.04-min` - Minimal variant
 - `latest` - Latest version, default OS, standard variant
 
 ## Configuration

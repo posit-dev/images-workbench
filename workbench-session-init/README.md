@@ -25,7 +25,7 @@ Use as an init container in your Kubernetes pod specification:
 ```yaml
 initContainers:
   - name: session-init
-    image: ghcr.io/posit-dev/workbench-session-init:2026.01.2-ubuntu-24.04
+    image: ghcr.io/posit-dev/workbench-session-init:2026.04.0-ubuntu-24.04
     volumeMounts:
       - name: session-components
         mountPath: /opt/session-components
@@ -51,9 +51,9 @@ Images are published to:
 
 Tag formats:
 
-- `2026.01.2` - Full version (Ubuntu 24.04)
-- `2026.01.2-ubuntu-24.04` - Explicit OS
-- `2026.01.2-ubuntu-22.04` - Ubuntu 22.04
+- `2026.04.0` - Full version (Ubuntu 24.04)
+- `2026.04.0-ubuntu-24.04` - Explicit OS
+- `2026.04.0-ubuntu-22.04` - Ubuntu 22.04
 - `latest` - Latest stable release (Ubuntu 24.04)
 
 ## Session Components
