@@ -66,6 +66,7 @@ jobs:
 
     uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
     with:
+      version: "feature/quarto-tinytex-build-secret"
       dev-versions: "only"
       matrix-versions: "exclude"
       image-version: ${{ inputs.version }}

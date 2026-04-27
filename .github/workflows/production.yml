@@ -79,6 +79,7 @@ jobs:
       DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
       DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
     with:
+      version: "feature/quarto-tinytex-build-secret"
       dev-versions: "exclude"
       matrix-versions: "exclude"
       # Push images only for merges into main and weekly schduled re-builds.
