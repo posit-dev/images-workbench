@@ -31,6 +31,9 @@ images:
       It gives data teams the IDEs they love, and IT the control and governance needed
       for secure, compliant work."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    buildSecrets:
+      - id: github_token
+        envVar: GITHUB_TOKEN
     dependencyConstraints:
       - dependency: R
         constraint:
@@ -138,6 +141,9 @@ images:
             - linux/amd64
             - linux/arm64
   - name: workbench-session
+    buildSecrets:
+      - id: github_token
+        envVar: GITHUB_TOKEN
     matrix:
       namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"
       dependencyConstraints:
