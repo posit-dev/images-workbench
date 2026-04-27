@@ -114,7 +114,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True) }} \
+RUN {{ quarto.github_token_secret_mount() }} \
+    {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True, home_path="/opt") }} \
     && rm -f /tmp/tinytex-release.json
 {%- endif %}
 
