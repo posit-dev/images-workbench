@@ -14,7 +14,8 @@ apt-get download "${package_name}=2026.04.0+526.pro2"
 deb_file="$(pwd)/$(ls ${package_name}*.deb)"
 
 # Install dependencies
-apt-get install -yq $(dpkg -I $deb_file | grep '^ Depends:' | sed 's/^ Depends: //' | tr ',' '\n' | awk '{print $1}' | tr -d '(')
+# shellcheck disable=SC2046
+apt-get install -yq $(dpkg -I "$deb_file" | grep '^ Depends:' | sed 's/^ Depends: //' | tr ',' '\n' | awk '{print $1}' | tr -d '(')
 
 # Patch the installer to not activate the service
 echo "$d Patching ${deb_file} $d"
