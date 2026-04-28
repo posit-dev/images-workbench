@@ -24,7 +24,7 @@ ARG TARGETARCH=${BUILDARCH}
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 ### Install Apt Packages ###
-{{ apt.run_setup(codename_override="noble") }}
+{{ apt.run_setup(codename="noble") }}
 
 COPY {{ Path.Version }}/deps/ubuntu-26.04_packages.txt /tmp/ubuntu-26.04_packages.txt
 {{ apt.run_install(files = '/tmp/ubuntu-26.04_packages.txt') }}
