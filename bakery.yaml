@@ -59,6 +59,9 @@ images:
         stream: daily
         os:
           - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 24.04
             primary: true
             platforms:
@@ -114,6 +117,9 @@ images:
         stream: daily
         os:
           - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 24.04
             primary: true
             platforms:
@@ -178,6 +184,9 @@ images:
             latest: true
       os:
         - name: Ubuntu 26.04
+          platforms:
+            - linux/amd64
+            - linux/arm64
         - name: Ubuntu 24.04
           primary: true
           platforms:
