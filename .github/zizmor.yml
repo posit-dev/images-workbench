@@ -6,4 +6,3 @@ rules:
         # are kept at @main intentionally.
         "posit-dev/images-shared/*": ref-pin
         "*": hash-pin
-
