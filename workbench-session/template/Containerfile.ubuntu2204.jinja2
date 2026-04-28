@@ -53,7 +53,8 @@ RUN {{ quarto.install(quarto.build_arg()) | indent(4) }} && \
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ quarto.install_tinytex_command(quarto.get_version_directory(quarto.build_arg() | trim) + "/bin/quarto", True) | indent(4) }} && \
+RUN {{ quarto.github_token_secret_mount() }} \
+    {{ quarto.install_tinytex_command(quarto.get_version_directory(quarto.build_arg() | trim) + "/bin/quarto", True, home_path="/opt") | indent(4) }} && \
     rm -f /tmp/tinytex-release.json
 
 COPY {{ Path.Version }}/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf

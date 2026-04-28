@@ -41,7 +41,7 @@ command:
     exec: /usr/local/bin/quarto check --quiet
     exit-status: 0
   "Verify Quarto has TinyTeX installed":
-    exec: quarto list tools
+    exec: "HOME='/opt' quarto list tools"
     exit-status: 0
     stderr:
       - "/tinytex\\s+Up to date/"
