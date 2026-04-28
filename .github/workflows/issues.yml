@@ -4,29 +4,32 @@ on:
     types:
       - opened
 
+permissions: {}
+
 jobs:
   issue:
     # only run in posit-dev/images-workbench.
     if: github.repository == 'posit-dev/images-workbench'
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
 
       - name: GitHub App Token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859  # v3.0.0
         id: app-token
         with:
           app-id: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
 
       - name: Add to Platform Carbon Project
-        uses: actions/add-to-project@v1.0.2
+        uses: actions/add-to-project@244f685bbc3b7adfa8466e08b698b5577571133e  # v1.0.2
         with:
           github-token: ${{ steps.app-token.outputs.token }}
           project-url: https://github.com/orgs/posit-dev/projects/17
 
       - name: Add Default Labels
-        uses: actions-ecosystem/action-add-labels@v1
-        with:
-          github_token: ${{ steps.app-token.outputs.token }}
-          labels: |
-            docker
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: gh issue edit "$ISSUE_NUMBER" --add-label "docker"

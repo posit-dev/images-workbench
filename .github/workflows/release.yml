@@ -7,8 +7,14 @@ on:
         required: true
         type: string
 
+
 jobs:
   release:
+    if: github.event_name == 'workflow_dispatch'
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
     uses: posit-dev/images-shared/.github/workflows/product-release.yml@main
     with:
       version: ${{ inputs.version }}

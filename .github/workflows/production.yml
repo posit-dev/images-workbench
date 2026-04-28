@@ -6,15 +6,12 @@ on:
     # Weekly rebuild of all images, to pick up any upstream changes.
     - cron: "15 3 * * 0" # At 03:15 on Sunday
 
-  pull_request:
-
   push:
     branches:
       - main
 
+
 concurrency:
-  # Only cancel in-progress runs for pull_request events, this prevents cancelling workflows against main or tags
-  # A pull_request will reuse the same group thus enabling cancelation, all others receive a unique run_id
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
@@ -28,13 +25,14 @@ jobs:
     if: always()
 
     runs-on: ubuntu-latest
+    permissions: {}
     timeout-minutes: 10
     needs:
       - lint
       - build
 
     steps:
-      - uses: re-actors/alls-green@release/v1
+      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe  # v1.2.2
         id: alls-green
         with:
           jobs: ${{ toJSON(needs) }}
