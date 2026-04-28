@@ -1,0 +1,130 @@
+# Build Python using uv in a separate stage
+FROM ghcr.io/astral-sh/uv:debian-slim AS python-builder
+
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+ENV UV_PYTHON_INSTALL_DIR=/opt/python
+ENV UV_PYTHON_PREFERENCE=only-managed
+RUN uv python install 3.14.4
+RUN mv /opt/python/cpython-3.14.4-linux-*/ /opt/python/3.14.4
+
+
+FROM docker.io/library/ubuntu:24.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
+ARG WORKBENCH_VERSION="2026.04.0+526.pro2"
+ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
+
+ENV STARTUP_DEBUG_MODE=0
+ENV PWB_LICENSE=""
+ENV PWB_LICENSE_SERVER=""
+ENV PWB_TESTUSER=""
+ENV PWB_TESTUSER_PASSWD=""
+ENV PWB_TESTUSER_UID=""
+ENV PWB_LAUNCHER=true
+ENV PWB_LAUNCHER_TIMEOUT=10
+ENV DIAGNOSTIC_DIR=/var/log/rstudio
+ENV DIAGNOSTIC_ENABLE=false
+ENV DIAGNOSTIC_ONLY=false
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Setup environment ###
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+## Install Apt Packages ###
+COPY workbench/2026.04/deps/ubuntu-24.04_packages.txt /tmp/packages.txt
+COPY workbench/2026.04/deps/ubuntu-24.04_optional_packages.txt /tmp/optional_packages.txt
+RUN apt-get update -yqq && \
+    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
+    xargs -a /tmp/optional_packages.txt apt-get install -yqq --no-install-recommends && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+
+### Install wait-for-it ###
+RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
+
+### Install Workbench 2026.04.0+526.pro2 ###
+COPY --chmod=0755 workbench/2026.04/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN \
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Install Quarto to PATH ###
+RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
+
+### Install R ###
+RUN RUN_UNATTENDED=1 R_VERSION=4.5.3 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
+    find . -type f -name '[rR]-4.5.3.*\.(deb|rpm)' -delete
+
+### Install Python from previous stage ###
+COPY --from=python-builder /opt/python /opt/python
+
+### Install Jupyter ###
+RUN /opt/python/3.14.4/bin/python -m venv /opt/python/jupyter && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
+    ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
+
+### Install Jupyter kernels ###
+RUN /opt/python/3.14.4/bin/pip install --no-cache-dir --upgrade --break-system-packages \
+    ipykernel && \
+    /opt/python/3.14.4/bin/python -m ipykernel install --user --name python3.14.4 --display-name "Python 3.14.4"
+
+### Install Pro Drivers ###
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        apt-get update -yqq && \
+        apt-get install -yqq --no-install-recommends \
+            rstudio-drivers && \
+        apt-get clean -yqq && \
+        rm -rf /var/lib/apt/lists/* && \
+        cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini; \
+    else \
+        echo "Pro Drivers will not be installed for architecture: $TARGETARCH"; \
+    fi
+
+### Copy startup scripts ###
+COPY --chmod=0775 "workbench/2026.04/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2026.04/startup/launcher" /startup/launcher
+COPY "workbench/2026.04/startup/base" /startup/base
+COPY "workbench/2026.04/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2026.04/startup/user-provisioning" /startup/user-provisioning
+COPY --chmod=600 "workbench/2026.04/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2026.04/conf/jupyter/*" "workbench/2026.04/conf/launcher/*" "workbench/2026.04/conf/rstudio/*" "workbench/2026.04/conf/positron/*" "workbench/2026.04/conf/vscode/*" /etc/rstudio/
+
+### Configure Workbench ###
+RUN mkdir -p /var/lib/rstudio-server/monitor/log \
+    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+    && mkdir -p /startup/custom/ \
+    && mkdir -p /startup/user-provisioning/ \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
+    && echo "RSPM=https://p3m.dev/cran/__linux__/noble/latest" > /etc/rstudio/repos.conf \
+    && echo "CRAN=https://p3m.dev/cran/__linux__/noble/latest" >> /etc/rstudio/repos.conf
+
+### Install TinyTeX using Quarto ###
+# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
+# the cache on new releases.
+ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN --mount=type=secret,id=github_token,required=false \
+    GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path \
+    && rm -f /tmp/tinytex-release.json
+
+EXPOSE 8787/tcp
+EXPOSE 5559/tcp
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

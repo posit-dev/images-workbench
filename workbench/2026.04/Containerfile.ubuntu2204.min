@@ -1,0 +1,79 @@
+FROM docker.io/library/ubuntu:22.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
+ARG WORKBENCH_VERSION="2026.04.0+526.pro2"
+ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
+
+ENV STARTUP_DEBUG_MODE=0
+ENV PWB_LICENSE=""
+ENV PWB_LICENSE_SERVER=""
+ENV PWB_TESTUSER=""
+ENV PWB_TESTUSER_PASSWD=""
+ENV PWB_TESTUSER_UID=""
+ENV PWB_LAUNCHER=true
+ENV PWB_LAUNCHER_TIMEOUT=10
+ENV DIAGNOSTIC_DIR=/var/log/rstudio
+ENV DIAGNOSTIC_ENABLE=false
+ENV DIAGNOSTIC_ONLY=false
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Setup environment ###
+RUN apt-get update -yqq --fix-missing && \
+    apt-get upgrade -yqq && \
+    apt-get dist-upgrade -yqq && \
+    apt-get autoremove -yqq --purge && \
+    apt-get install -yqq --no-install-recommends \
+        curl \
+        ca-certificates \
+        gnupg \
+        tar && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+## Install Apt Packages ###
+COPY workbench/2026.04/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
+RUN apt-get update -yqq && \
+    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+
+### Install wait-for-it ###
+RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
+
+### Install Workbench 2026.04.0+526.pro2 ###
+COPY --chmod=0755 workbench/2026.04/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN \
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Install Quarto to PATH ###
+RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
+
+
+
+### Copy startup scripts ###
+COPY --chmod=0775 "workbench/2026.04/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2026.04/startup/launcher" /startup/launcher
+COPY "workbench/2026.04/startup/base" /startup/base
+COPY "workbench/2026.04/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+COPY "workbench/2026.04/conf/jupyter/*" "workbench/2026.04/conf/launcher/*" "workbench/2026.04/conf/rstudio/*" "workbench/2026.04/conf/positron/*" "workbench/2026.04/conf/vscode/*" /etc/rstudio/
+
+### Configure Workbench ###
+RUN mkdir -p /var/lib/rstudio-server/monitor/log \
+    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+    && mkdir -p /startup/custom/ \
+    && mkdir -p /startup/user-provisioning/ \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
+    && echo "RSPM=https://p3m.dev/cran/__linux__/jammy/latest" > /etc/rstudio/repos.conf \
+    && echo "CRAN=https://p3m.dev/cran/__linux__/jammy/latest" >> /etc/rstudio/repos.conf
+
+EXPOSE 8787/tcp
+EXPOSE 5559/tcp
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

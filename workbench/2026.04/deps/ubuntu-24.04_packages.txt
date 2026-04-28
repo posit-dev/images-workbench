@@ -1,0 +1,12 @@
+build-essential
+libc6
+libclang-dev
+libpq5
+libssl-dev
+libsqlite3-0
+libxkbcommon-x11-0
+lsb-release
+psmisc
+rrdtool
+sudo
+supervisor
