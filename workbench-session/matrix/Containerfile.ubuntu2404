@@ -61,7 +61,13 @@ COPY --from=python-builder /opt/python /opt/python
 ### Install Jupyter ###
 RUN /opt/python/$PYTHON_VERSION/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade \
+        "jupyterlab<5" \
+        notebook \
+        "pwb_jupyterlab<2" && \
+    rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/tests && \
+    rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/galata && \
+    rm -f /opt/python/jupyter/lib/python*/site-packages/jupyterlab/staging/yarn.lock && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernel ###

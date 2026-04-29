@@ -33,10 +33,7 @@ COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/ubuntu-22.04_package
 {{ python.copy_from_build_stage() }}
 
 ### Install Jupyter ###
-RUN {{ python.get_version_directory(python.build_arg()) }}/bin/python -m venv /opt/python/jupyter && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
-    ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
+{{ python.run_install_jupyterlab_workbench(python.build_arg(), jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
 
 ### Install Jupyter kernel ###
 RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
