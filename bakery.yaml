@@ -58,6 +58,10 @@ images:
         product: workbench
         stream: daily
         os:
+          - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 24.04
             primary: true
             platforms:
@@ -112,6 +116,10 @@ images:
         product: workbench-session
         stream: daily
         os:
+          - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 24.04
             primary: true
             platforms:
@@ -175,6 +183,10 @@ images:
           constraint:
             latest: true
       os:
+        - name: Ubuntu 26.04
+          platforms:
+            - linux/amd64
+            - linux/arm64
         - name: Ubuntu 24.04
           primary: true
           platforms:

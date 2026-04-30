@@ -1,0 +1,33 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+FROM docker.io/library/ubuntu:26.04 AS builder
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Initialize PTI in container ###
+{{ apt.run_setup(codename="noble") }}
+
+# Download the RStudio Workbench session components
+RUN case ${TARGETARCH} in \
+      amd64) CDN_ARCH=x86_64 ;; \
+      arm64) CDN_ARCH=arm64 ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    mkdir -p /pwb-staging && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/$CDN_ARCH/rsp-session-multi-linux-{{ Image.Version | replace('+', '-') }}-$CDN_ARCH.tar.gz" && \
+    mkdir -p /opt/session-components && \
+    tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
+    chmod 755 /opt/session-components && \
+    rm -rf /pwb-staging
+
+FROM docker.io/library/ubuntu:26.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:26.04"
+COPY --from=builder /opt/session-components /opt/session-components
+CMD ["/opt/session-components/bin/session-init"]
