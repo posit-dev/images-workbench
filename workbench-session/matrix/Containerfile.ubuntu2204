@@ -21,8 +21,6 @@ ARG R_VERSION
 ARG PYTHON_VERSION
 ARG QUARTO_VERSION
 
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
 ### Install Apt Packages ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
@@ -68,16 +66,23 @@ RUN RUN_UNATTENDED=1 R_VERSION=$R_VERSION bash -c "$(curl -fsSL https://rstd.io/
     find . -type f -name '[rR]-$R_VERSION.*\.(deb|rpm)' -delete
 
 ### Install Quarto ###
-RUN mkdir -p /opt/quarto/$QUARTO_VERSION && \
-    curl -fsSL "https://github.com/quarto-dev/quarto-cli/releases/download/v$QUARTO_VERSION/quarto-$QUARTO_VERSION-linux-${TARGETARCH}.tar.gz" | tar xzf - -C "/opt/quarto/$QUARTO_VERSION" --strip-components=1 && \
-    ln -s /opt/quarto/$QUARTO_VERSION/bin/quarto /usr/local/bin/quarto
+RUN bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
+    apt-get install -yqq --no-install-recommends \
+        quarto=$QUARTO_VERSION && \
+    apt-mark hold quarto && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 ### Install TinyTeX ###
-# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
-# the cache on new releases.
+# ADD busts the cache on new TinyTeX releases.
+# HOME="/opt" workaround: https://github.com/quarto-dev/quarto-cli/issues/11800
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN --mount=type=secret,id=github_token,required=false \
-    GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /opt/quarto/$QUARTO_VERSION/bin/quarto install tinytex --no-prompt --quiet --update-path && \
+RUN apt-get update -yqq && \
+    apt-get install -yqq --no-install-recommends \
+        xz-utils && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/* && \
+    GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /opt/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path && \
     rm -f /tmp/tinytex-release.json
 
 COPY workbench-session/matrix/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf

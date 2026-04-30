@@ -21,8 +21,6 @@ ARG TARGETARCH=${BUILDARCH}
 {{ python.declare_build_arg() }}
 {{ quarto.declare_build_arg() }}
 
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
 ### Install Apt Packages ###
 {{ apt.run_setup() }}
 
@@ -43,15 +41,14 @@ RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
 {{ r.run_install(r.build_arg()) }}
 
 ### Install Quarto ###
-RUN {{ quarto.install(quarto.build_arg()) | indent(4) }} && \
-    {{ quarto.symlink_binary(quarto.build_arg(), "quarto", "/usr/local/bin/quarto") | indent(4) }}
+RUN {{ quarto.install(quarto.build_arg()) | indent(4) }}
 
 ### Install TinyTeX ###
-# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
-# the cache on new releases.
+# ADD busts the cache on new TinyTeX releases.
+# HOME="/opt" workaround: https://github.com/quarto-dev/quarto-cli/issues/11800
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ quarto.github_token_secret_mount() }} \
-    {{ quarto.install_tinytex_command(quarto.get_version_directory(quarto.build_arg() | trim) + "/bin/quarto", True, home_path="/opt") | indent(4) }} && \
+RUN {{ apt.install(packages="xz-utils") | indent(4) }} && \
+    {{ quarto.install_tinytex_command(quarto.get_directory() ~ "/bin/quarto", update_path=True, home_path="/opt") | indent(4) }} && \
     rm -f /tmp/tinytex-release.json
 
 COPY {{ Path.Version }}/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf

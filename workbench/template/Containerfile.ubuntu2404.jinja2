@@ -34,8 +34,6 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
 ### Setup environment ###
 {{ apt.run_setup() }}
 
@@ -92,7 +90,7 @@ COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.c
 COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
 {%- endif %}
-COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio/
+COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -108,9 +106,14 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 ### Install TinyTeX using Quarto ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
+#
+# TinyTeX is installed under HOME="/opt" so the install lands at /opt/.TinyTeX,
+# which is readable by non-root runtime users. `--update-path` makes tlmgr
+# symlink the TinyTeX binaries into /usr/local/bin.
+# TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
+# for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ quarto.github_token_secret_mount() }} \
-    {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", True, home_path="/opt") }} \
+RUN {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", update_path=True, home_path="/opt") }} \
     && rm -f /tmp/tinytex-release.json
 {%- endif %}
 
