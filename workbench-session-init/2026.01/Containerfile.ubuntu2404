@@ -1,6 +1,8 @@
 FROM docker.io/library/ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -19,8 +21,13 @@ RUN apt-get update -yqq --fix-missing && \
     rm -rf /var/lib/apt/lists/*
 
 # Download the RStudio Workbench session components
-RUN mkdir -p /pwb-staging && \
-    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/x86_64/rsp-session-multi-linux-2026.01.2-418.pro1-x86_64.tar.gz" && \
+RUN case ${TARGETARCH} in \
+      amd64) CDN_ARCH=x86_64 ;; \
+      arm64) CDN_ARCH=arm64 ;; \
+      *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    mkdir -p /pwb-staging && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/$CDN_ARCH/rsp-session-multi-linux-2026.01.2-418.pro1-$CDN_ARCH.tar.gz" && \
     mkdir -p /opt/session-components && \
     tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
     chmod 755 /opt/session-components && \

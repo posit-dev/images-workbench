@@ -30,8 +30,6 @@ ENV DIAGNOSTIC_DIR=/var/log/rstudio
 ENV DIAGNOSTIC_ENABLE=false
 ENV DIAGNOSTIC_ONLY=false
 
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
 ### Setup environment ###
 RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
@@ -57,7 +55,8 @@ RUN apt-get update -yqq && \
 
 
 ### Install wait-for-it ###
-COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN curl -fsSL -o /usr/local/bin/wait-for-it.sh https://raw.githubusercontent.com/rstudio/wait-for-it/master/wait-for-it.sh && \
+    chmod +x /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench 2025.09.2+418.pro4 ###
 COPY --chmod=0755 workbench/2025.09/scripts/install_workbench.sh /tmp/install_workbench.sh
@@ -78,13 +77,7 @@ COPY --from=python-builder /opt/python /opt/python
 ### Install Jupyter ###
 RUN /opt/python/3.13.7/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade \
-        "jupyterlab<5" \
-        notebook \
-        "pwb_jupyterlab<2" && \
-    rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/tests && \
-    rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/galata && \
-    rm -f /opt/python/jupyter/lib/python*/site-packages/jupyterlab/staging/yarn.lock && \
+    /opt/python/jupyter/bin/pip install --no-cache-dir 'jupyterlab<5' notebook 'pwb_jupyterlab<2' && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernels ###
@@ -93,12 +86,9 @@ RUN /opt/python/3.13.7/bin/pip install --no-cache-dir --upgrade --break-system-p
     /opt/python/3.13.7/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
 
 ### Install Pro Drivers ###
-RUN apt-get update -yqq && \
-    apt-get install -yqq --no-install-recommends \
-        rstudio-drivers && \
+RUN apt-get install -yq rstudio-drivers && \
     apt-get clean -yqq && \
-    rm -rf /var/lib/apt/lists/*
-RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
+rm -rf /var/lib/apt/lists/*
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.sh
@@ -107,7 +97,7 @@ COPY "workbench/2025.09/startup/base" /startup/base
 COPY "workbench/2025.09/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 COPY "workbench/2025.09/startup/user-provisioning" /startup/user-provisioning
 COPY --chmod=600 "workbench/2025.09/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio/
+COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -121,9 +111,14 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 ### Install TinyTeX using Quarto ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
+#
+# TinyTeX is installed under HOME="/opt" so the install lands at /opt/.TinyTeX,
+# which is readable by non-root runtime users. `--update-path` makes tlmgr
+# symlink the TinyTeX binaries into /usr/local/bin.
+# TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
+# for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN --mount=type=secret,id=github_token,required=false \
-    GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path \
+RUN HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --quiet --update-path \
     && rm -f /tmp/tinytex-release.json
 
 EXPOSE 8787/tcp
