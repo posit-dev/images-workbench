@@ -93,16 +93,12 @@ RUN /opt/python/3.13.7/bin/pip install --no-cache-dir --upgrade --break-system-p
     /opt/python/3.13.7/bin/python -m ipykernel install --user --name python3.13.7 --display-name "Python 3.13.7"
 
 ### Install Pro Drivers ###
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-        apt-get update -yqq && \
-        apt-get install -yqq --no-install-recommends \
-            rstudio-drivers && \
-        apt-get clean -yqq && \
-        rm -rf /var/lib/apt/lists/* && \
-        cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini; \
-    else \
-        echo "Pro Drivers will not be installed for architecture: $TARGETARCH"; \
-    fi
+RUN apt-get update -yqq && \
+    apt-get install -yqq --no-install-recommends \
+        rstudio-drivers && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2025.09/scripts/startup.sh" /usr/local/bin/startup.sh
