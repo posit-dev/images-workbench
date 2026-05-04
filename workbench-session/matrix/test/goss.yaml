@@ -5,6 +5,10 @@ package:
   {{.}}:
     installed: true
   {{end}}
+  quarto:
+    installed: true
+    versions:
+      - {{ .Env.BUILD_ARG_QUARTO_VERSION }}
 
 file:
   python-{{ .Env.BUILD_ARG_PYTHON_VERSION }}:
@@ -13,9 +17,19 @@ file:
   r-{{ .Env.BUILD_ARG_R_VERSION }}:
     exists: true
     path: /opt/R/{{ .Env.BUILD_ARG_R_VERSION }}
-  quarto-{{ .Env.BUILD_ARG_QUARTO_VERSION }}:
+  quarto:
     exists: true
-    path: /opt/quarto/{{ .Env.BUILD_ARG_QUARTO_VERSION }}
+    path: /opt/quarto/bin/quarto
+  # TinyTeX is installed under /opt/.TinyTeX; tlmgr path add symlinks binaries into /usr/local/bin.
+  /opt/.TinyTeX:
+    exists: true
+    filetype: directory
+  /usr/local/bin/tlmgr:
+    exists: true
+    filetype: symlink
+  /usr/local/bin/pdflatex:
+    exists: true
+    filetype: symlink
 
 command:
   "Verify Jupyter Notebook works":
@@ -44,4 +58,18 @@ command:
     exec: "HOME='/opt' quarto list tools"
     exit-status: 0
     stderr:
-      - "/tinytex\\s+Up to date/"
+      # "External Installation" because Quarto doesn't recognize TinyTeX installed under HOME="/opt".
+      # TODO: Switch to "Up to date" once https://github.com/quarto-dev/quarto-cli/issues/11800 lands.
+      - "/tinytex\\s+External Installation/"
+  "Verify TinyTeX is readable and executable by a non-root user":
+    exec: su -s /bin/sh -c 'command -v tlmgr && command -v pdflatex && tlmgr --version && pdflatex --version' nobody
+    exit-status: 0
+    stdout:
+      - "tlmgr"
+      - "pdfTeX"
+  "Verify quarto package is held":
+    # Guards against apt upgrade drifting quarto off the pinned version.
+    exec: apt-mark showhold
+    exit-status: 0
+    stdout:
+      - "/^quarto$/"
