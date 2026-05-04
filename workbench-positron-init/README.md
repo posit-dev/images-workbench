@@ -1,6 +1,6 @@
 # Posit Workbench Positron Init Container Image
 
-This init container image provides the Positron IDE components for [Posit Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments. It bundles the Positron IDE server, documentation, and a session-init binary that copies selected components into a shared volume at runtime.
+This init container image provides the Positron IDE components for [Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments. It bundles the Positron IDE server, documentation, and a session-init binary that copies selected components into a shared volume at runtime.
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
@@ -9,8 +9,8 @@ This init container image provides the Positron IDE components for [Posit Workbe
 
 The `workbench-positron-init` container copies Positron IDE components to a shared volume, which is then mounted into the session container. It is used as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images.
 
-| Image | Description | Docker Hub | GHCR |
-|:------|:------------|:-----------|:-----|
+| Image | Description | Docker Hub | GitHub Container Registry |
+|:------|:------------|:-----------|:--------------------------|
 | `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
 | `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
 | `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
@@ -18,7 +18,7 @@ The `workbench-positron-init` container copies Positron IDE components to a shar
 
 See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
-## Quick Start
+## Quick start
 
 Use as an init container in your Kubernetes pod specification:
 
@@ -45,7 +45,7 @@ volumes:
     emptyDir: {}
 ```
 
-## Image Tags
+## Image tags
 
 Images are published to:
 
@@ -68,18 +68,18 @@ The init container provides the following components in `/opt/positron`:
 | Positron docs | `docs/positron/bundled/` | Positron Workbench documentation |
 | Session init binary | `/usr/local/bin/positron-session-init` | Go entrypoint that copies components at runtime |
 
-## Environment Variables
+## Environment variables
 
 | Variable | Description | Values |
 |----------|-------------|--------|
 | `PWB_POSITRON_TARGET` | Selects which components to copy to `/mnt/init` | `positron`, `positron-docs` |
 
-### Copy Targets
+### Copy targets
 
-- `positron` — copies `bin/positron-server` to `/mnt/init/bin/positron-server`
-- `positron-docs` — copies `docs/positron` to `/mnt/init/docs/positron`
+- `positron`: copies `bin/positron-server` to `/mnt/init/bin/positron-server`
+- `positron-docs`: copies `docs/positron` to `/mnt/init/docs/positron`
 
-## Volume Mounts
+## Volume mounts
 
 | Mount Point | Description |
 |-------------|-------------|
@@ -89,9 +89,9 @@ The init container provides the following components in `/opt/positron`:
 
 ### Security
 
-These images should be reviewed before production use. Organizations with specific CVE or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before production use. If your organization has specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements, rebuild these images to meet your security standards.
 
-Published images for Posit Product editions under active support are re-built on a weekly basis to pull in operating system patches.
+Posit rebuilds published images weekly for product editions under active support to include operating system patches.
 
 ## Documentation
 
