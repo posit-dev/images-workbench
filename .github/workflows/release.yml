@@ -21,3 +21,27 @@ jobs:
     secrets:
       APP_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
+
+  trigger-specialized:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3  # v3.1.1
+        with:
+          app-id: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
+          private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
+          owner: posit-dev
+          repositories: images-specialized
+
+      - name: Trigger images-specialized release
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh workflow run release.yml \
+            --repo posit-dev/images-specialized \
+            --ref main \
+            -f version="$VERSION"
