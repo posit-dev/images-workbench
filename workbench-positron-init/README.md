@@ -1,31 +1,49 @@
-# Posit Workbench Positron Init Container Image
+# Posit Workbench Positron Init container image
 
-This init container image provides the Positron IDE components for [Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments. It bundles the Positron IDE server, documentation, and a session-init binary that copies selected components into a shared volume at runtime.
+This container image is an init container for [Posit Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments that copies Positron IDE components into a shared volume for session containers to consume. The image decouples the Positron IDE server from the Workbench session image, which enables out-of-band Positron version upgrades without waiting for a full Workbench release.
+
+![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench-positron-init)
+![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-positron-init/latest)
 
 > [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The [rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) images remain supported.
 
-## Overview
+## Supported tags
 
-The `workbench-positron-init` container copies Positron IDE components to a shared volume, which is then mounted into the session container. It is used as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images.
+- [`2026.03.0-212`, `2026.03.0-212-ubuntu-24.04`, `latest`, `ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-positron-init/matrix/Containerfile.ubuntu2404)
+
+For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench-positron-init/tags) on Docker Hub.
+
+## Quick reference
+
+| | |
+|---|---|
+| **Maintained by** | [the Posit Docker team](https://github.com/posit-dev/images) |
+| **Where to get help** | [GitHub Issues](https://github.com/posit-dev/images-workbench/issues), [Images Discussion Board](https://github.com/posit-dev/images/discussions), [the Posit Community Forum](https://forum.posit.co/c/posit-professional-hosted/posit-workbench/69), [Posit Support](https://support.posit.co/hc/en-us) |
+| **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues) |
+| **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench) |
+| **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md) |
+
+## Related images
+
+For Kubernetes deployments, Workbench uses several images together. See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
 | Image | Description | Docker Hub | GitHub Container Registry |
 |:------|:------------|:-----------|:--------------------------|
 | `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
 | `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
 | `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
-| `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
+## How to use this image
 
-## Quick start
+### As a Kubernetes init container
 
-Use as an init container in your Kubernetes pod specification:
+Mount a shared volume at `/mnt/init` and set `PWB_POSITRON_TARGET` to select which components to copy. The session container then mounts the same volume to consume the components.
 
 ```yaml
 initContainers:
   - name: positron-init
-    image: posit/workbench-positron-init:2026.03.0-212
+    image: ghcr.io/posit-dev/workbench-positron-init:2026.03.0-212
     env:
       - name: PWB_POSITRON_TARGET
         value: positron
@@ -47,16 +65,23 @@ volumes:
 
 ## Image tags
 
-Images are published to:
+Posit publishes images to:
 
 - Docker Hub: `docker.io/posit/workbench-positron-init`
 - GitHub Container Registry: `ghcr.io/posit-dev/workbench-positron-init`
 
-Tag formats:
+Ubuntu 24.04 is the default OS.
 
-- `2026.03.0-212` - Full version (Ubuntu 24.04)
-- `2026.03.0-212-ubuntu-24.04` - Explicit OS
-- `latest` - Latest stable release (Ubuntu 24.04)
+Tag formats where `YYYY.MM.P-BUILD` is any supported Positron version:
+
+- `YYYY.MM.P-BUILD` - Default OS
+- `YYYY.MM.P-BUILD-ubuntu-24.04` - Explicit OS
+- `latest` - Latest version, default OS
+- `ubuntu-24.04` - Latest version, explicit OS
+
+## Architectures
+
+Posit publishes multi-arch images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform; Docker selects the matching manifest automatically.
 
 ## Components
 
@@ -79,19 +104,46 @@ The init container provides the following components in `/opt/positron`:
 - `positron`: copies `bin/positron-server` to `/mnt/init/bin/positron-server`
 - `positron-docs`: copies `docs/positron` to `/mnt/init/docs/positron`
 
-## Volume mounts
+## Volumes
 
-| Mount Point | Description |
-|-------------|-------------|
-| `/mnt/init` | Target directory for copied components (output) |
+The init container copies components from `/opt/positron` in the image into `/mnt/init` on the shared volume.
+
+| Mount point | Description                                                       |
+|-------------|-------------------------------------------------------------------|
+| `/mnt/init` | Shared volume populated with the selected Positron components     |
+
+The session container mounts the same volume to consume the components at the path Workbench expects.
+
+## User
+
+The container starts as `root` so the entrypoint can write files into the shared volume with the permissions Workbench expects. The init container exits after the copy completes.
+
+## Migrating from rstudio/workbench-positron-init
+
+This image replaces the legacy [`rstudio/workbench-positron-init`](https://hub.docker.com/r/rstudio/workbench-positron-init) image. The init container behavior is unchanged — the entrypoint copies Positron components into a shared volume at `/mnt/init` based on the `PWB_POSITRON_TARGET` environment variable. The differences are in how the image is published.
+
+### Image references
+
+The legacy image was published as `rstudio/workbench-positron-init` on Docker Hub and `ghcr.io/rstudio/workbench-positron-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Positron version. See [Image tags](#image-tags) and [Architectures](#architectures).
+
+### Base OS options
+
+The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04. See [Image tags](#image-tags).
+
+### What did not change
+
+- Source path for Positron components (`/opt/positron`)
+- Target path on the shared volume (`/mnt/init`)
+- `PWB_POSITRON_TARGET` environment variable selects which components to copy
+- Entrypoint behavior (one-shot copy, then exit)
 
 ## Caveats
 
 ### Security
 
-Review these images before production use. If your organization has specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements, rebuild these images to meet your security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
 
-Posit rebuilds published images weekly for product editions under active support to include operating system patches.
+Posit rebuilds published images for Posit product editions under active support weekly to pull in operating system patches.
 
 ## Documentation
 
