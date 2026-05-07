@@ -1,31 +1,68 @@
-# Posit Workbench Session Init Container Image
+# Posit Workbench Session Init container image
 
-This init container image provides the session runtime components for [Workbench](https://docs.posit.co/ide/server-pro/). Use this image to pull the session runtime components into another base session image, then run Workbench sessions in Kubernetes from the resulting image.
+This container image is an init container for Posit Workbench. It stages the Workbench session runtime components under `/opt/session-components` for use by another container. Use this image to share components with a session container through a Kubernetes volume, or to copy them into a custom session image at build time.
+
+![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench-session-init)
+![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-session-init/latest)
 
 > [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The [rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) images remain supported.
 
-## Overview
+> [!TIP]
+> Deploying on Kubernetes? Try the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html), which can configure Workbench to launch sessions with this image.
 
-The `workbench-session-init` container copies session runtime components to a shared volume, which is then mounted into the session container. Use this container as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images that include the Workbench session components.
+## Supported tags
 
-| Image | Description | Docker Hub | GitHub Container Registry |
-|:------|:------------|:-----------|:--------------------------|
+- [`2026.04.0`, `2026.04.0-ubuntu-24.04`, `latest`, `ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2026.04/Containerfile.ubuntu2404)
+- [`2026.01.2`, `2026.01.2-ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2026.01/Containerfile.ubuntu2404)
+- [`2025.09.2`, `2025.09.2-ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2025.09/Containerfile.ubuntu2404)
+
+For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench-session-init/tags) on Docker Hub.
+
+## Quick reference
+
+| | |
+|---|---|
+| **Maintained by** | [the Posit Docker team](https://github.com/posit-dev/images) |
+| **Where to get help** | [GitHub Issues](https://github.com/posit-dev/images-workbench/issues), [Images Discussion Board](https://github.com/posit-dev/images/discussions), [the Posit Workbench Community Forum](https://forum.posit.co/c/posit-professional-hosted/posit-workbench/69), [Posit Workbench Documentation](https://docs.posit.co/ide/server-pro/), [Posit Support](https://support.posit.co/hc/en-us) |
+| **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues) |
+| **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench) |
+| **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md) |
+
+## Related images
+
+For Kubernetes deployments, Workbench uses these images together. See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
+
+| Image | Description | Docker Hub | GHCR |
+|:------|:------------|:-----------|:-----|
 | `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
 | `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
-| `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
-| `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
+| `workbench-positron-init` | Init container providing Positron Pro components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
+## How to use this image
 
-## Quick start
+### With the Posit Workbench Helm chart
 
-Use as an init container in your Kubernetes pod specification:
+The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) can configure Workbench to launch Kubernetes sessions with this image as an init container. Set the image and tag in `rserver.conf`:
+
+```yaml
+config:
+  server:
+    rserver.conf:
+      launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
+      launcher-sessions-init-container-image-tag: "2026.04.0"
+```
+
+See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for a full chart example.
+
+### As a Kubernetes init container
+
+To wire the image up directly in a pod spec, mount a shared volume at `/opt/session-components`. The init container provides the session runtime components at this path. The session container then mounts the same volume to consume them.
 
 ```yaml
 initContainers:
   - name: session-init
-    image: ghcr.io/posit-dev/workbench-session-init:2026.04.0-ubuntu-24.04
+    image: ghcr.io/posit-dev/workbench-session-init:2026.04.0
     volumeMounts:
       - name: session-components
         mountPath: /opt/session-components
@@ -44,58 +81,75 @@ volumes:
 
 ## Image tags
 
-Images are published to:
-
+Posit publishes images to:
 - Docker Hub: `docker.io/posit/workbench-session-init`
 - GitHub Container Registry: `ghcr.io/posit-dev/workbench-session-init`
 
-Tag formats:
+Ubuntu 24.04 is the only OS.
 
-- `2026.04.0` - Full version (Ubuntu 24.04)
-- `2026.04.0-ubuntu-24.04` - Explicit OS
-- `2026.04.0-ubuntu-22.04` - Ubuntu 22.04
-- `latest` - Latest stable release (Ubuntu 24.04)
+Tag formats where `YYYY.MM.P` is any supported Workbench version:
+- `YYYY.MM.P` - Default OS
+- `YYYY.MM.P-ubuntu-24.04` - Explicit OS
+- `latest` - Latest version, default OS
 
-## Session components
+## Architectures
 
-The init container provides the following components in `/opt/session-components`:
+Posit publishes multi-arch images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform; Docker selects the matching manifest automatically.
 
-| Component | Description |
-|-----------|-------------|
-| `rsession` | RStudio IDE session binary |
-| `rserver` | RStudio server components |
-| Jupyter integration | Components for Jupyter notebook/lab sessions |
-| VS Code integration | Components for VS Code sessions |
+## Volumes
 
-## Volume mounts
+The init container stages the Workbench session components at `/opt/session-components` in the image. Mount a shared volume at the same path to expose them to a session container.
 
-| Mount Point | Description |
-|-------------|-------------|
-| `/opt/session-components` | Session runtime components (output) |
+| Mount point             | Description                                  |
+|-------------------------|----------------------------------------------|
+| `/opt/session-components` | Workbench session runtime components       |
 
-## Differences from rstudio/workbench-session-init
+The session container mounts the same volume at `/opt/session-components` to consume the runtime components at the path Workbench expects.
 
-This image differs from the legacy [`rstudio/workbench-session-init`](https://hub.docker.com/r/rstudio/workbench-session-init) image:
+## User
 
-| Aspect           | This Image                          | rstudio/workbench-session-init |
-|------------------|-------------------------------------|--------------------------------|
-| Registry         | `posit/workbench-session-init`      | `rstudio/workbench-session-init` |
-| Base OS options  | Ubuntu 24.04, Ubuntu 22.04          | Ubuntu 22.04                   |
+The container starts as `root` so the session components are readable from the shared volume by the session container.
+
+## Examples
+
+### Building a custom session image
+
+You can pull the session components into a custom session image at build time using a multi-stage build:
+
+```dockerfile
+FROM ghcr.io/posit-dev/workbench-session-init:2026.04.0 AS session-init
+
+FROM your-custom-base
+COPY --from=session-init /opt/session-components /opt/session-components
+```
+
+The resulting image bundles the session components directly, so it can run Workbench sessions without an init container at runtime.
+
+## Migrating from rstudio/workbench-session-init
+
+This image replaces the legacy [`rstudio/workbench-session-init`](https://hub.docker.com/r/rstudio/workbench-session-init) image. The runtime contents are unchanged — the image still ships the Workbench session components at `/opt/session-components` for a session container to consume. The differences are in how the image is published.
+
+### Image references
+
+The legacy image was published as `rstudio/workbench-session-init` on Docker Hub and `ghcr.io/rstudio/workbench-session-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Workbench version. See [Image tags](#image-tags) and [Architectures](#architectures).
+
+### Base OS options
+
+The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04 only. See [Image tags](#image-tags).
+
+### What did not change
+
+- Source path for the session runtime components (`/opt/session-components`)
+- Compatibility with the Workbench server and session containers
 
 ## Caveats
 
 ### Security
 
-Review these images before production use. If your organization has specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements, rebuild these images to meet your security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
 
-Posit rebuilds published images weekly for product editions under active support to include operating system patches.
+Posit rebuilds published images for Posit product editions under active support weekly to pull in operating system patches.
 
 ### Version compatibility
 
 The `workbench-session-init` image version must match the Workbench server version. Mismatched versions can cause session startup failures or unexpected behavior.
-
-## Documentation
-
-- [Posit Workbench Documentation](https://docs.posit.co/ide/server-pro/)
-- [Kubernetes Integration Guide](https://docs.posit.co/ide/server-pro/integration/kubernetes.html)
-- [Session Components Documentation](https://docs.posit.co/ide/server-pro/job_launcher/kubernetes_plugin.html)
