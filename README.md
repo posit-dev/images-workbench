@@ -1,9 +1,9 @@
-# Posit Workbench Container Images
+# Posit Workbench container images
 
 Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 
 > [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
+> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The previous images remain supported.
 
 ## Prerequisites
 
@@ -82,23 +82,15 @@ helm upgrade --install workbench rstudio/rstudio-workbench --values values.yaml
 
 See the [full chart documentation](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) for all available values.
 
-## Building from source
-
-You can interact with this repository in multiple ways:
-
-* [Build container images directly](#build) from the Containerfile.
-* [Use the `bakery` CLI](#using-bakery) to manage and build container images.
-* Extend the functionality by using the Minimal base image (see [examples](https://github.com/posit-dev/images-examples)).
-
 ## Build
 
-You can build OCI container images from the definitions in this repository using one of the following container build tools:
+You can build Open Container Initiative (OCI) container images from the definitions in this repository using one of the following container build tools:
 
-* [buildah](https://github.com/containers/buildah/blob/main/install.md)
 * [docker buildx](https://github.com/docker/buildx#installing)
+* [buildah](https://github.com/containers/buildah/blob/main/install.md)
+* [podman](https://podman.io/docs/installation)
 
-Each Containerfile uses the root of the repository as its build context.
-The [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) project file is in the root of this repository.
+Each Containerfile uses the root of the repository as the build context.
 
 ```shell
 PWB_VERSION="2026.04"
@@ -122,63 +114,11 @@ podman build \
     .
 ```
 
-## Using `bakery`
+For builds using the `bakery` CLI, see the [contributing guide](CONTRIBUTING.md).
 
-This repository follows the structure described in [bakery usage](https://github.com/posit-dev/images-shared/tree/main/posit-bakery#usage).
+## Contributing
 
-Additional documentation:
-- [Configuration Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md): `bakery.yaml` schema and options
-- [Templating Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/TEMPLATING.md): Jinja2 macros for Containerfile templates
-- [CI Workflows](https://github.com/posit-dev/images-shared/blob/main/CI.md): shared GitHub Actions workflows for building and pushing images
-
-### Prerequisites
-
-Build prerequisites
-
-* [python](https://docs.astral.sh/uv/guides/install-python/)
-* [uv](https://docs.astral.sh/uv/getting-started/installation/)
-* [docker buildx bake](https://github.com/docker/buildx#installing)
-* [just](https://just.systems/man/en/prerequisites.html)
-* [gh](https://github.com/cli/cli#installation) (required while repositories are private)
-* `bakery`
-
-    ```shell
-    just install bakery
-    ```
-
-* `goss` and `dgoss` for running image validation tests
-
-    ```shell
-    just install-goss
-    ```
-
-* [`pre-commit`](https://pre-commit.com/) hooks (for contributors)
-
-    ```shell
-    just setup
-    ```
-
-### Build with `bakery`
-
-By default, bakery creates an ephemeral JSON [bakefile](https://docs.bakefile.org/en/latest/language.html) to render all containers in parallel.
-
-```shell
-bakery build
-```
-
-You can view the bake plan using `bakery build --plan`.
-
-You can use CLI flags to build only a subset of images in the project.
-
-### Test images
-
-After building the container images, run the test suite for all images:
-
-```shell
-bakery run dgoss
-```
-
-You can use CLI flags to limit the tests to run against a subset of images.
+To build images with `bakery` or run the test suite, see the [contributing guide](CONTRIBUTING.md).
 
 ## Related repositories
 
