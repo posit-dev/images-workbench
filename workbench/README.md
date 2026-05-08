@@ -17,10 +17,10 @@ This container image provides [Workbench](https://docs.posit.co/ide/server-pro/)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench/latest)
 
 > [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The previous images remain supported.
+> These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The previous images remain supported.
 
 > [!TIP]
-> Deploying on Kubernetes? Try the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html)!
+> Deploying on Kubernetes? Try the <a href="https://docs.posit.co/helm/charts/rstudio-workbench/README.html">Posit Workbench Helm chart</a>!
 
 ## Related images
 
@@ -72,7 +72,7 @@ docker run -d \
 Access Workbench at `http://localhost:8787`. Log in with username `posit` and password `posit`.
 
 > [!NOTE]
-> This example does not mount a data volume. Session data does not persist when the container stops. See [Volumes](#volumes) for persistent storage.
+> This example does not mount a data volume. Session data does not persist when the container stops. See <a href="#volumes">Volumes</a> for persistent storage.
 
 ### With a custom configuration file
 
@@ -367,7 +367,7 @@ License, launcher, and test user environment variables now use the `PWB_` prefix
 The image accepts the legacy `RSW_` names as a fallback during the deprecation window.
 
 > [!NOTE]
-> Posit supports legacy `RSW_` variables but plans to deprecate them after 2026. For more details and updates, see the [Workbench release notes](https://docs.posit.co/ide/server-pro/news/). For future deployments, always use the `PWB_` prefix to ensure forward compatibility.
+> Posit supports legacy `RSW_` variables but plans to deprecate them after 2026. For more details and updates, see the <a href="https://docs.posit.co/ide/server-pro/news/">Workbench release notes</a>. For future deployments, always use the `PWB_` prefix to ensure forward compatibility.
 
 ### Privileged mode
 

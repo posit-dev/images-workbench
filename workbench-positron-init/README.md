@@ -20,7 +20,7 @@ TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is mer
 -->
 
 > [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The [rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) images remain supported.
+> These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The <a href="https://github.com/rstudio/rstudio-docker-products">rstudio-docker-products</a> images remain supported.
 
 ## Supported tags
 
