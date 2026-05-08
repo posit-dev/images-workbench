@@ -268,6 +268,27 @@ docker run -v /path/to/rserver.conf:/etc/rstudio/rserver.conf ...
 
 Changes take effect when the container is restarted. See the [configuration documentation](https://docs.posit.co/ide/server-pro/reference/rserver_conf.html) for available options.
 
+If you replace `rserver.conf` with your own file, keep `server-health-check-enabled=1` so the [health check](#health-check) endpoint works.
+
+## Health check
+
+The image declares a Docker [`HEALTHCHECK`](https://docs.docker.com/reference/dockerfile/#healthcheck) that polls Workbench's `/health-check` endpoint:
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8787/health-check || exit 1
+```
+
+The endpoint requires `server-health-check-enabled=1` in `rserver.conf`. The bundled configuration sets this by default, so no action is required unless you mount your own `rserver.conf`.
+
+When the container is healthy, `docker ps` reports `healthy` in the status column and the endpoint returns `200 OK` with a plain-text dump of server diagnostics. To inspect the response directly:
+
+```bash
+docker exec <container> curl -fsS http://localhost:8787/health-check
+```
+
+To disable the built-in health check, run the container with `--no-healthcheck` or override it in your orchestrator.
+
 ## Process management
 
 Workbench runs several services inside the container under [`supervisord`](http://supervisord.org/). `supervisord` exits the container if any required service exits, so the container fails fast on startup errors.

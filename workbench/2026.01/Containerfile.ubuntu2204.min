@@ -75,4 +75,6 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8787/health-check || exit 1
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
