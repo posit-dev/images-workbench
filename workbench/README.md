@@ -51,19 +51,22 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 PWB_VERSION="2026.04.0"
 PWB_IMAGE="ghcr.io/posit-dev/workbench"  # or docker.io/posit/workbench
 PWB_LICENSE_FILE_HOST_PATH="/path/to/license.lic"
+PWB_LICENSE_FILE_PATH="/etc/rstudio-server/license.lic"
+PWB_DATA_STORAGE_HOST_PATH="/path/to/data"
+PWB_HOME_STORAGE_HOST_PATH="/path/to/home"
 docker run -d \
   --name workbench \
   -p 8787:8787 \
   -e PWB_TESTUSER=posit \
   -e PWB_TESTUSER_PASSWD=posit \
-  -v ${PWB_LICENSE_FILE_HOST_PATH}:/etc/rstudio-server/license.lic \
+  -e PWB_LICENSE_FILE_PATH=${PWB_LICENSE_FILE_PATH} \
+  -v ${PWB_LICENSE_FILE_HOST_PATH}:${PWB_LICENSE_FILE_PATH} \
+  -v ${PWB_DATA_STORAGE_HOST_PATH}:/var/lib/rstudio-server \
+  -v ${PWB_HOME_STORAGE_HOST_PATH}:/home \
   ${PWB_IMAGE}:${PWB_VERSION}
 ```
 
 Access Workbench at `http://localhost:8787`. Log in with username `posit` and password `posit`.
-
-> [!NOTE]
-> This example does not mount a data volume. Session data does not persist when the container stops. See <a href="#volumes">Volumes</a> for persistent storage.
 
 ### With a custom configuration file
 
@@ -97,10 +100,12 @@ services:
     - /path/to/license.lic:/etc/rstudio-server/license.lic
     - /path/to/rstudio:/etc/rstudio:ro
     - workbench-home:/home
+    - workbench-shared:/var/lib/rstudio-server
     restart: unless-stopped
 
 volumes:
   workbench-home:
+  workbench-shared:
 ```
 
 ## Image variants
