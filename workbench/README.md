@@ -32,15 +32,6 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 | `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
 | `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-## Supported tags
-
-- [`2026.04.0`, `2026.04.0-ubuntu-24.04`, `latest`, `std`, `ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench/2026.04/Containerfile.ubuntu2404.std)
-- [`2026.04.0-min`, `2026.04.0-ubuntu-24.04-min`, `min`, `ubuntu-24.04-min`](https://github.com/posit-dev/images-workbench/blob/main/workbench/2026.04/Containerfile.ubuntu2404.min)
-- [`2026.04.0-ubuntu-22.04`, `ubuntu-22.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench/2026.04/Containerfile.ubuntu2204.std)
-- [`2026.04.0-ubuntu-22.04-min`, `ubuntu-22.04-min`](https://github.com/posit-dev/images-workbench/blob/main/workbench/2026.04/Containerfile.ubuntu2204.min)
-
-For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench/tags) on Docker Hub.
-
 ## Quick reference
 
 | |                                                                                                                                                                                                                                                          |

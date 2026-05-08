@@ -25,24 +25,6 @@ TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is mer
 > [!TIP]
 > Deploying on Kubernetes? Try the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html)!
 
-## Supported tags
-
-The standard set of session images covers a matrix of R and Python versions, paired by minor release. For example:
-
-| R version | Python version | OS           | Tag                                                          |
-|-----------|----------------|--------------|--------------------------------------------------------------|
-| 4.5       | 3.14           | Ubuntu 24.04 | posit/workbench-session:R4.5.2-python3.14.3-ubuntu-24.04     |
-| 4.5       | 3.14           | Ubuntu 22.04 | posit/workbench-session:R4.5.2-python3.14.3-ubuntu-22.04     |
-| 4.4       | 3.12           | Ubuntu 24.04 | posit/workbench-session:R4.4.3-python3.12.12-ubuntu-24.04    |
-| 4.4       | 3.12           | Ubuntu 22.04 | posit/workbench-session:R4.4.3-python3.12.12-ubuntu-22.04    |
-| ...       | ...            | ...          | ...                                                          |
-| 4.3       | 3.11           | Ubuntu 24.04 | posit/workbench-session:R4.3.3-python3.11.15-ubuntu-24.04    |
-| 4.3       | 3.11           | Ubuntu 22.04 | posit/workbench-session:R4.3.3-python3.11.15-ubuntu-22.04    |
-
-Posit builds each combination for both Ubuntu 24.04 (default) and Ubuntu 22.04. Tags follow the format `R{r_version}-python{python_version}-{os}`. Posit always uses the most recent patch version for each minor release to ensure security updates and bugfixes are included. Posit retains previous patch versions in the registry, but does not rebuild them.
-
-For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench-session/tags) on Docker Hub.
-
 ## Quick reference
 
 |                           |                                                                                                                                                                                                                                                                                                            |

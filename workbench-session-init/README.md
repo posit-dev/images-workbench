@@ -22,14 +22,6 @@ This container image is an init container for Posit Workbench. It stages the Wor
 > [!TIP]
 > Deploying on Kubernetes? Try the <a href="https://docs.posit.co/helm/charts/rstudio-workbench/README.html">Posit Workbench Helm chart</a>, which can configure Workbench to launch sessions with this image.
 
-## Supported tags
-
-- [`2026.04.0`, `2026.04.0-ubuntu-24.04`, `latest`, `ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2026.04/Containerfile.ubuntu2404)
-- [`2026.01.2`, `2026.01.2-ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2026.01/Containerfile.ubuntu2404)
-- [`2025.09.2`, `2025.09.2-ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/2025.09/Containerfile.ubuntu2404)
-
-For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench-session-init/tags) on Docker Hub.
-
 ## Quick reference
 
 | | |

@@ -22,12 +22,6 @@ TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is mer
 > [!NOTE]
 > These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The <a href="https://github.com/rstudio/rstudio-docker-products">rstudio-docker-products</a> images remain supported.
 
-## Supported tags
-
-- [`2026.03.0-212`, `2026.03.0-212-ubuntu-24.04`, `latest`, `ubuntu-24.04`](https://github.com/posit-dev/images-workbench/blob/main/workbench-positron-init/matrix/Containerfile.ubuntu2404)
-
-For a full list of available tags, see the [Tags tab](https://hub.docker.com/r/posit/workbench-positron-init/tags) on Docker Hub.
-
 ## Quick reference
 
 | | |
