@@ -69,8 +69,8 @@ The main Posit Workbench server image. Two variants:
 - `PWB_TESTUSER_UID` — test user UID, default `10000`
 - `PWB_LAUNCHER` — enable Launcher startup, default `true` (falls back to `RSW_LAUNCHER`)
 - `PWB_LAUNCHER_TIMEOUT` — Launcher readiness timeout in seconds, default `10`
-- `STARTUP_DEBUG_MODE` — set to `1` for verbose startup logging
-- `DIAGNOSTIC_ENABLE` — set to `true` to run diagnostic checks on startup
+- `PWB_STARTUP_DEBUG` — set to `1` for verbose startup logging
+- `PWB_DIAGNOSTIC_ENABLE` — set to `true` to run diagnostic checks on startup
 
 All license env vars are unset after activation to prevent child process inheritance.
 

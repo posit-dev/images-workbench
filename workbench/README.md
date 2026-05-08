@@ -145,9 +145,10 @@ Posit publishes multi-arch images for both `linux/amd64` and `linux/arm64`. Pull
 | `PWB_TESTUSER`         | Test user name. If empty, the image creates no test user.                   |
 | `PWB_TESTUSER_PASSWD`  | Test user password                                                          |
 | `PWB_TESTUSER_UID`     | Test user UID (default: `10000` when `PWB_TESTUSER` is set)                 |
-| `STARTUP_DEBUG_MODE`   | Set to `1` for verbose startup logging                                      |
-| `DIAGNOSTIC_ENABLE`    | Enable diagnostic logging (default: `false`)                                |
-| `DIAGNOSTIC_DIR`       | Directory for diagnostic logs (default: `/var/log/rstudio`)                 |
+| `PWB_STARTUP_DEBUG`    | Set to `1` for verbose startup logging                                      |
+| `PWB_DIAGNOSTIC_ENABLE`| Enable diagnostic logging (default: `false`)                                |
+| `PWB_DIAGNOSTIC_DIR`   | Directory for diagnostic logs (default: `/var/log/rstudio`)                 |
+| `PWB_EXIT_AFTER_VERIFY`| When `PWB_DIAGNOSTIC_ENABLE=true`, exit after running verification instead of starting the server (default: `false`) |
 
 If you are migrating from `rstudio/rstudio-workbench`, see [Environment variables](#environment-variables-1) under the migration guide for the legacy `RSW_` names and deprecation timeline.
 
