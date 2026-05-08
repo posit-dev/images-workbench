@@ -1,21 +1,21 @@
 # Posit Workbench Container Image
 
-This container image provides [Posit Workbench](https://docs.posit.co/ide/server-pro/) (PWB), an integrated development environment for data science teams that supports R, Python, and VS Code.
+This container image provides [Workbench](https://docs.posit.co/ide/server-pro/), an integrated development environment for data science teams that supports R, Python, and VS Code.
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
 
-## Related Images
+## Related images
 
 For Kubernetes deployments, Workbench uses these images together. See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
-| Image | Description | Docker Hub | GHCR |
-|:------|:------------|:-----------|:-----|
+| Image | Description | Docker Hub | GitHub Container Registry |
+|:------|:------------|:-----------|:--------------------------|
 | `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
 | `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
 | `workbench-positron-init` | Init container providing Positron IDE components | [posit/workbench-positron-init](https://hub.docker.com/r/posit/workbench-positron-init) | [posit-dev/workbench-positron-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-## Quick Start
+## Quick start
 
 ```bash
 PWB_VERSION="2026.04.0"
@@ -35,18 +35,18 @@ Access Workbench at `http://localhost:8787`. Log in with username `posit` and pa
 > [!NOTE]
 > This example does not mount a data volume. Session data will not persist when the container stops. See [Volume Mounts](#volume-mounts) for persistent storage.
 
-## Image Variants
+## Image variants
 
 Two variants are available:
 
 | Variant | Description |
 |---------|-------------|
 | `std` (Standard) | Opinionated image, runs out of the box |
-| `min` (Minimal) | Small image you can extend with desired dependencies, *will not run as is* |
+| `min` (Minimal) | Small image you can extend with desired dependencies, will not run as-is |
 
 See [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending) for how to build on the Minimal image.
 
-## Image Tags
+## Image tags
 
 Images are published to:
 - Docker Hub: `docker.io/posit/workbench`
@@ -63,26 +63,26 @@ Tag formats:
 
 ## Configuration
 
-### License Activation
+### License activation
 
-A [product license](https://docs.posit.co/licensing/licensing-faq.html) is required. Posit recommends license file activation. Choose one method:
+You must have a valid [product license](https://docs.posit.co/licensing/licensing-faq.html). Posit recommends license file activation. Choose one method:
 
-**Option 1: License File (Recommended)**
+#### Option 1: License file (recommended)
 ```bash
 docker run -v /path/to/license.lic:/etc/rstudio-server/license.lic ...
 ```
 
-**Option 2: License Key**
+#### Option 2: License key
 ```bash
 docker run -e PWB_LICENSE="your-license-key" ...
 ```
 
-**Option 3: Floating License Server**
+#### Option 3: Floating license server
 ```bash
 docker run -e PWB_LICENSE_SERVER="http://license-server:8989" ...
 ```
 
-### Environment Variables
+### Environment variables
 
 | Variable              | Description                                                         |
 |-----------------------|---------------------------------------------------------------------|
@@ -90,14 +90,14 @@ docker run -e PWB_LICENSE_SERVER="http://license-server:8989" ...
 | `PWB_LICENSE_SERVER`  | URL of floating license server                                      |
 | `PWB_LAUNCHER`        | Enable the Job Launcher (default: `true`)                           |
 | `PWB_LAUNCHER_TIMEOUT`| Launcher startup timeout in seconds (default: `10`)                 |
-| `PWB_TESTUSER`        | Test user name. If empty, no test user is created.                  |
+| `PWB_TESTUSER`        | Test user name. If empty, the image creates no test user.           |
 | `PWB_TESTUSER_PASSWD` | Test user password                                                  |
 | `PWB_TESTUSER_UID`    | Test user UID (default: `10000` when `PWB_TESTUSER` is set)         |
 | `STARTUP_DEBUG_MODE`  | Set to `1` for verbose startup logging                              |
 | `DIAGNOSTIC_ENABLE`   | Enable diagnostic logging (default: `false`)                        |
 | `DIAGNOSTIC_DIR`      | Directory for diagnostic logs (default: `/var/log/rstudio`)         |
 
-#### Legacy Environment Variables
+#### Legacy environment variables
 
 | Legacy Variable        | Preferred Equivalent   | Notes         |
 |------------------------|------------------------|---------------|
@@ -109,9 +109,9 @@ docker run -e PWB_LICENSE_SERVER="http://license-server:8989" ...
 | `RSW_TESTUSER_PASSWD`  | `PWB_TESTUSER_PASSWD`  | Same behavior |
 | `RSW_TESTUSER_UID`     | `PWB_TESTUSER_UID`     | Same behavior |
 
-**Note:** Legacy `RSW_` variables are supported but are planned for deprecation after 2025. For more details and updates, see the [Posit Workbench release notes](https://docs.posit.co/ide/server-pro/news/). For new deployments, always use the `PWB_` prefix to ensure forward compatibility.
+**Note:** Posit supports legacy `RSW_` variables but plans to deprecate them after 2026. For details and updates, see the [Workbench release notes](https://docs.posit.co/ide/server-pro/news/). For new deployments, always use the `PWB_` prefix to ensure forward compatibility.
 
-### Volume Mounts
+### Volume mounts
 
 For persistent data, add these volume mounts to your `docker run` command:
 
@@ -125,7 +125,7 @@ For persistent data, add these volume mounts to your `docker run` command:
 | `/var/lib/rstudio-server` | Session data and database |
 | `/etc/rstudio`          | Configuration files       |
 
-### Custom Configuration
+### Custom configuration
 
 Mount custom configuration files:
 
@@ -135,7 +135,7 @@ docker run -v /path/to/rserver.conf:/etc/rstudio/rserver.conf ...
 
 See the [configuration documentation](https://docs.posit.co/ide/server-pro/reference/rserver_conf.html) for available options.
 
-## Exposed Ports
+## Exposed ports
 
 | Port | Description |
 |------|-------------|
@@ -154,20 +154,20 @@ This image differs from the legacy [`rstudio/rstudio-workbench`](https://hub.doc
 |------------------|----------------------------------------|---------------------------------------------------------------|
 | Registry         | `posit/workbench`                      | `rstudio/rstudio-workbench`                                   |
 | License env vars | `PWB_` prefix                          | `RSW_` prefix                                                 |
-| Variants         | `std` (with R/Python), `min` (minimal) | Single variant; multiple tags for different R/Python versions |
+| Variants         | `std` (with R/Python), `min` (minimal) | Single variant. Tags vary by R and Python version             |
 | Base OS options  | Ubuntu 24.04, Ubuntu 22.04             | Ubuntu 22.04                                                  |
 
 ## Caveats
 
 ### Security
 
-These images should be reviewed before production use. Organizations with specific CVE or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before production use. If your organization has specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements, rebuild these images to meet your security standards.
 
-Published images for Posit Product editions under active support are re-built on a weekly basis to pull in operating system patches.
+Posit rebuilds published images weekly for product editions under active support to include operating system patches.
 
-### License Keys
+### License keys
 
-License keys used in containers risk activation slot loss if containers aren't gracefully stopped. The license deactivates on container exit, but ungraceful shutdowns (crashes, `docker kill`) may leave the activation slot consumed on Posit's license server.
+License keys used in containers risk activation slot loss if containers are not gracefully stopped. The license deactivates on container exit, but ungraceful shutdowns (crashes, `docker kill`) might leave the activation slot consumed on the Posit license server.
 
 To ensure proper license deactivation, use a sufficient stop timeout:
 
@@ -180,9 +180,9 @@ docker run -d \
 
 For production deployments, license files are recommended over license keys.
 
-### Hardware Locking
+### Hardware locking
 
-License state files are hardware-locked. Changes to MAC addresses, hostnames, or container orchestration platforms, such as Kubernetes, may invalidate existing license state, requiring reactivation.
+Posit hardware-locks license state files. Changes to MAC addresses, hostnames, or container orchestration platforms (such as Kubernetes) might invalidate the license state and require reactivation.
 
 ## Documentation
 

@@ -1,16 +1,16 @@
 # Posit Workbench Session Init Container Image
 
-This init container image provides the session runtime components for [Posit Workbench](https://docs.posit.co/ide/server-pro/). It can be used to pull the session runtime components into another base session image, which can then be used to run Workbench sessions in Kubernetes environments.
+This init container image provides the session runtime components for [Workbench](https://docs.posit.co/ide/server-pro/). Use this image to pull the session runtime components into another base session image, then run Workbench sessions in Kubernetes from the resulting image.
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
 
 ## Overview
 
-The `workbench-session-init` container copies session runtime components to a shared volume, which is then mounted into the session container. It is used as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images extended with Workbench session components.
+The `workbench-session-init` container copies session runtime components to a shared volume, which is then mounted into the session container. Use this container as a Kubernetes init container alongside `posit/workbench` and `posit/workbench-session`, or with custom session images that include the Workbench session components.
 
-| Image | Description | Docker Hub | GHCR |
-|:------|:------------|:-----------|:-----|
+| Image | Description | Docker Hub | GitHub Container Registry |
+|:------|:------------|:-----------|:--------------------------|
 | `workbench` | The Posit Workbench server | [posit/workbench](https://hub.docker.com/r/posit/workbench) | [posit-dev/workbench](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
 | `workbench-session` | Session images for Kubernetes (R and Python version matrix) | [posit/workbench-session](https://hub.docker.com/r/posit/workbench-session) | [posit-dev/workbench-session](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
 | `workbench-session-init` | Init container providing session runtime components | [posit/workbench-session-init](https://hub.docker.com/r/posit/workbench-session-init) | [posit-dev/workbench-session-init](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
@@ -18,7 +18,7 @@ The `workbench-session-init` container copies session runtime components to a sh
 
 See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for Helm configuration.
 
-## Quick Start
+## Quick start
 
 Use as an init container in your Kubernetes pod specification:
 
@@ -42,7 +42,7 @@ volumes:
     emptyDir: {}
 ```
 
-## Image Tags
+## Image tags
 
 Images are published to:
 
@@ -56,7 +56,7 @@ Tag formats:
 - `2026.04.0-ubuntu-22.04` - Ubuntu 22.04
 - `latest` - Latest stable release (Ubuntu 24.04)
 
-## Session Components
+## Session components
 
 The init container provides the following components in `/opt/session-components`:
 
@@ -67,7 +67,7 @@ The init container provides the following components in `/opt/session-components
 | Jupyter integration | Components for Jupyter notebook/lab sessions |
 | VS Code integration | Components for VS Code sessions |
 
-## Volume Mounts
+## Volume mounts
 
 | Mount Point | Description |
 |-------------|-------------|
@@ -86,13 +86,13 @@ This image differs from the legacy [`rstudio/workbench-session-init`](https://hu
 
 ### Security
 
-These images should be reviewed before production use. Organizations with specific CVE or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before production use. If your organization has specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements, rebuild these images to meet your security standards.
 
-Published images for Posit Product editions under active support are re-built on a weekly basis to pull in operating system patches.
+Posit rebuilds published images weekly for product editions under active support to include operating system patches.
 
-### Version Compatibility
+### Version compatibility
 
-The `workbench-session-init` image version must match the Posit Workbench server version. Using mismatched versions may cause session startup failures or unexpected behavior.
+The `workbench-session-init` image version must match the Workbench server version. Mismatched versions can cause session startup failures or unexpected behavior.
 
 ## Documentation
 

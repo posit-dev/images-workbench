@@ -1,6 +1,6 @@
 # Posit Workbench Container Images
 
-Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
+Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The existing images remain supported.
@@ -12,7 +12,7 @@ Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
 | [Docker](https://docs.docker.com/get-docker/) | Running containers locally | [Get Docker](https://docs.docker.com/get-docker/) |
 | [Helm](https://helm.sh/docs/intro/install/) | Deploying on Kubernetes | [Install Helm](https://helm.sh/docs/intro/install/) |
 | [kubectl](https://kubernetes.io/docs/tasks/tools/) | Deploying on Kubernetes | [Install kubectl](https://kubernetes.io/docs/tasks/tools/) |
-| Product license | Running Posit Workbench | [Licensing FAQ](https://docs.posit.co/licensing/licensing-faq.html) |
+| Product license | Running Workbench | [Licensing FAQ](https://docs.posit.co/licensing/licensing-faq.html) |
 
 ## Images
 
@@ -23,22 +23,22 @@ Container images for [Posit Workbench](https://docs.posit.co/ide/server-pro).
 | [workbench-session-init](./workbench-session-init/) | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
 | [workbench-positron-init](./workbench-positron-init/) | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
-Additional Posit container images are published to [Docker Hub](https://hub.docker.com/u/posit) and [GitHub Container Registry](https://github.com/orgs/posit-dev/packages).
+Posit publishes additional container images to [Docker Hub](https://hub.docker.com/u/posit) and [GitHub Container Registry](https://github.com/orgs/posit-dev/packages).
 
-## Running the Images
+## Running the images
 
 The fastest way to get started is to pull and run a pre-built image. See each image's documentation for Quick Start examples, configuration, and environment variables.
 
-- [Posit Workbench](./workbench/) — The Workbench server
-- [Workbench Session](./workbench-session/) — Session images for Kubernetes
-- [Workbench Session Init](./workbench-session-init/) — Init container for Kubernetes session deployments
-- [Workbench Positron Init](./workbench-positron-init/) — Init container for Positron IDE in Kubernetes
+- [Workbench](./workbench/): the Workbench server
+- [Workbench Session](./workbench-session/): session images for Kubernetes
+- [Workbench Session Init](./workbench-session-init/): init container for Kubernetes session deployments
+- [Workbench Positron Init](./workbench-positron-init/): init container for Positron IDE in Kubernetes
 
 See the [Workbench installation guide](https://docs.posit.co/ide/server-pro/getting_started/installation/) for full setup instructions.
 
 ## Deploying on Kubernetes
 
-Use the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) to deploy on Kubernetes.
+Use the [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) to deploy on Kubernetes.
 
 ```bash
 helm repo add rstudio https://helm.rstudio.com
@@ -73,7 +73,7 @@ config:
       launcher-sessions-init-container-image-tag: "2026.04.0"
 ```
 
-The `rserver.conf` entries configure Workbench to use the new session init container image.
+The `rserver.conf` entries configure Workbench to use the session init container image.
 
 Install command:
 ```bash
@@ -82,7 +82,7 @@ helm upgrade --install workbench rstudio/rstudio-workbench --values values.yaml
 
 See the [full chart documentation](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) for all available values.
 
-## Building from Source
+## Building from source
 
 You can interact with this repository in multiple ways:
 
@@ -97,8 +97,8 @@ You can build OCI container images from the definitions in this repository using
 * [buildah](https://github.com/containers/buildah/blob/main/install.md)
 * [docker buildx](https://github.com/docker/buildx#installing)
 
-The root of the bakery project is used as the build context for each Containerfile.
-Here, the [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) file, or project, is in the root of this repository.
+Each Containerfile uses the root of the repository as its build context.
+The [`bakery.yaml`](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md#bakery-configuration) project file is in the root of this repository.
 
 ```shell
 PWB_VERSION="2026.04"
@@ -124,12 +124,12 @@ podman build \
 
 ## Using `bakery`
 
-The structure and contents of this repository were created following the steps in [bakery usage](https://github.com/posit-dev/images-shared/tree/main/posit-bakery#usage).
+This repository follows the structure described in [bakery usage](https://github.com/posit-dev/images-shared/tree/main/posit-bakery#usage).
 
 Additional documentation:
-- [Configuration Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md) — `bakery.yaml` schema and options
-- [Templating Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/TEMPLATING.md) — Jinja2 macros for Containerfile templates
-- [CI Workflows](https://github.com/posit-dev/images-shared/blob/main/CI.md) — Shared GitHub Actions workflows for building and pushing images
+- [Configuration Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/CONFIGURATION.md): `bakery.yaml` schema and options
+- [Templating Reference](https://github.com/posit-dev/images-shared/blob/main/posit-bakery/TEMPLATING.md): Jinja2 macros for Containerfile templates
+- [CI Workflows](https://github.com/posit-dev/images-shared/blob/main/CI.md): shared GitHub Actions workflows for building and pushing images
 
 ### Prerequisites
 
@@ -180,11 +180,11 @@ bakery run dgoss
 
 You can use CLI flags to limit the tests to run against a subset of images.
 
-## Related Repositories
+## Related repositories
 
 This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. To extend the Minimal image with additional languages or system dependencies, see the [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending). For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
 
-## Share your Feedback
+## Share your feedback
 
 We invite you to join us on [GitHub Discussions](https://github.com/posit-dev/images/discussions) to ask questions and share feedback.
 
@@ -198,4 +198,4 @@ We expect all contributors to adhere to the project's [Code of Conduct](CODE_OF_
 
 ## License
 
-Posit Container Images and associated tooling are licensed under the [MIT License](LICENSE.md)
+Posit licenses these container images and associated tooling under the [MIT License](LICENSE.md).
