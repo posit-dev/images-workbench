@@ -1,9 +1,23 @@
+<a href="https://posit.co/products/enterprise/workbench">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-reverse.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+  <img alt="Posit Package Manager Logo" src="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+</picture>
+</a>
+
 # Posit Workbench Positron Init container image
 
 This container image is an init container for [Posit Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments that copies Positron IDE components into a shared volume for session containers to consume. The image decouples the Positron IDE server from the Workbench session image, which enables out-of-band Positron version upgrades without waiting for a full Workbench release.
 
-![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench-positron-init)
+[![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-positron-init)
+<!-- 
+TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is merged
+[![Latest Version](https://img.shields.io/docker/v/posit/workbench-positron-init?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench-positron-init/tags)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-positron-init/latest)
+-->
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The [rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products) images remain supported.

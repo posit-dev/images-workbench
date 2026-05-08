@@ -1,8 +1,19 @@
+<a href="https://posit.co/products/enterprise/workbench">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-reverse.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+  <img alt="Posit Package Manager Logo" src="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+</picture>
+</a>
+
 # Posit Workbench container image
 
 This container image provides [Workbench](https://docs.posit.co/ide/server-pro/), an integrated development environment for data science teams that supports R, Python, and VS Code.
 
-![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench)
+[![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/production.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
+[![Latest Version](https://img.shields.io/docker/v/posit/workbench?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench/tags)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench/latest)
 
 > [!NOTE]

@@ -1,8 +1,19 @@
+<a href="https://posit.co/products/enterprise/workbench">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-reverse.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+  <img alt="Posit Package Manager Logo" src="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+</picture>
+</a>
+
 # Posit Workbench Session Init container image
 
 This container image is an init container for Posit Workbench. It stages the Workbench session runtime components under `/opt/session-components` for use by another container. Use this image to share components with a session container through a Kubernetes volume, or to copy them into a custom session image at build time.
 
-![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench-session-init)
+[![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/production.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
+[![Latest Version](https://img.shields.io/docker/v/posit/workbench-session-init?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench-session-init/tags)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-session-init)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-session-init/latest)
 
 > [!NOTE]

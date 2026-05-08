@@ -1,6 +1,19 @@
+<a href="https://posit.co/products/enterprise/workbench">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-reverse.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+  <img alt="Posit Package Manager Logo" src="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+</picture>
+</a>
+
 # Posit Workbench container images
 
 Container images for [Workbench](https://docs.posit.co/ide/server-pro).
+
+[![Production CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
+[![Development CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/development.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/development.yml)
+[![Session Image CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
+[![Latest Version](https://img.shields.io/docker/v/posit/workbench?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench/tags)
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The previous images remain supported.

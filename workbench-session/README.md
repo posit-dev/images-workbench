@@ -1,8 +1,23 @@
+<a href="https://posit.co/products/enterprise/workbench">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-reverse.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+  <img alt="Posit Package Manager Logo" src="https://cdn.posit.co/platform/containers/logos/logo_workbenchtag-fullcolor.svg">
+</picture>
+</a>
+
 # Posit Workbench Session container image
 
 These container images provide the session runtime environments for [Posit Workbench](https://docs.posit.co/ide/server-pro/) in Kubernetes. Each image bundles a specific R and Python version pair, along with Jupyter, Quarto, and Posit Professional Drivers, so that user sessions run in an environment matching the user's language requirements.
 
-![Docker Pulls](https://img.shields.io/docker/pulls/posit/workbench-session)
+[![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-session)
+<!-- 
+TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is merged
+[![Latest Version](https://img.shields.io/docker/v/posit/workbench-session?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench-session/tags)
+![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-session/latest)
+-->
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The previous `rstudio/workbench-session` and `rstudio/r-session-complete` images remain supported.
