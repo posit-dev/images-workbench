@@ -14,7 +14,7 @@ These container images provide the session runtime environments for [Posit Workb
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
 ![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-session)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-session/latest)
-<!-- 
+<!--
 TODO: Try this again after the [deterministic push order PR is merged](https://github.com/posit-dev/images-shared/pull/505)
 [![Latest Version](https://img.shields.io/docker/v/posit/workbench-session?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench-session/tags)
 -->

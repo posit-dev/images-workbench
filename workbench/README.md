@@ -186,7 +186,7 @@ For persistent data, add these volume mounts to your `docker run` command:
 
 ### License activation
 
-Workbench requires a [product license](https://docs.posit.co/licensing/licensing-faq.html). If you don't have a license yet, request a free 30-day trial at [posit.co/trial-license](https://posit.co/trial-license/). 
+Workbench requires a [product license](https://docs.posit.co/licensing/licensing-faq.html). If you don't have a license yet, request a free 30-day trial at [posit.co/trial-license](https://posit.co/trial-license/).
 
 Posit recommends activating with a license file. Choose one method:
 
