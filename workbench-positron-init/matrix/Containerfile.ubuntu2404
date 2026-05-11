@@ -5,6 +5,8 @@ ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 ARG POSITRON_VERSION
 
+ENV PWB_POSITRON_TARGET="positron,positron-docs"
+
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 RUN apt-get update -yqq --fix-missing && \
