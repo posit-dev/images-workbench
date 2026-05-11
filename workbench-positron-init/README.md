@@ -21,13 +21,14 @@ This container image is an init container for [Posit Workbench](https://docs.pos
 
 ## Quick reference
 
-| | |
-|---|---|
-| **Maintained by** | [the Posit Docker team](https://github.com/posit-dev/images) |
+| |                                                                                                                                                                                                                                                                                                           |
+|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Maintained by** | [the Posit Docker team](https://github.com/posit-dev/images)                                                                                                                                                                                                                                              |
 | **Where to get help** | [GitHub Issues](https://github.com/posit-dev/images-workbench/issues), [Images Discussion Board](https://github.com/posit-dev/images/discussions), [the Posit Community Forum](https://forum.posit.co/c/posit-professional-hosted/posit-workbench/69), [Posit Support](https://support.posit.co/hc/en-us) |
-| **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues) |
-| **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench) |
-| **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md) |
+| **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues)                                                                                                                                                                                              |
+| **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench)                                                                                                                                                                                                            |
+| **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md)                                                                                                                                                                                                                                 |
+| **Product documentation** | [Posit Workbench documentation](https://docs.posit.co/ide/server-pro/), [Upgrading Positron in Kubernetes deployments](https://docs.posit.co/ide/server-pro/admin/positron_sessions/upgrading_positron.html#kubernetes)                                                                                   |
 
 ## Related images
 
