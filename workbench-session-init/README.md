@@ -46,41 +46,21 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 
 ### With the Posit Workbench Helm chart
 
-The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) can configure Workbench to launch Kubernetes sessions with this image as an init container. Set the image and tag in `rserver.conf`:
+The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) by default configures Workbench to use a `workbench-session-init` image to bootstrap a `workbench-session` image. The images used can be configured as shown below.
 
 ```yaml
-config:
-  server:
-    rserver.conf:
-      launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
-      launcher-sessions-init-container-image-tag: "2026.04.0"
+session:
+  image:
+    repository: "ghcr.io/posit-dev/workbench-session"
+    tag: "latest"
+
+components:
+  sessionInit:
+    image:
+      repository: "ghcr.io/posit-dev/workbench-session-init"
 ```
 
 See the [repository README](https://github.com/posit-dev/images-workbench#deploying-on-kubernetes) for a full chart example.
-
-### As a Kubernetes init container
-
-To wire the image up directly in a pod spec, mount a shared volume at `/opt/session-components`. The init container provides the session runtime components at this path. The session container then mounts the same volume to consume them.
-
-```yaml
-initContainers:
-  - name: session-init
-    image: ghcr.io/posit-dev/workbench-session-init:2026.04.0
-    volumeMounts:
-      - name: session-components
-        mountPath: /opt/session-components
-
-containers:
-  - name: session
-    image: your-custom-session-image
-    volumeMounts:
-      - name: session-components
-        mountPath: /opt/session-components
-
-volumes:
-  - name: session-components
-    emptyDir: {}
-```
 
 ## Image tags
 
