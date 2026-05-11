@@ -12,12 +12,9 @@ This container image is an init container for [Posit Workbench](https://docs.pos
 
 [![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
-![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-positron-init)
-<!-- 
-TODO: uncomment after https://github.com/posit-dev/images-shared/pull/501 is merged
 [![Latest Version](https://img.shields.io/docker/v/posit/workbench-positron-init?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench-positron-init/tags)
+![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench-positron-init)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench-positron-init/latest)
--->
 
 > [!NOTE]
 > These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The <a href="https://github.com/rstudio/rstudio-docker-products">rstudio-docker-products</a> images remain supported.
