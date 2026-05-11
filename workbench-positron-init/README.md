@@ -44,29 +44,14 @@ For Kubernetes deployments, Workbench uses several images together. See the [rep
 
 ### As a Kubernetes init container
 
-Mount a shared volume at `/mnt/init` and set `PWB_POSITRON_TARGET` to select which components to copy. The session container then mounts the same volume to consume the components.
+The [rstudio-workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) consumes this image from the `components.positron` values. If an image repository and version are provided, the init container image will be used to provide the specified Positron version to session pods.
 
 ```yaml
-initContainers:
-  - name: positron-init
-    image: ghcr.io/posit-dev/workbench-positron-init:2026.03.0-212
-    env:
-      - name: PWB_POSITRON_TARGET
-        value: positron
-    volumeMounts:
-      - name: positron-components
-        mountPath: /mnt/init
-
-containers:
-  - name: session
-    image: your-custom-session-image
-    volumeMounts:
-      - name: positron-components
-        mountPath: /mnt/init
-
-volumes:
-  - name: positron-components
-    emptyDir: {}
+components:
+  positron:
+    version: "2026.05.1-2"
+    image:
+      repository: "ghcr.io/posit-dev/workbench-positron-init"
 ```
 
 ## Image tags
