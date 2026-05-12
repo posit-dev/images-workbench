@@ -77,7 +77,7 @@ Tag formats where `YYYY.MM.P` is any supported Workbench version:
 
 ## Architectures
 
-Posit publishes multi-arch images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform; Docker selects the matching manifest automatically.
+Posit publishes Workbench images for `linux/amd64` only. `linux/arm64` builds remain in developer preview until Workbench supports ARM in production.
 
 ## Volumes
 

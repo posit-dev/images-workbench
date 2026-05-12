@@ -72,7 +72,10 @@ Tag formats where `YYYY.MM.P-BUILD` is any supported Positron version:
 
 ## Architectures
 
-Posit publishes multi-arch images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform; Docker selects the matching manifest automatically.
+Posit publishes Ubuntu 24.04 init images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform. Docker selects the matching manifest automatically.
+
+> [!WARNING]
+> While these images are built for both `linux/amd64` and `linux/arm64`, the `workbench` and `workbench-session-init` images are built for `linux/amd64` only. `linux/arm64` builds for those images remain in developer preview until ARM64 platform support is officially added for Workbench.
 
 ## Components
 
