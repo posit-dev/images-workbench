@@ -167,6 +167,19 @@ bakery update files
 Note: Workbench versions include build metadata (e.g., `2026.01.1+403.pro11`). Quote version
 strings containing `+` in shell commands.
 
+## Documentation
+
+Each image directory (e.g., `workbench/`) has a `README.md` with usage instructions, build guidance, and other details specific to that image. The root `README.md` provides an overview of the repository structure, CI workflows, and Helm integration.
+
+Each image specific `README.md` is published as the description on Docker Hub and GitHub Container Registry, so it should be written with that audience in mind. These platforms have limitations for certain Markdown behaviors:
+
+| Avoid                                                                                                      | Alternative                                                                                                                                           |
+|------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Relative links to files in the repo (e.g., `./workbench-session/matrix/Containerfile.ubuntu2404`)          | Absolute links to the GitHub repo (e.g., `https://github.com/posit-dev/images-workbench/blob/main/workbench-session/matrix/Containerfile.ubuntu2404`) |
+| Markdown links in callouts (e.g., `[Get started with Bakery](https://posit-dev.github.io/images-shared/)`) | HTML anchors in callouts (e.g., `<a href="https://posit-dev.github.io/images-shared/">Get started with Bakery</a>                                     |
+
+When making changes to the repository, consider whether updates are required for the image-specific `README.md` files in addition to the root `README.md`. For example, if you add a new environment variable to the `workbench` image, you should update the `workbench/README.md` to document it.
+
 ## CI Workflows
 
 All workflows call shared reusable workflows from `images-shared`:
