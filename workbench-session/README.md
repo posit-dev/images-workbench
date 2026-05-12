@@ -86,7 +86,7 @@ Each image includes:
 | R                            | `/opt/R/{version}/bin/R`            |
 | Python                       | `/opt/python/{version}/bin/python3` |
 | JupyterLab and Jupyter kernel | Installed under the bundled Python  |
-| Quarto                       | `/opt/quarto/{version}/bin/quarto`  |
+| Quarto                       | `/opt/quarto/bin/quarto`  |
 | TinyTeX                      | `/opt/TinyTeX/bin/`                 |
 | Posit Professional Drivers   | `/opt/rstudio-drivers/`             |
 
