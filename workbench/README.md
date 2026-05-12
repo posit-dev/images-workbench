@@ -309,7 +309,7 @@ Workbench runs several services inside the container under [`supervisord`](http:
 The image manages these services:
 
 - **Workbench**: the main server process. Startup configuration is mounted at `/startup/base`.
-- **Job Launcher**: enables Jupyter, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. Startup configuration is mounted at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
+- **Job Launcher**: enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. Startup configuration is mounted at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
 - **sssd**: used for user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, mount an empty volume over `/startup/user-provisioning/`.
 - **custom**: to run additional services inside the container, mount supervisord configuration files into `/startup/custom/`. `supervisord` starts and manages them alongside the built-in services. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
 
