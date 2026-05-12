@@ -134,8 +134,6 @@ podman build \
     .
 ```
 
-For builds using the `bakery` CLI, see the [contributing guide](CONTRIBUTING.md).
-
 ## Contributing
 
 To build images with `bakery` or run the test suite, see the [contributing guide](CONTRIBUTING.md).
