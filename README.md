@@ -58,12 +58,14 @@ helm repo add rstudio https://helm.rstudio.com
 helm repo update
 ```
 
-Create a Kubernetes secret from your license file, then configure the chart in your `values.yaml`:
+Create a Kubernetes secret from your license file:
 
 ```bash
 kubectl create secret generic posit-workbench-license \
   --from-file=license.lic=/path/to/license.lic
 ```
+
+Then configure the chart in your `values.yaml`:
 
 ```yaml
 image:
@@ -79,16 +81,21 @@ session:
     repository: ghcr.io/posit-dev/workbench-session
     tag: "R4.5.2-python3.14.3-ubuntu-24.04"
 
-config:
-  server:
-    rserver.conf:
-      launcher-sessions-init-container-image-name: ghcr.io/posit-dev/workbench-session-init
-      launcher-sessions-init-container-image-tag: "2026.04.0"
+components:
+  # This is included for illustrative purposes. The workbench-session-init image version must match the workbench image version. The Workbench Helm chart will use the correct image by default so this usually does not need to be set unless you are using a custom image or mirror.
+  sessionInit:
+    image:
+      repository: "ghcr.io/posit-dev/workbench-session-init"
+      tag: "2026.04.0"
+  # Specify the version of Positron you wish to use in your environment. If not set, Workbench will use the default Positron version for the Workbench version you are using.
+  positron:
+    version: "2026.05.1-2"
+    image:
+      repository: "ghcr.io/posit-dev/workbench-positron-init"
 ```
 
-The `rserver.conf` entries configure Workbench to use the session init container image.
+Then deploy the chart using Helm:
 
-Install command:
 ```bash
 helm upgrade --install workbench rstudio/rstudio-workbench --values values.yaml
 ```
