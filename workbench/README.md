@@ -269,7 +269,7 @@ docker run -d \
   ghcr.io/posit-dev/workbench:latest
 ```
 
-For custom authentication or session behavior with PAM, you may also need to modify the PAM configuration files in the container. See the [Workbench admin guide](https://docs.posit.co/ide/server-pro/admin/authenticating_users/authenticating_users.html) for more information.
+For custom authentication or session behavior with PAM, you might also need to modify the PAM configuration files in the container. See the [Workbench admin guide](https://docs.posit.co/ide/server-pro/admin/authenticating_users/authenticating_users.html) for more information.
 
 ### Custom configuration
 
@@ -291,7 +291,7 @@ If you replace `rserver.conf` with your own file, keep `server-health-check-enab
 
 ## Health check
 
-The image declares a Docker [`HEALTHCHECK`](https://docs.docker.com/reference/dockerfile/#healthcheck) that polls Workbench's `/health-check` endpoint:
+The image declares a Docker [`HEALTHCHECK`](https://docs.docker.com/reference/dockerfile/#healthcheck) that polls the Workbench `/health-check` endpoint:
 
 ```dockerfile
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
@@ -317,9 +317,9 @@ Workbench runs several services inside the container under [`supervisord`](http:
 
 The image manages these services:
 
-- **Workbench**: the main server process. Startup configuration is mounted at `/startup/base`.
-- **Job Launcher**: enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. Startup configuration is mounted at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
-- **sssd**: used for user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, mount an empty volume over `/startup/user-provisioning/`.
+- **Workbench**: the main server process. The startup configuration mounts at `/startup/base`.
+- **Job Launcher**: enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. The startup configuration mounts at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
+- **sssd**: provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, mount an empty volume over `/startup/user-provisioning/`.
 - **custom**: to run additional services inside the container, mount supervisord configuration files into `/startup/custom/`. `supervisord` starts and manages them alongside the built-in services. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
 
 ## User
@@ -346,7 +346,7 @@ Open `http://localhost:8787` and log in as `posit`.
 
 ## Migrating from legacy image
 
-This image replaces the legacy [`rstudio/rstudio-workbench`](https://hub.docker.com/r/rstudio/rstudio-workbench) image. Workbench itself is unchanged — the application reads `/etc/rstudio/rserver.conf`, listens on `8787`, runs the Job Launcher on `5559`, and runs as the `rstudio-server` user (UID/GID `999`). Existing data and configuration volumes mount unchanged. The differences are in how the image is published and configured.
+This image replaces the legacy [`rstudio/rstudio-workbench`](https://hub.docker.com/r/rstudio/rstudio-workbench) image. Workbench itself is unchanged. The application reads `/etc/rstudio/rserver.conf`, listens on `8787`, runs the Job Launcher on `5559`, and runs as the `rstudio-server` user (UID/GID `999`). Data and configuration volume mount points are unchanged. The differences are in how the image is published and configured.
 
 ### Image references
 
@@ -354,11 +354,11 @@ The legacy image was published as `rstudio/rstudio-workbench` on Docker Hub and 
 
 ### Variants
 
-The legacy image shipped a single variant containing two versions of R and two versions of Python alongside many extraneous system packages. The Standard (`std`) variant is closest to the legacy image, containing one version of R and one version of Python and a reduced set of system packages required for Workbench to run. The new Minimal (`min`) variant has no equivalent in the legacy image. See [Image variants](#image-variants).
+The legacy image shipped a single variant containing two versions of R and two versions of Python alongside many extraneous system packages. The Standard (`std`) variant is closest to the legacy image. It ships with one version of R, one version of Python, and a reduced set of system packages required for Workbench to run. The Minimal (`min`) variant has no equivalent in the legacy image. See [Image variants](#image-variants).
 
 ### Environment variables
 
-License, launcher, and test user environment variables now use the `PWB_` prefix:
+License, launcher, and test user environment variables use the `PWB_` prefix:
 
 | New variable           | Legacy variable        |
 |------------------------|------------------------|
@@ -378,7 +378,7 @@ The image accepts the legacy `RSW_` names as a fallback during the deprecation w
 
 ### Privileged mode
 
-The legacy image documented `docker run --privileged` for some examples. The new image does not require `--privileged` and does not document it.
+The legacy image documented `docker run --privileged` for some examples. This image does not require `--privileged`.
 
 ### What did not change
 
@@ -393,7 +393,7 @@ The legacy image documented `docker run --privileged` for some examples. The new
 
 ### Security
 
-Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements can rebuild these images to meet their security standards.
 
 Posit rebuilds published images weekly for Posit product editions under active support to pull in operating system patches.
 
