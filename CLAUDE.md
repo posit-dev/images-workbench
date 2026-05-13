@@ -70,7 +70,9 @@ The main Posit Workbench server image. Two variants:
 - `PWB_LAUNCHER` — enable Launcher startup, default `true` (falls back to `RSW_LAUNCHER`)
 - `PWB_LAUNCHER_TIMEOUT` — Launcher readiness timeout in seconds, default `10`
 - `PWB_STARTUP_DEBUG` — set to `1` for verbose startup logging
-- `PWB_DIAGNOSTIC_ENABLE` — set to `true` to run diagnostic checks on startup
+- `PWB_DIAGNOSTIC_ENABLE` — set to `true` to run `rstudio-server verify-installation` before server startup
+- `PWB_DIAGNOSTIC_DIR` - directory to store diagnostic output from `rstudio-server verify-installation`, default `/var/log/rstudio`
+- `PWB_EXIT_AFTER_VERIFY` - set to `true` to exit after running `rstudio-server verify-installation` (must be used with `PWB_DIAGNOSTIC_ENABLE=true`)
 
 All license env vars are unset after activation to prevent child process inheritance.
 

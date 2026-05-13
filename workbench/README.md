@@ -142,20 +142,20 @@ Posit publishes Workbench images for `linux/amd64` only. `linux/arm64` builds re
 
 ## Environment variables
 
-| Variable               | Description                                                                 |
-|------------------------|-----------------------------------------------------------------------------|
-| `PWB_LICENSE`          | License key for activation                                                  |
-| `PWB_LICENSE_SERVER`   | URL of floating license server                                              |
-| `PWB_LICENSE_FILE_PATH`| Path to license file (default: `/etc/rstudio-server/license.lic`)           |
-| `PWB_LAUNCHER`         | Enable the Job Launcher (default: `true`)                                   |
-| `PWB_LAUNCHER_TIMEOUT` | Launcher startup timeout in seconds (default: `10`)                         |
-| `PWB_TESTUSER`         | Test user name. If empty, the image creates no test user.                   |
-| `PWB_TESTUSER_PASSWD`  | Test user password                                                          |
-| `PWB_TESTUSER_UID`     | Test user UID (default: `10000` when `PWB_TESTUSER` is set)                 |
-| `PWB_STARTUP_DEBUG`    | Set to `1` for verbose startup logging                                      |
-| `PWB_DIAGNOSTIC_ENABLE`| Enable diagnostic logging (default: `false`)                                |
-| `PWB_DIAGNOSTIC_DIR`   | Directory for diagnostic logs (default: `/var/log/rstudio`)                 |
-| `PWB_EXIT_AFTER_VERIFY`| When `PWB_DIAGNOSTIC_ENABLE=true`, exit after running verification instead of starting the server (default: `false`) |
+| Variable               | Description                                                                                                                                     |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| `PWB_LICENSE`          | License key for activation                                                                                                                      |
+| `PWB_LICENSE_SERVER`   | URL of floating license server                                                                                                                  |
+| `PWB_LICENSE_FILE_PATH`| Path to license file (default: `/etc/rstudio-server/license.lic`)                                                                               |
+| `PWB_LAUNCHER`         | Enable the Job Launcher (default: `true`)                                                                                                       |
+| `PWB_LAUNCHER_TIMEOUT` | Launcher startup timeout in seconds (default: `10`)                                                                                             |
+| `PWB_TESTUSER`         | Test user name. If empty, the image creates no test user.                                                                                       |
+| `PWB_TESTUSER_PASSWD`  | Test user password                                                                                                                              |
+| `PWB_TESTUSER_UID`     | Test user UID (default: `10000` when `PWB_TESTUSER` is set)                                                                                     |
+| `PWB_STARTUP_DEBUG`    | Set to `1` for verbose startup logging                                                                                                          |
+| `PWB_DIAGNOSTIC_ENABLE`| When true, run `rstudio-server verify-installation` before server start and write results to `$PWB_DIAGNOSTIC_DIR/verify.log` (default: `false`) |
+| `PWB_DIAGNOSTIC_DIR`   | Directory for diagnostic logs (default: `/var/log/rstudio`)                                                                                     |
+| `PWB_EXIT_AFTER_VERIFY`| When `PWB_DIAGNOSTIC_ENABLE=true`, exit after running verification instead of starting the server (default: `false`)                            |
 
 If you are migrating from `rstudio/rstudio-workbench`, see [Environment variables](#environment-variables-1) under the migration guide for the legacy `RSW_` names and deprecation timeline.
 
