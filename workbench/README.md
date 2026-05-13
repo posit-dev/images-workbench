@@ -78,7 +78,6 @@ PWB_CONFIG_HOST_PATH="/path/to/rstudio"
 docker run -d \
   --name workbench \
   -p 8787:8787 \
-  -p 5559:5559 \
   -v ${PWB_LICENSE_FILE_HOST_PATH}:/etc/rstudio-server/license.lic \
   -v ${PWB_CONFIG_HOST_PATH}:/etc/rstudio:ro \
   ${PWB_IMAGE}:${PWB_VERSION}
@@ -92,7 +91,6 @@ services:
     image: docker.io/posit/workbench:latest  # or ghcr.io/posit-dev/workbench:latest
     ports:
     - "8787:8787"
-    - "5559:5559"
     environment:
       PWB_TESTUSER: posit
       PWB_TESTUSER_PASSWD: posit
@@ -161,10 +159,10 @@ If you are migrating from `rstudio/rstudio-workbench`, see [Environment variable
 
 ## Exposed ports
 
-| Port | Description                |
-|------|----------------------------|
-| 8787 | HTTP web interface         |
-| 5559 | Job Launcher               |
+| Port | Description                   |
+|------|-------------------------------|
+| 8787 | HTTP web interface            |
+| 5559 | Job Launcher (needed for OHE) |
 
 ## Volumes
 
