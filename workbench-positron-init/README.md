@@ -50,6 +50,11 @@ For Kubernetes deployments, Workbench uses several images together. See the [rep
 The [rstudio-workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) consumes this image from the `components.positron` values. If an image repository and version are provided, the init container image will be used to provide the specified Positron version to session pods.
 
 ```yaml
+session:
+  image:
+    repository: "ghcr.io/posit-dev/workbench-session"
+    tag: "latest"
+
 components:
   positron:
     version: "2026.05.1-2"
