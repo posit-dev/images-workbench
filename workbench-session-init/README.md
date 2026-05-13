@@ -83,6 +83,10 @@ Tag formats where `YYYY.MM.P` is any supported Workbench version:
 
 Posit publishes Workbench images for `linux/amd64` only. `linux/arm64` builds remain in developer preview until Workbench supports ARM in production.
 
+## Environment variables
+
+The init container does not consume any environment variables at runtime.
+
 ## Volumes
 
 The init container stages the Workbench session components at `/opt/session-components` in the image. Mount a shared volume at the same path to expose them to a session container.
