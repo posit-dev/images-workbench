@@ -399,7 +399,7 @@ Posit rebuilds published images weekly for Posit product editions under active s
 
 ### License keys
 
-License keys used in containers risk activation slot loss if containers are not gracefully stopped. The license deactivates on container exit, but ungraceful shutdowns (crashes, `docker kill`) can leave the activation slot consumed on the Posit license server.
+License keys used in containers risk activation slot loss if the container does not shut down gracefully. The license deactivates on container exit, but ungraceful shutdowns (crashes, `docker kill`) can leave the activation slot consumed on the Posit license server.
 
 To ensure proper license deactivation, use a sufficient stop timeout for both `docker run` and `docker stop`:
 
@@ -412,4 +412,15 @@ For production deployments, use license files rather than license keys.
 
 ### Hardware locking
 
-Hardware locks license state files to a specific machine. Changes to MAC addresses, hostnames, or container orchestration platforms, such as Kubernetes, can invalidate the license state, requiring reactivation.
+Workbench hardware-locks license state files to a specific machine. Changes to MAC addresses, hostnames, or container orchestration platforms, such as Kubernetes, can invalidate the license state, requiring reactivation.
+
+To preserve license state across container restarts, mount these directories to persistent storage:
+
+* License key
+  * `/var/lib/.local`
+  * `/var/lib/.prof`
+  * `/var/lib/rstudio-woorkbench`
+* Floating license
+  * `/var/lib/.TurboFloat`
+
+Files in these directories are hardware-locked and not transferable between hosts. Gracefully shut down containers and allow license deactivation before changing host hardware or firmware (for example, upgrading a network card or updating BIOS). Apply the same caution before changing container resources (for example, the network driver or allocated CPU cores).
