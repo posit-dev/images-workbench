@@ -81,14 +81,14 @@ Posit publishes Ubuntu 24.04 session images for both `linux/amd64` and `linux/ar
 
 Each image includes:
 
-| Component                    | Path                                |
-|------------------------------|-------------------------------------|
-| R                            | `/opt/R/{version}/bin/R`            |
-| Python                       | `/opt/python/{version}/bin/python3` |
-| JupyterLab and Jupyter kernel | Installed under the bundled Python  |
-| Quarto                       | `/opt/quarto/bin/quarto`  |
-| TinyTeX                      | `/opt/TinyTeX/bin/`                 |
-| Posit Professional Drivers   | `/opt/rstudio-drivers/`             |
+| Component                  | Path                                |
+|----------------------------|-------------------------------------|
+| R                          | `/opt/R/{version}/bin/R`            |
+| Python                     | `/opt/python/{version}/bin/python3` |
+| JupyterLab                 | Installed under the bundled Python  |
+| Quarto                     | `/opt/quarto/bin/quarto`            |
+| TinyTeX                    | `/opt/TinyTeX/bin/`                 |
+| Posit Professional Drivers | `/opt/rstudio-drivers/`             |
 
 These images do not bundle the Workbench session components themselves. The `workbench-session-init` init container provides those components at runtime through a shared volume.
 
