@@ -146,8 +146,3 @@ The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04 only. 
 Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
 
 Posit rebuilds published images for Posit product editions under active support weekly to pull in operating system patches.
-
-## Documentation
-
-- [Posit Workbench Documentation](https://docs.posit.co/ide/server-pro/)
-- [Kubernetes Integration Guide](https://docs.posit.co/ide/server-pro/integration/kubernetes.html)
