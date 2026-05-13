@@ -198,7 +198,14 @@ Mount the license file to any path in the container and set `PWB_LICENSE_FILE_PA
 docker run -v /path/to/license.lic:/etc/rstudio-server/license.lic -e PWB_LICENSE_FILE_PATH=/etc/rstudio-server/license.lic ...
 ```
 
-If the container is unable to activate the license, ensure the file has correct permissions (`0600`) and is owned by the `rstudio-server` user (UID 999).
+To ensure correct permissions on the license file, set the owner and mode on the host before mounting:
+
+```bash
+sudo chown 999:999 /path/to/license.lic
+sudo chmod 0600 /path/to/license.lic
+```
+
+If the license file does not successfully activate, the container fails to start under most circumstances. See the [Licensing FAQ](https://docs.posit.co/licensing/licensing-faq.html) for usage and troubleshooting information.
 
 #### Option 2: License key
 
@@ -206,7 +213,13 @@ If the container is unable to activate the license, ensure the file has correct 
 docker run -e PWB_LICENSE="your-license-key" ...
 ```
 
-License key activations can leak when a container shuts down ungracefully, consuming an activation slot that cannot be recovered through normal means. See the [License keys](#license-keys) caveat for more detail.
+License key activations can leak when a container shuts down ungracefully, consuming an activation slot that cannot be recovered through normal means. To help preserve license state across container restarts, mount these directories to persistent storage:
+
+- `/var/lib/.local`
+- `/var/lib/.prof`
+- `/var/lib/rstudio-workbench`
+
+The license manager hardware-locks these state files to a single host; they do not transfer between machines. Mounting these paths reduces the chance of a leak but does not eliminate it. To avoid the leak risk entirely, use a license file (Option 1). See the [License keys](#license-keys) caveat for more detail.
 
 #### Option 3: Floating license server
 
@@ -214,15 +227,11 @@ License key activations can leak when a container shuts down ungracefully, consu
 docker run -e PWB_LICENSE_SERVER="http://license-server:8989" ...
 ```
 
-#### Verifying license activation
+Floating license activations can also leak on ungraceful shutdown. To help preserve license state across container restarts, mount this directory to persistent storage:
 
-To confirm activation, run the `license-manager status` command inside a running container:
+- `/var/lib/.TurboFloat`
 
-```bash
-docker exec -it <container> /usr/lib/rstudio-server/bin/license-manager status
-```
-
-The output reports the activation status, license type, and expiration date for license file, local key, and floating license activations.
+State files are hardware-locked and not transferable between hosts. To avoid the leak risk entirely, use a license file (Option 1).
 
 ### User provisioning
 
