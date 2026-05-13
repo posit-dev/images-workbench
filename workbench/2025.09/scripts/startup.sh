@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-if [[ "${STARTUP_DEBUG_MODE:-0}" -eq 1 ]]; then
+if [[ "${PWB_STARTUP_DEBUG:-0}" -eq 1 ]]; then
   set -x
 fi
 
@@ -40,9 +40,9 @@ PWB_TESTUSER_PASSWD=${PWB_TESTUSER_PASSWD:-${RSW_TESTUSER_PASSWD}}
 
 verify_installation(){
    echo "==VERIFY INSTALLATION==";
-   mkdir -p "$DIAGNOSTIC_DIR"
-   chmod 777 "$DIAGNOSTIC_DIR"
-   rstudio-server verify-installation --verify-user="$PWB_TESTUSER" | tee "$DIAGNOSTIC_DIR/verify.log"
+   mkdir -p "$PWB_DIAGNOSTIC_DIR"
+   chmod 777 "$PWB_DIAGNOSTIC_DIR"
+   rstudio-server verify-installation --verify-user="$PWB_TESTUSER" | tee "$PWB_DIAGNOSTIC_DIR/verify.log"
 }
 
 # Backward compatibility for RSW_ and RSP_ prefixes
@@ -94,15 +94,15 @@ if [ "$PWB_LAUNCHER" == "true" ]; then
 fi
 
 # Check diagnostic configurations
-if [ "$DIAGNOSTIC_ENABLE" == "true" ]; then
+if [ "$PWB_DIAGNOSTIC_ENABLE" == "true" ]; then
   verify_installation
-  if [ "$DIAGNOSTIC_ONLY" == "true" ]; then
-    echo "$(<"$DIAGNOSTIC_DIR"/verify.log)";
-    echo "Exiting script because DIAGNOSTIC_ONLY=${DIAGNOSTIC_ONLY}";
+  if [ "$PWB_EXIT_AFTER_VERIFY" == "true" ]; then
+    echo "$(<"$PWB_DIAGNOSTIC_DIR"/verify.log)";
+    echo "Exiting script because PWB_EXIT_AFTER_VERIFY=${PWB_EXIT_AFTER_VERIFY}";
     exit 0
   fi;
 else
-  echo "not running verify installation because DIAGNOSTIC_ENABLE=${DIAGNOSTIC_ENABLE}";
+  echo "not running verify installation because PWB_DIAGNOSTIC_ENABLE=${PWB_DIAGNOSTIC_ENABLE}";
 fi
 
 # the main container process

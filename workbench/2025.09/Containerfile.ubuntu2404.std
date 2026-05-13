@@ -18,7 +18,7 @@ ARG TARGETARCH=${BUILDARCH}
 ARG WORKBENCH_VERSION="2025.09.2+418.pro4"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
-ENV STARTUP_DEBUG_MODE=0
+ENV PWB_STARTUP_DEBUG=0
 ENV PWB_LICENSE=""
 ENV PWB_LICENSE_SERVER=""
 ENV PWB_TESTUSER=""
@@ -26,9 +26,9 @@ ENV PWB_TESTUSER_PASSWD=""
 ENV PWB_TESTUSER_UID=""
 ENV PWB_LAUNCHER=true
 ENV PWB_LAUNCHER_TIMEOUT=10
-ENV DIAGNOSTIC_DIR=/var/log/rstudio
-ENV DIAGNOSTIC_ENABLE=false
-ENV DIAGNOSTIC_ONLY=false
+ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
+ENV PWB_DIAGNOSTIC_ENABLE=false
+ENV PWB_EXIT_AFTER_VERIFY=false
 
 ### Setup environment ###
 RUN apt-get update -yqq --fix-missing && \
@@ -123,4 +123,6 @@ RUN HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-p
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8787/health-check || exit 1
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
