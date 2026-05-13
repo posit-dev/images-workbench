@@ -48,7 +48,7 @@ For Kubernetes deployments, Workbench uses several images together. See the [rep
 
 ## How to use this image
 
-Do not run these images directly. The Workbench Job Launcher schedules them as session pods when users start sessions on Kubernetes. Each pod runs an interactive session — RStudio Pro, VS Code, Positron, or Jupyter — using the R and Python versions baked into the image. The `workbench-session-init` and `workbench-positron-init` init containers supply the session runtime components that the session image itself does not bundle.
+Do not run these images directly. The Workbench Job Launcher schedules them as session pods when users start sessions on Kubernetes. Each pod runs an interactive session — RStudio Pro, VS Code, Positron, or Jupyter — using the R and Python versions baked into the image. You should pick the image(s) with the R and Python versions that best match your needs, extend the image with additional libraries and packages you require, or build your own from scratch. The `workbench-session-init` and `workbench-positron-init` init containers supply the session runtime components that the session image itself does not bundle.
 
 Configure these images as session images for Workbench through any of the following methods:
 
