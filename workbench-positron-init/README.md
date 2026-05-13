@@ -8,7 +8,7 @@
 
 # Posit Workbench Positron Init container image
 
-This container image is an init container for [Posit Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments that copies Positron IDE components into a shared volume for session containers to consume. The image decouples the Positron IDE server from the Workbench session image, which enables Positron version upgrades outside the regular Workbench server release cadence.
+This container image is an init container for [Workbench](https://docs.posit.co/ide/server-pro/) Kubernetes deployments that copies Positron IDE components into a shared volume for session containers to consume. The image decouples the Positron IDE server from the Workbench session image, which enables Positron version upgrades outside the regular Workbench server release cadence.
 
 [![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
@@ -47,7 +47,7 @@ For Kubernetes deployments, Workbench uses several images together. See the [rep
 
 ### As a Kubernetes init container
 
-The [rstudio-workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) consumes this image from the `components.positron` values. If an image repository and version are provided, the init container image will be used to provide the specified Positron version to session pods.
+The [rstudio-workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) consumes this image from the `components.positron` values. If an image repository and version are provided, the chart uses the init container image to provide the specified Positron version to session pods.
 
 ```yaml
 session:
@@ -83,7 +83,7 @@ Tag formats where `YYYY.MM.P-BUILD` is any supported Positron version:
 Posit publishes Ubuntu 24.04 init images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform. Docker selects the matching manifest automatically.
 
 > [!WARNING]
-> While these images are built for both `linux/amd64` and `linux/arm64`, the `workbench` and `workbench-session-init` images are built for `linux/amd64` only. `linux/arm64` builds for those images remain in developer preview until ARM64 platform support is officially added for Workbench.
+> Posit builds these images for both `linux/amd64` and `linux/arm64`, but builds the `workbench` and `workbench-session-init` images for `linux/amd64` only. `linux/arm64` builds for those images remain in developer preview until ARM64 platform support is officially added for Workbench.
 
 ## Components
 
@@ -122,11 +122,11 @@ The container starts as `root` so the entrypoint can write files into the shared
 
 ## Migrating from rstudio/workbench-positron-init
 
-This image replaces the legacy [`rstudio/workbench-positron-init`](https://hub.docker.com/r/rstudio/workbench-positron-init) image. The init container behavior is unchanged — the entrypoint copies Positron components into a shared volume at `/mnt/init` based on the `PWB_POSITRON_TARGET` environment variable. The differences are in how the image is published.
+This image replaces the legacy [`rstudio/workbench-positron-init`](https://hub.docker.com/r/rstudio/workbench-positron-init) image. The init container behavior is unchanged. The entrypoint copies Positron components into a shared volume at `/mnt/init` based on the `PWB_POSITRON_TARGET` environment variable. The differences are in how the image is published.
 
 ### Image references
 
-The legacy image was published as `rstudio/workbench-positron-init` on Docker Hub and `ghcr.io/rstudio/workbench-positron-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Positron version. See [Image tags](#image-tags) and [Architectures](#architectures).
+Posit published the legacy image as `rstudio/workbench-positron-init` on Docker Hub and `ghcr.io/rstudio/workbench-positron-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Positron version. See [Image tags](#image-tags) and [Architectures](#architectures).
 
 ### Base OS options
 
@@ -143,6 +143,6 @@ The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04 only. 
 
 ### Security
 
-Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements can rebuild these images to meet their security standards.
 
-Posit rebuilds published images for Posit product editions under active support weekly to pull in operating system patches.
+Posit rebuilds published images weekly for Posit product editions under active support to pull in operating system patches.
