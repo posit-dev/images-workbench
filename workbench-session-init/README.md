@@ -31,6 +31,7 @@ This container image is an init container for Posit Workbench. It stages the Wor
 | **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues) |
 | **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench) |
 | **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md) |
+| **Product documentation** | [Posit Workbench documentation](https://docs.posit.co/ide/server-pro/), [Job Launcher overview](https://docs.posit.co/ide/server-pro/admin/job_launcher/job_launcher.html), [Kubernetes integration guide](https://docs.posit.co/ide/server-pro/integration/kubernetes.html)                               |
 
 ## Related images
 
