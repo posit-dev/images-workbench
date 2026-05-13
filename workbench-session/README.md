@@ -122,6 +122,10 @@ Posit published the legacy images as `rstudio/workbench-session` and `rstudio/r-
 
 Legacy `workbench-session` tags bundled two R versions and two Python versions per image, for example `ubuntu2204-r4.4.1_4.3.3-py3.12.6_3.11.10`. Replacement tags pin a single R and Python version per image and follow `R{r_version}-python{python_version}-{os}`, for example `R4.5.2-python3.14.3-ubuntu-24.04`. To cover the same set of R and Python combinations, configure Workbench to use multiple session images instead of one.
 
+### Quarto installation path
+
+The legacy images installed Quarto under `/opt/quarto/{version}/bin/quarto`. The new `workbench-session` images install Quarto under `/opt/quarto/bin/quarto` from the Posit Apt repository. `quarto` and its installed tools are still symlinked to the system `PATH`. Update any references to the Quarto path accordingly.
+
 ### Session components
 
 The legacy `r-session-complete` image bundled the Workbench session components directly. The `workbench-session` image does not. Instead, the `workbench-session-init` init container delivers session components into the session pod through a shared volume at runtime.
@@ -132,7 +136,7 @@ The legacy `rstudio/workbench-session` image already followed this init containe
 
 ### What did not change
 
-- R, Python, Jupyter, Quarto, and Posit Professional Drivers installation paths under `/opt`.
+- R, Python, Jupyter, and Posit Professional Drivers installation paths under `/opt`.
 - The role of these images as session execution environments managed by the Workbench Job Launcher.
 - The system dependencies bundled to support popular R packages.
 
