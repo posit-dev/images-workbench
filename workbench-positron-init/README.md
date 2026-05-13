@@ -19,6 +19,9 @@ This container image is an init container for [Posit Workbench](https://docs.pos
 > [!NOTE]
 > These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The <a href="https://github.com/rstudio/rstudio-docker-products">rstudio-docker-products</a> images remain supported.
 
+> [!TIP]
+> Deploying on Kubernetes? Try the <a href="https://docs.posit.co/helm/charts/rstudio-workbench/README.html">Posit Workbench Helm chart</a>!
+
 ## Quick reference
 
 | |                                                                                                                                                                                                                                                                                                           |
