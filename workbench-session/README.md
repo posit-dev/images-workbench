@@ -8,7 +8,7 @@
 
 # Posit Workbench Session container image
 
-These container images provide the session runtime environments for [Posit Workbench](https://docs.posit.co/ide/server-pro/) in Kubernetes. Each image bundles a specific R and Python version pair, along with Jupyter, Quarto, and Posit Professional Drivers, so that user sessions run in an environment matching the user's language requirements.
+These container images provide the session runtime environments for [Workbench](https://docs.posit.co/ide/server-pro/) in Kubernetes. Each image bundles a specific R and Python version pair, along with Jupyter, Quarto, and Posit Professional Drivers, so that user sessions run in an environment matching the user's language requirements.
 
 [![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/session.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
@@ -48,7 +48,7 @@ For Kubernetes deployments, Workbench uses several images together. See the [rep
 
 ## How to use this image
 
-Do not run these images directly. The Workbench Job Launcher schedules them as session pods when users start sessions on Kubernetes. Each pod runs an interactive session — RStudio Pro, VS Code, Positron, or Jupyter — using the R and Python versions baked into the image. You should pick the image(s) with the R and Python versions that best match your needs, extend the image with additional libraries and packages you require, or build your own from scratch. The `workbench-session-init` and `workbench-positron-init` init containers supply the session runtime components that the session image itself does not bundle.
+Do not run these images directly. The Workbench Job Launcher schedules them as session pods when users start sessions on Kubernetes. Each pod runs an interactive session (RStudio Pro, VS Code, Positron, or Jupyter) using the R and Python versions baked into the image. You should pick the image(s) with the R and Python versions that best match your needs, extend the image with additional libraries and packages you require, or build your own from scratch. The `workbench-session-init` and `workbench-positron-init` init containers supply the session runtime components that the session image itself does not bundle.
 
 Configure these images as session images for Workbench through any of the following methods:
 
@@ -72,7 +72,7 @@ Examples:
 
 ## Architectures
 
-Posit publishes Ubuntu 24.04 session images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform. Docker selects the matching manifest automatically. Ubuntu 22.04 session images are published for `linux/amd64` only.
+Posit publishes Ubuntu 24.04 session images for both `linux/amd64` and `linux/arm64`. Pull the same tag from either platform. Docker selects the matching manifest automatically. Posit publishes Ubuntu 22.04 session images for `linux/amd64` only.
 
 > [!WARNING]
 > While these images are built for both `linux/amd64` and `linux/arm64`, the `workbench` and `workbench-session-init` images are built for `linux/amd64` only. `linux/arm64` builds for those images remain in developer preview until ARM64 platform support is officially added for Workbench.
@@ -112,7 +112,7 @@ See [extending examples](https://github.com/posit-dev/images-examples/tree/main/
 
 ## Migrating from legacy image
 
-These images replace the legacy [`rstudio/workbench-session`](https://hub.docker.com/r/rstudio/workbench-session) and [`rstudio/r-session-complete`](https://hub.docker.com/r/rstudio/r-session-complete) images. The runtime tools are unchanged. R, Python, Jupyter, Quarto, and Posit Professional Drivers install at the same paths under `/opt`, and Workbench schedules sessions into these images the same way. The differences are in how Posit publishes and tags the images, and how session components are packaged.
+These images replace the legacy [`rstudio/workbench-session`](https://hub.docker.com/r/rstudio/workbench-session) and [`rstudio/r-session-complete`](https://hub.docker.com/r/rstudio/r-session-complete) images. The runtime tools are unchanged. R, Python, Jupyter, Quarto, and Posit Professional Drivers install at the same paths under `/opt`, and Workbench schedules sessions into these images the same way. The differences are in how Posit publishes, tags, and packages the images and their session components.
 
 ### Image references
 
@@ -136,18 +136,18 @@ The legacy `rstudio/workbench-session` image already followed this init containe
 
 ### What did not change
 
-- R, Python, Jupyter, and Posit Professional Drivers installation paths under `/opt`.
-- The role of these images as session execution environments managed by the Workbench Job Launcher.
-- The system dependencies bundled to support popular R packages.
+- R, Python, Jupyter, and Posit Professional Drivers installation paths under `/opt`
+- The role of these images as session execution environments managed by the Workbench Job Launcher
+- The system dependencies bundled to support popular R packages
 
 ## Caveats
 
 ### Security
 
-Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements can rebuild these images to meet their security standards.
 
 Posit rebuilds published images weekly for Posit product editions under active support to pull in operating system patches.
 
 ### Image dependency licenses
 
-These images contain third-party software (R, Python, Jupyter, Quarto, TinyTeX, Posit Professional Drivers, system libraries, and their transitive dependencies) under various licenses. Image users are responsible for ensuring that use of these images and any of their dependent layers complies with all relevant licenses for the contained software.
+These images contain third-party software (R, Python, Jupyter, Quarto, TinyTeX, Posit Professional Drivers, system libraries, and their transitive dependencies) under various licenses. You are responsible for confirming that these images and their dependencies comply with all applicable licenses.
