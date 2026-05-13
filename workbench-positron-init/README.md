@@ -89,11 +89,11 @@ Posit publishes Ubuntu 24.04 init images for both `linux/amd64` and `linux/arm64
 
 The init container provides the following components in `/opt/positron`:
 
-| Component | Path | Description |
-|-----------|------|-------------|
-| Positron IDE | `bin/positron-server/bundled/` | Positron server (VS Code REH web) |
-| Positron docs | `docs/positron/bundled/` | Positron Workbench documentation |
-| Session init binary | `/usr/local/bin/positron-session-init` | Go entrypoint that copies components at runtime |
+| Component | Path                                         | Description |
+|-----------|----------------------------------------------|-------------|
+| Positron IDE | `/opt/positron/bin/positron-server/bundled/` | Positron server (VS Code REH web) |
+| Positron docs | `/opt/positron/docs/positron/bundled/`       | Positron Workbench documentation |
+| Session init binary | `/usr/local/bin/positron-session-init`       | Go entrypoint that copies components at runtime |
 
 ## Environment variables
 
