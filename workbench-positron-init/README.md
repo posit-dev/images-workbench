@@ -130,7 +130,7 @@ The legacy image was published as `rstudio/workbench-positron-init` on Docker Hu
 
 ### Base OS options
 
-The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04. See [Image tags](#image-tags).
+The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04 only. See [Image tags](#image-tags).
 
 ### What did not change
 
