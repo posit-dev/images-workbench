@@ -49,6 +49,9 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 
 The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) by default configures Workbench to use a `workbench-session-init` image to bootstrap a `workbench-session` image. The images used can be configured as shown below.
 
+> [!NOTE]
+> The `workbench-session-init` version should always match the `workbench` server version. See [Version compatibility](#version-compatibility).
+
 ```yaml
 session:
   image:
