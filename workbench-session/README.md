@@ -124,7 +124,9 @@ Legacy `workbench-session` tags bundled two R versions and two Python versions p
 
 ### Session components
 
-The legacy `r-session-complete` image bundled the Workbench session components directly. The replacement `workbench-session` image does not. Instead, the `workbench-session-init` init container delivers session components into the session pod through a shared volume at runtime. When migrating from `r-session-complete`, configure the `workbench-session-init` init container alongside the session image. See the [`workbench-session-init` README](../workbench-session-init/README.md) for details.
+The legacy `r-session-complete` image bundled the Workbench session components directly. The `workbench-session` image does not. Instead, the `workbench-session-init` init container delivers session components into the session pod through a shared volume at runtime.
+
+`r-session-complete` will not be supported by this repository. If you are still using `r-session-complete`, migrate to the new `workbench-session` images and enable the `workbench-session-init` init container. See the [`workbench-session-init` README](https://github.com/posit-dev/images-workbench/blob/main/workbench-session-init/README.md) for additional details.
 
 The legacy `rstudio/workbench-session` image already followed this init container pattern, so this migration step does not apply when moving from `rstudio/workbench-session`.
 
