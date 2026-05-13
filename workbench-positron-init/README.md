@@ -120,7 +120,7 @@ The session container mounts the same volume to consume the components at the pa
 
 The container starts as `root` so the entrypoint can write files into the shared volume with the permissions Workbench expects. The init container exits after the copy completes.
 
-## Migrating from rstudio/workbench-positron-init
+## Migrating from legacy image
 
 This image replaces the legacy [`rstudio/workbench-positron-init`](https://hub.docker.com/r/rstudio/workbench-positron-init) image. The init container behavior is unchanged. The entrypoint copies Positron components into a shared volume at `/mnt/init` based on the `PWB_POSITRON_TARGET` environment variable. The differences are in how the image is published.
 
