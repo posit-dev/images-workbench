@@ -8,7 +8,7 @@
 
 # Posit Workbench Session Init container image
 
-This container image is an init container for Posit Workbench. It stages the Workbench session runtime components under `/opt/session-components` for use by another container. Use this image to share components with a session container through a Kubernetes volume, or to copy them into a custom session image at build time.
+This container image is an init container for Workbench. It stages the Workbench session runtime components under `/opt/session-components` for use by another container. Use this image to share components with a session container through a Kubernetes volume, or to copy them into a custom session image at build time.
 
 [![GitHub Repository](https://img.shields.io/badge/github-repo?logo=github&color=grey)](https://github.com/posit-dev/images-workbench)
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/posit-dev/images-workbench/production.yml?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
@@ -45,9 +45,9 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 
 ## How to use this image
 
-### With the Posit Workbench Helm chart
+### With the Workbench Helm chart
 
-The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) by default configures Workbench to use a `workbench-session-init` image to bootstrap a `workbench-session` image. The images used can be configured as shown below.
+The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) by default configures Workbench to use a `workbench-session-init` image to bootstrap a `workbench-session` image. Configure the images as shown below.
 
 > [!NOTE]
 > The `workbench-session-init` version should always match the `workbench` server version. See [Version compatibility](#version-compatibility).
@@ -99,7 +99,7 @@ The session container mounts the same volume at `/opt/session-components` to con
 
 ## User
 
-The container starts as `root` so the session components are readable from the shared volume by the session container.
+The container starts as `root` so the session container can read the session components from the shared volume.
 
 ## Examples
 
@@ -116,13 +116,13 @@ COPY --from=session-init /opt/session-components /opt/session-components
 
 The resulting image bundles the session components directly, so it can run Workbench sessions without an init container at runtime.
 
-## Migrating from rstudio/workbench-session-init
+## Migrating from legacy image
 
-This image replaces the legacy [`rstudio/workbench-session-init`](https://hub.docker.com/r/rstudio/workbench-session-init) image. The runtime contents are unchanged — the image still ships the Workbench session components at `/opt/session-components` for a session container to consume. The differences are in how the image is published.
+This image replaces the legacy [`rstudio/workbench-session-init`](https://hub.docker.com/r/rstudio/workbench-session-init) image. The runtime contents are unchanged. The image still ships the Workbench session components at `/opt/session-components` for a session container to consume. The differences are in how the image is published.
 
 ### Image references
 
-The legacy image was published as `rstudio/workbench-session-init` on Docker Hub and `ghcr.io/rstudio/workbench-session-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Workbench version. See [Image tags](#image-tags) and [Architectures](#architectures).
+Posit published the legacy image as `rstudio/workbench-session-init` on Docker Hub and `ghcr.io/rstudio/workbench-session-init` on GHCR, tagged by OS (`jammy`, `ubuntu2204`, `jammy-<version>`, `ubuntu2204-<version>`) for `linux/amd64` only. Update your image reference to one of the new locations and pick a tag that pins to your desired Workbench version. See [Image tags](#image-tags) and [Architectures](#architectures).
 
 ### Base OS options
 
@@ -137,9 +137,9 @@ The legacy image shipped Ubuntu 22.04 only. This image ships Ubuntu 24.04 only. 
 
 ### Security
 
-Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements should rebuild these images to meet their security standards.
+Review these images before using them in production. Organizations with specific Common Vulnerabilities and Exposures (CVE) or vulnerability requirements can rebuild these images to meet their security standards.
 
-Posit rebuilds published images for Posit product editions under active support weekly to pull in operating system patches.
+Posit rebuilds these images weekly for Posit product editions under active support, pulling in operating system patches.
 
 ### Version compatibility
 
