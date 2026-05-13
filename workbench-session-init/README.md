@@ -27,7 +27,7 @@ This container image is an init container for Posit Workbench. It stages the Wor
 | | |
 |---|---|
 | **Maintained by** | [the Posit Docker team](https://github.com/posit-dev/images) |
-| **Where to get help** | [GitHub Issues](https://github.com/posit-dev/images-workbench/issues), [Images Discussion Board](https://github.com/posit-dev/images/discussions), [the Posit Workbench Community Forum](https://forum.posit.co/c/posit-professional-hosted/posit-workbench/69), [Posit Workbench Documentation](https://docs.posit.co/ide/server-pro/), [Posit Support](https://support.posit.co/hc/en-us) |
+| **Where to get help** | [GitHub Issues](https://github.com/posit-dev/images-workbench/issues), [Images Discussion Board](https://github.com/posit-dev/images/discussions), [the Posit Community Forum](https://forum.posit.co/c/posit-professional-hosted), [Posit Workbench Documentation](https://docs.posit.co/ide/server-pro/), [Posit Support](https://support.posit.co/hc/en-us) |
 | **Where to file issues** | [https://github.com/posit-dev/images-workbench/issues](https://github.com/posit-dev/images-workbench/issues) |
 | **Source** | [https://github.com/posit-dev/images-workbench](https://github.com/posit-dev/images-workbench) |
 | **License** | [MIT](https://github.com/posit-dev/images-workbench/blob/main/LICENSE.md) |
