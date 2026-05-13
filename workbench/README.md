@@ -110,10 +110,10 @@ volumes:
 
 Two variants are available:
 
-| Variant          | Description                                                                                                                                                                                       |
-|------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Standard (`std`) | Opinionated image, runs out of the box. Bundles Workbench with one R version, one Python version, Quarto, Posit Professional Drivers, and the Job Launcher.                                       |
-| Minimal (`min`)  | Small image you can extend with the dependencies you need. Does not include R, Python, or Quarto, and does not run as-is. Use this variant as a starting point for custom images.                 |
+| Variant          | Description                                                                                                                                                                                                                       |
+|------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Standard (`std`) | Opinionated image, runs out of the box. Bundles Workbench with one R version, one Python version, Quarto, Posit Professional Drivers, and the Job Launcher.                                                                       |
+| Minimal (`min`)  | Small image you can extend with the dependencies you need. Does not include R, Python, or Quarto, and cannot run RStudio, JupyterLab, and other dependent features as-is. Use this variant as a starting point for custom images. |
 
 Each tagged image bundles a fixed set of dependencies. Both variants ship the `YYYY.MM` release of Workbench at the latest patch release available when the image was built. The `std` variant additionally ships one R version and one Python version, locked to the latest available at build time. The Containerfiles in this repository under `workbench/<version>/` document the exact versions in any tag. No arguments are overridden at build time.
 
