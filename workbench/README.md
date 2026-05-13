@@ -324,7 +324,7 @@ The image manages these services:
 
 ## User
 
-Runs as the `rstudio-server` user with user ID (UID) and group ID (GID) 999.
+The container starts as `root` and Workbench drops privileges to the `rstudio-server` user (UID and GID `999`) for the server process.
 
 ## Examples
 
