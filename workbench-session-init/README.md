@@ -81,7 +81,7 @@ Tag formats where `YYYY.MM.P` is any supported Workbench version:
 
 ## Architectures
 
-Posit publishes Workbench images for `linux/amd64` only. `linux/arm64` builds remain in developer preview until Workbench supports ARM in production.
+Posit publishes `workbench-session-init` images for `linux/amd64` only. `linux/arm64` builds remain in developer preview until Workbench supports ARM in production.
 
 ## Environment variables
 
