@@ -48,56 +48,7 @@ See the [Workbench installation guide](https://docs.posit.co/ide/server-pro/gett
 
 ## Deploying on Kubernetes
 
-Use the [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) to deploy on Kubernetes.
-
-```bash
-helm repo add rstudio https://helm.rstudio.com
-helm repo update
-```
-
-Create a Kubernetes secret from your license file:
-
-```bash
-kubectl create secret generic posit-workbench-license \
-  --from-file=license.lic=/path/to/license.lic
-```
-
-Then configure the chart in your `values.yaml`:
-
-```yaml
-image:
-  repository: ghcr.io/posit-dev/workbench
-  tag: "2026.04.0"
-
-license:
-  file:
-    secret: posit-workbench-license
-
-session:
-  image:
-    repository: ghcr.io/posit-dev/workbench-session
-    tag: "R4.5.2-python3.14.3-ubuntu-24.04"
-
-components:
-  # This is included for illustrative purposes. The workbench-session-init image version must match the workbench image version. The Workbench Helm chart will use the correct image by default so this usually does not need to be set unless you are using a custom image or mirror.
-  sessionInit:
-    image:
-      repository: "ghcr.io/posit-dev/workbench-session-init"
-      tag: "2026.04.0"
-  # Specify the version of Positron you wish to use in your environment. If not set, Workbench will use the default Positron version for the Workbench version you are using.
-  positron:
-    version: "2026.05.1-2"
-    image:
-      repository: "ghcr.io/posit-dev/workbench-positron-init"
-```
-
-Then deploy the chart using Helm:
-
-```bash
-helm upgrade --install workbench rstudio/rstudio-workbench --values values.yaml
-```
-
-See the [full chart documentation](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) for all available values.
+Use the [Posit Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/README.html) to deploy on Kubernetes. These images are the default in chart versions `>= 0.20.0`; see the [image migration guide](https://docs.posit.co/helm/docs/migrating-to-posit-images.html) if you are upgrading from an earlier chart version.
 
 ## Build
 
