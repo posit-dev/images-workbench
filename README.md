@@ -15,9 +15,6 @@ Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 [![Session Image CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
 [![Latest Version](https://img.shields.io/docker/v/posit/workbench?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench/tags)
 
-> [!NOTE]
-> These images are in preview as Posit migrates container images from [rstudio/rstudio-docker-products](https://github.com/rstudio/rstudio-docker-products). The previous images remain supported.
-
 ## Prerequisites
 
 | Tool | Required for | Install                                                                                                                         |
