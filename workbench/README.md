@@ -16,9 +16,6 @@ This container image provides [Workbench](https://docs.posit.co/ide/server-pro/)
 ![Docker Hub Pulls](https://img.shields.io/docker/pulls/posit/workbench)
 ![Docker Image Size](https://img.shields.io/docker/image-size/posit/workbench/latest)
 
-> [!NOTE]
-> These images are in preview as Posit migrates container images from <a href="https://github.com/rstudio/rstudio-docker-products">rstudio/rstudio-docker-products</a>. The previous images remain supported.
-
 > [!TIP]
 > Deploying on Kubernetes? Try the <a href="https://docs.posit.co/helm/charts/rstudio-workbench/README.html">Posit Workbench Helm chart</a>!
 
