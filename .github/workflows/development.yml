@@ -12,8 +12,11 @@ on:
         type: string
 
   schedule:
-    # Hourly rebuild of dev images
-    - cron: "45 4 * * *" # At 04:45 every day
+    # Daily rebuild of dev images. Staggered with images-package-manager
+    # (07:45) and images-connect (08:45) so the three products don't
+    # all build in the same hour. Weeklies run at 01–03 UTC, dailies at
+    # 07–09 UTC, with 04–06 UTC reserved as growth headroom.
+    - cron: "45 9 * * *" # At 09:45 every day
 
   push:
     branches:
