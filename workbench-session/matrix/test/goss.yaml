@@ -30,6 +30,9 @@ file:
   /usr/local/bin/pdflatex:
     exists: true
     filetype: symlink
+  /opt:
+    exists: true
+    filetype: directory
 
 command:
   "Verify Jupyter Notebook works":
@@ -73,3 +76,9 @@ command:
     exit-status: 0
     stdout:
       - "/^quarto$/"
+  "Verify /opt files are world-readable":
+    exec: 'find /opt -type f -not -perm -004 -print 2>&1 | head -c1 | (! grep -q .)'
+    exit-status: 0
+  "Verify /opt directories are world-traversable":
+    exec: 'find /opt -type d -not -perm -005 -print 2>&1 | head -c1 | (! grep -q .)'
+    exit-status: 0
