@@ -51,7 +51,7 @@ RUN {{ quarto.install(quarto.build_arg()) | indent(4) }}
 # ADD busts the cache on new TinyTeX releases.
 # HOME="/opt" workaround: https://github.com/quarto-dev/quarto-cli/issues/11800
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN {{ apt.install(packages="xz-utils") | indent(4) }} && \
+RUN {{ quarto.github_token_secret_mount() }} \
     {{ quarto.install_tinytex_command(quarto.get_directory() ~ "/bin/quarto", update_path=True, home_path="/opt") | indent(4) }} && \
     rm -f /tmp/tinytex-release.json
 
