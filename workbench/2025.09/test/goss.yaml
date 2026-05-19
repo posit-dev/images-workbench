@@ -222,11 +222,7 @@ command:
     exec: "HOME='/opt' quarto list tools"
     exit-status: 0
     stderr:
-      # "External Installation" is reported because TinyTeX is installed under
-      # HOME="/opt" so Quarto does not consider it one of its managed installs.
-      # TODO: Switch back to "Up to date" once Quarto supports a custom TinyTeX
-      # install location, see https://github.com/quarto-dev/quarto-cli/issues/11800.
-      - "/tinytex\\s+External Installation/"
+      - "/tinytex\\s+Up to date/"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify TinyTeX is readable and executable by a non-root user":
     # Runs tlmgr and pdflatex as `nobody` to confirm the /opt/.TinyTeX install

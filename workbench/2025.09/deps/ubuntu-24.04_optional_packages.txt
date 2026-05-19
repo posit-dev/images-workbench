@@ -41,4 +41,5 @@ tk
 tk-dev
 tk-table
 unixodbc-dev
+xz-utils
 zlib1g-dev
