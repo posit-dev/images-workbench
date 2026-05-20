@@ -6,8 +6,10 @@ setup:
 
 install-bakery *OPTS:
   #!/bin/bash
-  # TODO: Update this after package is published somewhere
-  uv tool install {{OPTS}} 'git+ssh://git@github.com/posit-dev/images-shared.git@main#egg=posit-bakery&subdirectory=posit-bakery'
+  # Install the latest released posit-bakery from PyPI.
+  # For an unreleased development version, install from GitHub:
+  #   uv tool install 'git+ssh://git@github.com/posit-dev/images-shared.git@main#egg=posit-bakery&subdirectory=posit-bakery'
+  uv tool install {{OPTS}} posit-bakery
 
 install-goss:
   #!/bin/bash
