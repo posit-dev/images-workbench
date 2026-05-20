@@ -165,11 +165,11 @@ images:
       dependencyConstraints:
         - dependency: R
           constraint:
-            min: "4.3"
+            min: "4.2"
             latest: true
         - dependency: python
           constraint:
-            min: "3.11"
+            min: "3.10"
             latest: true
         - dependency: quarto
           constraint:
