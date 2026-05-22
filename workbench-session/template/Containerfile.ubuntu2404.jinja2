@@ -26,8 +26,14 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 ### Install Apt Packages ###
 {{ apt.run_setup() }}
 
+{% if Image.Variant != "Minimal" -%}
+COPY {{ Path.Version }}/deps/ubuntu-24.04_packages.txt /tmp/ubuntu-24.04_packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-24.04_optional_packages.txt /tmp/ubuntu-24.04_optional_packages.txt
+{{ apt.run_install(files = ['/tmp/ubuntu-24.04_packages.txt', '/tmp/ubuntu-24.04_optional_packages.txt']) }}
+{% else -%}
 COPY {{ Path.Version }}/deps/ubuntu-24.04_packages.txt /tmp/ubuntu-24.04_packages.txt
 {{ apt.run_install(files = '/tmp/ubuntu-24.04_packages.txt') }}
+{%- endif %}
 
 ### Install Pro Drivers ###
 {{ apt.run_install(packages="rstudio-drivers") }}

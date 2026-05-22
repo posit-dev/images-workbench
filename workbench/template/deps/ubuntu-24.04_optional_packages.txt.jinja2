@@ -1,46 +1,116 @@
+{#-
+Standard-variant optional apt packages for the workbench image. Groups
+mirror the sysreq categories that pak/PPM resolve for the most-downloaded
+CRAN packages plus the common Python source-build paths. Selection
+sources, curation rationale, and intentional exclusions live in the
+commit message and PR description; the per-group annotations below
+cannot move into the rendered .txt until posit-dev/images-shared#550
+lands.
+-#}
+{# Build toolchain - source installs of compiled R/Python pkgs (Matrix, RcppArmadillo, scipy) -#}
+autoconf
+automake
 cmake
-default-jdk
-gdal-bin
-gdb
-git
-gsfonts
-imagemagick
-libapparmor1
-libcairo2-dev
+gfortran
+make
+patch
+pkg-config
+{# Compression CLI tools - source archive extraction, Quarto bundles, conda envs -#}
+bzip2
+unzip
+xz-utils
+zip
+{# Compression headers - data.table, httpuv, Pillow, scipy, lxml from source -#}
+libbz2-dev
+liblzma-dev
+zlib1g-dev
+{# TLS / HTTP / crypto - curl, httr, httr2, openssl, urllib3, cryptography, sodium, plumber -#}
 libcurl4-openssl-dev
-libedit2
-libfontconfig1-dev
-libfreetype-dev
-libfribidi-dev
+libsodium-dev
+libssh2-1-dev
+{# FFI / readline / regex - Python cffi/cryptography, source rebuilds of R + Python -#}
+libffi-dev
+libpcre2-dev
+libreadline-dev
+{# XML / Unicode / text - xml2, XML, stringi, lxml, arrow -#}
+libicu-dev
+libxml2-dev
+libxslt1-dev
+{# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc -#}
+default-libmysqlclient-dev
+libmariadb-dev
+libmariadb-dev-compat
+libsqlite3-dev
+unixodbc-dev
+{# Version control / network - gert, git2r, renv from GitHub, pip git+ installs, SSH transports -#}
+git
+libgit2-dev
+openssh-client
+wget
+{# Geospatial - sf, terra, stars, geopandas, rasterio, pyproj -#}
+gdal-bin
 libgdal-dev
 libgeos-dev
-libgl1-mesa-dev
-libglpk-dev
-libglu1-mesa-dev
+libproj-dev
+libudunits2-dev
+{# Graphics / fonts / imaging - ragg, systemfonts, textshaping, magick, Cairo, Pillow, matplotlib -#}
+fonts-dejavu-core
+fonts-liberation
+ghostscript
+gsfonts
+imagemagick
+libcairo2-dev
+libfontconfig1-dev
+libfreetype6-dev
+libfribidi-dev
 libharfbuzz-dev
-libicu-dev
 libjpeg-dev
 libmagick++-dev
-libmysqlclient-dev
-libnode-dev
+libpango1.0-dev
 libpng-dev
-libproj-dev
-libsodium-dev
-libsqlite3-dev
-libssh2-1-dev
 libtiff-dev
-libudunits2-dev
+libwebp-dev
+{# Math libraries - igraph (GLPK), gmp, Rmpfr, gsl, RcppGSL, Bioconductor numerics -#}
+libglpk-dev
+libgmp3-dev
+libgsl-dev
+libmpfr-dev
+{# V8 / protobuf / arrow / httpuv source build -#}
+libabsl-dev
+libnode-dev
+libprotobuf-dev
+libprotoc-dev
 libuv1-dev
-libxml2-dev
-make
-oddjob-mkhomedir
-python3
-strace
-sssd
+protobuf-compiler
+{# PDF processing - pdftools, pdfminer.six, pdf2image, magick PDF rasterization -#}
+libpoppler-cpp-dev
+poppler-data
+poppler-utils
+{# X11 / OpenGL - rgl, plotly 3D, configure-script probes that test for X libs -#}
+libgl1-mesa-dev
+libglu1-mesa-dev
+libx11-dev
+{# Tcl/Tk - tcltk R pkg, Python tkinter -#}
 tcl
 tk
 tk-dev
 tk-table
-unixodbc-dev
-xz-utils
-zlib1g-dev
+{# Java - rJava, RJDBC, xlsx, JPype1; run R CMD javareconf after install -#}
+default-jdk
+{# Authentication / directory - mongolite, pymongo GSSAPI, python-ldap, requests-kerberos -#}
+libkrb5-dev
+libldap2-dev
+libsasl2-dev
+{# System Python - reticulate venv probes, fallback for source-built extensions on arm64 -#}
+python3
+python3-dev
+python3-venv
+{# Workbench-server identity / PAM / SSSD / AppArmor profiles -#}
+libapparmor1
+libedit2
+oddjob-mkhomedir
+sssd
+{# Debug / scripting - rstudio-server diagnostic flow, R configure perl scripts -#}
+gdb
+perl
+strace
