@@ -50,6 +50,13 @@ COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 ### Install wait-for-it ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
+### Pre-create rstudio-server user so deb postinst finds it and UID/GID stays 999 across image rebuilds ###
+RUN groupadd --system --gid 999 rstudio-server \
+    && useradd --system --uid 999 --gid 999 \
+        --no-create-home --home-dir /var/lib/rstudio-server \
+        --shell /usr/sbin/nologin \
+        rstudio-server
+
 ### Install Workbench {{ Image.Version }} ###
 COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
@@ -94,7 +101,19 @@ COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
-    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+               /var/lib/rstudio-server/conf \
+               /var/lib/rstudio-server/body \
+               /var/lib/rstudio-server/proxy \
+               /var/lib/rstudio-launcher \
+               /var/log/rstudio \
+               /var/run/rstudio-server \
+    && chown -R rstudio-server:rstudio-server \
+        /var/lib/rstudio-server \
+        /var/lib/rstudio-launcher \
+        /var/log/rstudio \
+        /var/run/rstudio-server \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/rstudio-server \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/rstudio-server -type d -exec chmod g+s {} + \
     && mkdir -p /startup/custom/ \
     && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \

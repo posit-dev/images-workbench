@@ -8,14 +8,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
+    gid: 999
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: {% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}
+    gid: 999
 
 package:
   rstudio-server:
@@ -82,11 +82,43 @@ file:
   # Check for rstudio-launcher executable
   /usr/lib/rstudio-server/bin/rstudio-launcher:
     exists: true
-  # Check for rstudio-server monitor log directory
+  # Check for rstudio-server runtime directories with correct ownership and setgid
+  /var/lib/rstudio-server:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    mode: "2775"
   /var/lib/rstudio-server/monitor/log:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+  /var/lib/rstudio-server/conf:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+  /var/lib/rstudio-server/body:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+  /var/lib/rstudio-server/proxy:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+  /var/lib/rstudio-launcher:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    mode: "2775"
+  /var/log/rstudio:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    mode: "2775"
+  /var/run/rstudio-server:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    mode: "2775"
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
   {% raw -%}
