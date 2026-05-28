@@ -5,6 +5,7 @@ krb5-user
 libpq-dev
 libuser
 libuser1-dev
+libuv1-dev
 rrdtool
 subversion
 xz-utils
