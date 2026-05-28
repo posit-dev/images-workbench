@@ -116,9 +116,6 @@ file:
     mode: "2775"
   /var/run/rstudio-server:
     exists: true
-    owner: rstudio-server
-    group: rstudio-server
-    mode: "2775"
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
   {% raw -%}
