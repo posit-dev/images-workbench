@@ -34,6 +34,13 @@ ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
 
+### Pre-create rstudio-server user so deb postinst finds it and UID/GID stays 999 across image rebuilds ###
+RUN groupadd --system --gid 999 rstudio-server \
+    && useradd --system --uid 999 --gid 999 \
+        --no-create-home --home-dir /var/lib/rstudio-server \
+        --shell /usr/sbin/nologin \
+        rstudio-server
+
 ### Setup environment ###
 {{ apt.run_setup() }}
 
@@ -49,13 +56,6 @@ COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 
 ### Install wait-for-it ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
-
-### Pre-create rstudio-server user so deb postinst finds it and UID/GID stays 999 across image rebuilds ###
-RUN groupadd --system --gid 999 rstudio-server \
-    && useradd --system --uid 999 --gid 999 \
-        --no-create-home --home-dir /var/lib/rstudio-server \
-        --shell /usr/sbin/nologin \
-        rstudio-server
 
 ### Install Workbench {{ Image.Version }} ###
 COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
