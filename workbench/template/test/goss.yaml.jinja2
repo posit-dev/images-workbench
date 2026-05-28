@@ -8,14 +8,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: 999
+    gid: {% if Image.IsDevelopmentVersion %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: 999
+    gid: {% if Image.IsDevelopmentVersion %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
 
 package:
   rstudio-server:
@@ -82,6 +82,7 @@ file:
   # Check for rstudio-launcher executable
   /usr/lib/rstudio-server/bin/rstudio-launcher:
     exists: true
+  {%- if Image.IsDevelopmentVersion %}
   # Check for rstudio-server runtime directories with correct ownership and setgid
   /var/lib/rstudio-server:
     exists: true
@@ -116,6 +117,13 @@ file:
     mode: "2775"
   /var/run/rstudio-server:
     exists: true
+  {%- else %}
+  # Check for rstudio-server monitor log directory
+  /var/lib/rstudio-server/monitor/log:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+  {%- endif %}
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
   {% raw -%}
@@ -215,7 +223,7 @@ file:
 
 command:
   "Ensure rstudio-server has permissions to log directory":
-    exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
+    exec: {% if Image.IsDevelopmentVersion %}sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log{% else %}su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'{% endif %}
     exit-status: 0
   "Ensure server log can be created":
     exec: touch /var/log/rstudio-server.log
