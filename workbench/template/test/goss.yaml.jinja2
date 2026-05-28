@@ -215,7 +215,7 @@ file:
 
 command:
   "Ensure rstudio-server has permissions to log directory":
-    exec: su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'
+    exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
     exit-status: 0
   "Ensure server log can be created":
     exec: touch /var/log/rstudio-server.log
