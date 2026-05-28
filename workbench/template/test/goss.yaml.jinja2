@@ -105,11 +105,12 @@ file:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+  # rstudio-launcher resets its scratch directory to 0755 on startup, so we
+  # only assert ownership here; the build-time setgid mode does not survive.
   /var/lib/rstudio-launcher:
     exists: true
     owner: rstudio-server
     group: rstudio-server
-    mode: "2775"
   /var/log/rstudio:
     exists: true
     owner: rstudio-server
