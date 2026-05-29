@@ -110,10 +110,15 @@ file:
     contents:
       - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
       - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
-  # Check for symlinked Quarto executable
+  # Quarto is bundled with Workbench.
+  /lib/rstudio-server/bin/quarto/bin/quarto:
+    exists: true
+    filetype: file
+    mode: "0755"
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
+    linked-to: /lib/rstudio-server/bin/quarto/bin/quarto
   # Check for R installation
 
   /opt/R/4.5.3/bin/R:
