@@ -65,7 +65,7 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@feat/dry-run-artifacts"
     with:
       dev-versions: "only"
       matrix-versions: "exclude"
