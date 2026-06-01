@@ -77,4 +77,4 @@ jobs:
     with:
       remove-dangling-caches: true
       remove-caches-older-than: 14
-      clean-temporary-images: false
+      remove-dangling-temporary-images: true

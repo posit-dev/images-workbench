@@ -75,5 +75,4 @@ jobs:
       matrix-versions: "only"
       remove-dangling-caches: true
       remove-caches-older-than: 14
-      remove-dangling-temporary-images: false
-      remove-temporary-images-older-than: 3
+      remove-dangling-temporary-images: true
