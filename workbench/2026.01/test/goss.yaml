@@ -104,6 +104,14 @@ file:
     owner: root
     group: root
     mode: "0600"
+  # sssd supervisord program is staged here; entrypoint installs it at runtime when root
+  /opt/startup-templates/sssd.conf:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    contains:
+      - "/^\\[program:sssd\\]$/"
+  /usr/local/bin/entrypoint.sh:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    mode: "0755"
   # Check for repos.conf
   /etc/rstudio/repos.conf:
     exists: true

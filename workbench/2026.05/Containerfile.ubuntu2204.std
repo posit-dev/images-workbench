@@ -29,6 +29,7 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+ENV PWB_SSSD=true
 
 ### Setup environment ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
@@ -98,11 +99,12 @@ rm -rf /var/lib/apt/lists/*
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2026.05/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY --chmod=0755 "workbench/2026.05/scripts/entrypoint.sh" /usr/local/bin/entrypoint.sh
 COPY "workbench/2026.05/startup/launcher" /startup/launcher
 COPY "workbench/2026.05/startup/base" /startup/base
 COPY "workbench/2026.05/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-COPY "workbench/2026.05/startup/user-provisioning" /startup/user-provisioning
 COPY --chmod=600 "workbench/2026.05/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2026.05/startup-templates/sssd.conf" /opt/startup-templates/sssd.conf
 COPY "workbench/2026.05/conf/jupyter/*" "workbench/2026.05/conf/launcher/*" "workbench/2026.05/conf/rstudio/*" "workbench/2026.05/conf/positron/*" "workbench/2026.05/conf/vscode/*" /etc/rstudio
 
 ### Configure Workbench ###
@@ -132,4 +134,5 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

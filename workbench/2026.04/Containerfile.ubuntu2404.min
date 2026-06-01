@@ -19,6 +19,7 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+ENV PWB_SSSD=true
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
