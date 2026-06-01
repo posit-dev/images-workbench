@@ -33,6 +33,7 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+ENV PWB_SSSD=true
 
 {% if Image.IsDevelopmentVersion %}
 ### Pre-create rstudio-server user so deb postinst finds it and UID/GID stays 999 across image rebuilds ###
@@ -102,12 +103,15 @@ RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
+{%- if Image.Variant != "Minimal" %}
+COPY --chmod=0755 "{{ Path.Version }}/scripts/entrypoint.sh" /usr/local/bin/entrypoint.sh
+{%- endif %}
 COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
 COPY "{{ Path.Version }}/startup/base" /startup/base
 COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 {%- if Image.Variant != "Minimal" %}
-COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "{{ Path.Version }}/startup-templates/sssd.conf" /opt/startup-templates/sssd.conf
 {%- endif %}
 COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio
 
@@ -127,6 +131,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
         /var/run/supervisor \
     && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
     && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
+    && mkdir -p /var/run/rstudio-server \
+    && chmod 1777 /var/run/rstudio-server \
 {% else %}
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
 {% endif %}
@@ -157,4 +163,7 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
+{%- if Image.Variant != "Minimal" %}
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+{%- endif %}
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
