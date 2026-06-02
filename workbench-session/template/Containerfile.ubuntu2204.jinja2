@@ -21,6 +21,8 @@ ARG TARGETARCH=${BUILDARCH}
 {{ python.declare_build_arg() }}
 {{ quarto.declare_build_arg() }}
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Install Apt Packages ###
 {{ apt.run_setup() }}
 
