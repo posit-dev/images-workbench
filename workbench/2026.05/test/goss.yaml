@@ -118,10 +118,15 @@ file:
     contents:
       - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
       - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
-  # Check for symlinked Quarto executable
+  # Quarto is bundled with Workbench.
+  /lib/rstudio-server/bin/quarto/bin/quarto:
+    exists: true
+    filetype: file
+    mode: "0755"
   /usr/local/bin/quarto:
     exists: true
     filetype: symlink
+    linked-to: /lib/rstudio-server/bin/quarto/bin/quarto
   # TinyTeX is installed under /opt/.TinyTeX (via HOME="/opt") so non-root runtime
   # users can read the install; tlmgr path add symlinks the binaries into
   # /usr/local/bin so they are on PATH.
