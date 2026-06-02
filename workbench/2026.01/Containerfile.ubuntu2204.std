@@ -129,7 +129,8 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 # TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
 # for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --update-path \
+RUN --mount=type=secret,id=github_token,required=false \
+    GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --update-path \
     && rm -f /tmp/tinytex-release.json
 
 EXPOSE 8787/tcp
