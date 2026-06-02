@@ -79,8 +79,8 @@ RUN {{ python.install_packages(python_version, "ipykernel") }} && \
 {% endfor -%}
 
 ### Install Pro Drivers ###
-RUN apt-get install -yq rstudio-drivers && \
-    {{ apt.clean_command() }}
+{{ apt.run_install(packages="rstudio-drivers") }}
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 {%- endif %}
 
 ### Copy startup scripts ###
