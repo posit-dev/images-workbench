@@ -35,25 +35,6 @@ ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
 ENV PWB_SSSD=true
 
-{% if Image.IsDevelopmentVersion %}
-### Pre-create rstudio-server user so deb postinst finds it and UID/GID stays 999 across image rebuilds ###
-# Idempotent so a cached layer (or the deb postinst) that already created the
-# account does not fail the build.
-RUN if ! getent group rstudio-server >/dev/null; then \
-        groupadd --system --gid 999 rstudio-server; \
-    fi \
-    && if ! getent passwd rstudio-server >/dev/null; then \
-        useradd --system --uid 999 --gid rstudio-server \
-            --no-create-home --home-dir /var/lib/rstudio-server \
-            --shell /usr/sbin/nologin \
-            rstudio-server; \
-    fi \
-    && if [ "$(id -u rstudio-server)" != 999 ] || [ "$(id -g rstudio-server)" != 999 ]; then \
-        echo "ERROR: rstudio-server must be uid/gid 999, got uid=$(id -u rstudio-server) gid=$(id -g rstudio-server)" >&2; \
-        exit 1; \
-    fi
-
-{% endif %}
 ### Setup environment ###
 {{ apt.run_setup() }}
 
