@@ -1,9 +1,10 @@
 {#-
 Standard-variant optional apt packages for the workbench image on Ubuntu
 22.04 (jammy). Mirrors the 24.04 list - see that template for selection
-rationale and the bakery-issue pointer. On jammy, `default-libmysqlclient-dev`
-resolves to MySQL instead of MariaDB; the interface is compatible and the
-mariadb-flavored headers also exist on jammy so the list is shared.
+rationale and the bakery-issue pointer. The MariaDB client headers are used
+directly (libmariadb-dev + libmariadb-dev-compat) rather than the
+default-libmysqlclient-dev metapackage, which on jammy resolves to the real
+libmysqlclient-dev and Conflicts: with libmariadb-dev-compat.
 -#}
 {# Build toolchain - source installs of compiled R/Python pkgs (Matrix, RcppArmadillo, scipy) -#}
 autoconf
@@ -34,8 +35,8 @@ libreadline-dev
 libicu-dev
 libxml2-dev
 libxslt1-dev
-{# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc -#}
-default-libmysqlclient-dev
+{# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc.
+   See header note: use libmariadb-dev + libmariadb-dev-compat, not default-libmysqlclient-dev. -#}
 libmariadb-dev
 libmariadb-dev-compat
 libsqlite3-dev

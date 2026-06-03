@@ -32,8 +32,9 @@ libreadline-dev
 libicu-dev
 libxml2-dev
 libxslt1-dev
-{# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc -#}
-default-libmysqlclient-dev
+{# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc.
+   Use libmariadb-dev + libmariadb-dev-compat, not default-libmysqlclient-dev: on jammy the
+   metapackage pulls the real libmysqlclient-dev, which Conflicts: with libmariadb-dev-compat. -#}
 libmariadb-dev
 libmariadb-dev-compat
 libsqlite3-dev
