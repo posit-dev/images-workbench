@@ -31,6 +31,8 @@ ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
 ENV PWB_SSSD=true
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Setup environment ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
     apt-get update -yqq --fix-missing && \
@@ -93,9 +95,12 @@ RUN /opt/python/3.14.5/bin/pip install --no-cache-dir --upgrade --break-system-p
     /opt/python/3.14.5/bin/python -m ipykernel install --user --name python3.14.5 --display-name "Python 3.14.5"
 
 ### Install Pro Drivers ###
-RUN apt-get install -yq rstudio-drivers && \
+RUN apt-get update -yqq && \
+    apt-get install -yqq --no-install-recommends \
+        rstudio-drivers && \
     apt-get clean -yqq && \
-rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/*
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2026.05/scripts/startup.sh" /usr/local/bin/startup.sh
@@ -104,8 +109,12 @@ COPY "workbench/2026.05/startup/launcher" /startup/launcher
 COPY "workbench/2026.05/startup/base" /startup/base
 COPY "workbench/2026.05/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 COPY --chmod=600 "workbench/2026.05/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+<<<<<<< HEAD
 COPY "workbench/2026.05/startup-templates/sssd.conf" /opt/startup-templates/sssd.conf
 COPY "workbench/2026.05/conf/jupyter/*" "workbench/2026.05/conf/launcher/*" "workbench/2026.05/conf/rstudio/*" "workbench/2026.05/conf/positron/*" "workbench/2026.05/conf/vscode/*" /etc/rstudio
+=======
+COPY "workbench/2026.05/conf/jupyter/*" "workbench/2026.05/conf/launcher/*" "workbench/2026.05/conf/rstudio/*" "workbench/2026.05/conf/positron/*" "workbench/2026.05/conf/vscode/*" /etc/rstudio/
+>>>>>>> main
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \

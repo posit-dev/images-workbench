@@ -7,6 +7,5 @@ libuser
 libuser1-dev
 libuv1-dev
 rrdtool
-rstudio-drivers
 subversion
 xz-utils
