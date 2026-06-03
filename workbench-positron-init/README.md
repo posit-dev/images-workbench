@@ -59,7 +59,7 @@ components:
       repository: "ghcr.io/posit-dev/workbench-positron-init"
 ```
 
-For a full guide to which Workbench image to customize for different goals, see the [Workbench extending examples](https://github.com/posit-dev/images-examples/tree/main/extending/workbench).
+For a guide to which Workbench image to customize for different goals, see the [Customizing images](https://github.com/posit-dev/images-workbench#customizing-images) section in the Workbench repository README.
 
 ## Image tags
 
