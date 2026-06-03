@@ -21,6 +21,8 @@ ARG R_VERSION
 ARG PYTHON_VERSION
 ARG QUARTO_VERSION
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Install Apt Packages ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
     apt-get update -yqq --fix-missing && \
@@ -41,6 +43,14 @@ RUN apt-get update -yqq && \
     xargs -a /tmp/ubuntu-22.04_packages.txt apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
+
+### Install Pro Drivers ###
+RUN apt-get update -yqq && \
+    apt-get install -yqq --no-install-recommends \
+        rstudio-drivers && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 # Install Python from previous stage
 COPY --from=python-builder /opt/python /opt/python
