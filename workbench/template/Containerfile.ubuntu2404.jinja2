@@ -33,19 +33,16 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
-<<<<<<< HEAD
 ENV PWB_SSSD=true
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 {% if Image.IsDevelopmentVersion %}
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
     rm -f /tmp/precreate_rstudio_user.sh
 {% endif %}
-=======
-
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
->>>>>>> main
 ### Setup environment ###
 {{ apt.run_setup() }}
 

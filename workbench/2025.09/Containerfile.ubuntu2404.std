@@ -109,12 +109,8 @@ COPY "workbench/2025.09/startup/launcher" /startup/launcher
 COPY "workbench/2025.09/startup/base" /startup/base
 COPY "workbench/2025.09/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 COPY --chmod=600 "workbench/2025.09/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-<<<<<<< HEAD
 COPY "workbench/2025.09/startup-templates/sssd.conf" /opt/startup-templates/sssd.conf
 COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio
-=======
-COPY "workbench/2025.09/conf/jupyter/*" "workbench/2025.09/conf/launcher/*" "workbench/2025.09/conf/rstudio/*" "workbench/2025.09/conf/positron/*" "workbench/2025.09/conf/vscode/*" /etc/rstudio/
->>>>>>> main
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
