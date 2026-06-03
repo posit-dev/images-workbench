@@ -102,7 +102,7 @@ FROM ghcr.io/posit-dev/workbench-session:R4.5.2-python3.14.3-ubuntu-24.04
 RUN /opt/R/4.5.2/bin/R -e 'install.packages("tidyverse", repos = "https://p3m.dev/cran/__linux__/noble/latest")'
 ```
 
-See [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending) for additional patterns.
+See [session extending examples](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session) for additional patterns, including pre-installing Python packages and system dependencies.
 
 ## Migrating from legacy image
 

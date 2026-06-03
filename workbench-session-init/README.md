@@ -113,6 +113,8 @@ COPY --from=session-init /opt/session-components /opt/session-components
 
 The resulting image bundles the session components directly, so it can run Workbench sessions without an init container at runtime.
 
+See the [session-init extending example](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session-init) for a complete example of this pattern.
+
 ## Migrating from legacy image
 
 This image replaces the legacy [`rstudio/workbench-session-init`](https://hub.docker.com/r/rstudio/workbench-session-init) image. The runtime contents are unchanged. The image still ships the Workbench session components at `/opt/session-components` for a session container to consume. The differences are in how the image is published.

@@ -86,9 +86,27 @@ podman build \
 
 To build images with `bakery` or run the test suite, see the [contributing guide](CONTRIBUTING.md).
 
+## Customizing images
+
+Each image serves a different role. The right image to customize depends on what you want to change.
+
+| I want to… | Customize | Example |
+|:-----------|:----------|:--------|
+| Add R or Python packages available in every user session | `workbench-session` | [session/r-python-packages](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/r-python-packages) |
+| Add system libraries that session packages need | `workbench-session` | [session/system-dependencies](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/system-dependencies) |
+| Change Workbench server configuration | `workbench` (Minimal) | [server/config](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/config) |
+| Install additional languages on the Workbench server | `workbench` (Minimal) | [server/python](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/python) |
+| Install Posit Pro Drivers on the Workbench server | `workbench` (Minimal) | [server/pro-drivers](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/pro-drivers) |
+| Pre-install VS Code extensions | `workbench` (Standard) | [server/vs-code-extensions](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/vs-code-extensions) |
+| Bundle session components into a self-contained session image | `workbench-session-init` + `workbench-session` | [session-init](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session-init) |
+| Run a newer Positron version than the Workbench server ships | `workbench-positron-init` | Helm `components.positron.version` |
+| Upgrade the Workbench server version | `workbench` + `workbench-session-init` (keep in sync) | — |
+
+For detailed guidance and full example code, see the [Workbench extending examples](https://github.com/posit-dev/images-examples/tree/main/extending/workbench).
+
 ## Related repositories
 
-This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. To extend the Minimal image with additional languages or system dependencies, see the [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending). For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
+This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
 
 ## Share your feedback
 
