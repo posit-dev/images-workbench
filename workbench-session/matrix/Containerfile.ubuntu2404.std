@@ -21,6 +21,8 @@ ARG R_VERSION
 ARG PYTHON_VERSION
 ARG QUARTO_VERSION
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 ### Install Apt Packages ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
     apt-get update -yqq --fix-missing && \
@@ -89,11 +91,7 @@ RUN bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
 # ADD busts the cache on new TinyTeX releases.
 # HOME="/opt" workaround: https://github.com/quarto-dev/quarto-cli/issues/11800
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
-RUN apt-get update -yqq && \
-    apt-get install -yqq --no-install-recommends \
-        xz-utils && \
-    apt-get clean -yqq && \
-    rm -rf /var/lib/apt/lists/* && \
+RUN --mount=type=secret,id=github_token,required=false \
     GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" /opt/quarto/bin/quarto install tinytex --no-prompt --update-path && \
     rm -f /tmp/tinytex-release.json
 
