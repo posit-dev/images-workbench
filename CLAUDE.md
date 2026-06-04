@@ -188,23 +188,14 @@ All workflows call shared reusable workflows from `images-shared`:
 
 | Workflow | Schedule | What it builds | Shared workflow |
 |---|---|---|---|
-| `production.yml` | Weekly (Sun 03:15 UTC), PR, push to main | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build.yml` |
-| `development.yml` | Daily (04:45 UTC), PR, push to main | Dev versions only (daily stream previews) | `bakery-build.yml` |
-| `session.yml` | Weekly (Sun 04:15 UTC), PR, push to main | `workbench-session` matrix images only | `bakery-build.yml` |
+| `production.yml` | Weekly (Sun 03:15 UTC), PR, push to main | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
+| `development.yml` | Daily (09:45 UTC), PR, push to main | Dev versions only (daily stream previews) | `bakery-build-native.yml` |
+| `session.yml` | Weekly (Sun 03:45 UTC), PR, push to main | `workbench-session` matrix images only | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
 Dev preview images push to AWS ECR.
 
-### CI failure checklist
-
-1. **Check which workflow failed** — production vs development vs session have different scopes
-2. **Read the failing step** — usually Build or Test
-3. **Common failures:**
-   - Python version not available in UV — a new Python minor version may not be in UV's release metadata yet
-   - Session-init download failure — S3 URL format uses `{{ Image.Version | replace('+', '-') }}`; verify the build artifact exists
-   - Goss test timeout — Workbench needs supervisor + launcher to start
-   - Registry auth — Docker Hub requires `DOCKER_HUB_ACCESS_TOKEN`, ECR requires AWS OIDC
-4. **Cache issues** — builds use `--cache-registry ghcr.io/posit-dev` for layer caching; stale caches can cause unexpected behavior
+For CI failure diagnosis, see [CONTRIBUTING.md](CONTRIBUTING.md#diagnose-a-build-failure).
 
 ## Helm Integration
 
