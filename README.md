@@ -95,7 +95,8 @@ Each image serves a different role. The right image to customize depends on what
 | Add R or Python packages available in every user session | `workbench-session` | [session/r-python-packages](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/r-python-packages) |
 | Add system libraries that session packages need | `workbench-session` | [session/system-dependencies](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/system-dependencies) |
 | Change Workbench server configuration | `workbench` (Minimal) | [server/config](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/config) |
-| Install additional languages on the Workbench server | `workbench` (Minimal) | [server/python](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/python) |
+| Install additional languages on the Workbench server | `workbench` (Minimal) | [common/R](https://github.com/posit-dev/images-examples/tree/main/extending/common/R) · [common/python](https://github.com/posit-dev/images-examples/tree/main/extending/common/python) |
+| Configure a Python package index | any | [Admin docs](https://docs.posit.co/ide/server-pro/admin/python/package_installation.html#setting-a-python-package-index-for-sessions) |
 | Install Posit Pro Drivers on the Workbench server | `workbench` (Minimal) | [server/pro-drivers](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/pro-drivers) |
 | Pre-install VS Code extensions | `workbench` (Standard) | [server/vs-code-extensions](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/vs-code-extensions) |
 | Bundle session components into a self-contained session image | `workbench-session-init` + `workbench-session` | [session-init](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session-init) |
