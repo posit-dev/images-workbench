@@ -190,7 +190,7 @@ All workflows call shared reusable workflows from `images-shared`:
 |---|---|---|
 | `production.yml` | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
 | `development.yml` | Dev versions only (daily stream previews) | `bakery-build-native.yml` |
-| `session.yml` | `workbench-session` matrix images only | `bakery-build-native.yml` |
+| `session.yml` | `workbench-session` + `workbench-positron-init` matrix images | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
 Dev preview images push to AWS ECR.
