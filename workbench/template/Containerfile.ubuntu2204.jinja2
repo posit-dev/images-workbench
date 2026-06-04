@@ -39,7 +39,7 @@ ENV PWB_SSSD=true
 COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
     rm -f /tmp/precreate_rstudio_user.sh
-{% endif %}
+{%- endif %}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
