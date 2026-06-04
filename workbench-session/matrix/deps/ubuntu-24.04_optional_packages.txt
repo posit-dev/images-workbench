@@ -38,7 +38,7 @@ gsfonts
 imagemagick
 libcairo2-dev
 libfontconfig1-dev
-libfreetype6-dev
+libfreetype-dev
 libfribidi-dev
 libharfbuzz-dev
 libjpeg-dev
