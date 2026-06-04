@@ -20,8 +20,7 @@ libreadline-dev
 libicu-dev
 libxml2-dev
 libxslt1-dev
-libmariadb-dev
-libmariadb-dev-compat
+default-libmysqlclient-dev
 libsqlite3-dev
 unixodbc-dev
 libgit2-dev
