@@ -138,9 +138,6 @@ block in `bakery.yaml` if goss probes fail immediately.
 `workbench-session/matrix/`. Do not create `workbench-session/<edition>/` directories
 manually.
 
-**Dev images push to AWS ECR.** The `development.yml` workflow requires `id-token: write`
-and `AWS_ROLE` for ECR auth.
-
 → [Shared footguns](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#footguns)
 
 ### Diagnose a build failure
@@ -148,7 +145,7 @@ and `AWS_ROLE` for ECR auth.
 | Workflow | Schedule | Builds |
 |---|---|---|
 | `production.yml` | Weekly Sun 03:15 UTC, push to main, dispatch | `workbench` + `workbench-session-init` (excludes dev and matrix) |
-| `development.yml` | Daily 09:45 UTC, push to main, dispatch | Dev stream previews → AWS ECR |
+| `development.yml` | Daily 09:45 UTC, push to main, dispatch | Dev stream previews → ghcr.io/posit-dev/workbench-preview |
 | `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` + `workbench-positron-init` matrix images |
 
 All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).

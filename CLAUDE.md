@@ -193,7 +193,7 @@ All workflows call shared reusable workflows from `images-shared`:
 | `session.yml` | `workbench-session` + `workbench-positron-init` matrix images | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
-Dev preview images push to AWS ECR.
+Dev preview images push to ghcr.io/posit-dev/workbench-preview.
 
 For CI failure diagnosis, see [CONTRIBUTING.md](CONTRIBUTING.md#diagnose-a-build-failure).
 
