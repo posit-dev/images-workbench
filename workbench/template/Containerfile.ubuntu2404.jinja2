@@ -37,7 +37,7 @@ ENV PWB_SSSD=true
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-{% if Image.IsDevelopmentVersion %}
+{% if Image.IsDevelopmentVersion -%}
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
