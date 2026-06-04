@@ -5,10 +5,6 @@ ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 ARG POSITRON_VERSION
 
-ENV PWB_POSITRON_TARGET="positron,positron-docs"
-
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
     apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
@@ -37,20 +33,19 @@ RUN case ${TARGETARCH} in \
       arm64) CDN_ARCH=arm64;  PKG_ARCH=arm64; INIT_ARTIFACT=linux-arm64 ;; \
       *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
-    # Download positron-server tarball from CDN
     mkdir -p /opt/positron/bin/positron-server && \
     curl -fsSL -o /tmp/positron.tar.gz \
+\
       "https://cdn.posit.co/positron/releases/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
+\
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
     mv /tmp/vscode-reh-web-*linux-* /opt/positron/bin/positron-server/bundled && \
     rm /tmp/positron.tar.gz && \
-    # Download positron docs from CDN
     mkdir -p /opt/positron/docs/positron && \
     curl -fsSL -o /tmp/docs.zip \
       "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-${POSITRON_VERSION}.zip" && \
     unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
     rm /tmp/docs.zip && \
-    # Download latest positron-session-init binary from CDN
     BINARY_URL=$(curl -fsSL "https://cdn.posit.co/pwb-components/positron-session-init/latest.json" \
       | jq -r ".artifacts[\"${INIT_ARTIFACT}\"].url") && \
     curl -fsSL -o /tmp/positron-session-init.tar.gz "$BINARY_URL" && \
@@ -64,13 +59,16 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
-    apt-get update -yqq --fix-missing && \
+RUN apt-get update -yqq --fix-missing && \
     apt-get upgrade -yqq && \
     apt-get dist-upgrade -yqq && \
     apt-get autoremove -yqq --purge && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
+
+
+ENV PWB_POSITRON_TARGET="positron,positron-docs"
+
 
 COPY --from=builder --chmod=755 /usr/local/bin/positron-session-init /usr/local/bin/positron-session-init
 COPY --from=builder --chmod=755 /opt/positron /opt/positron
