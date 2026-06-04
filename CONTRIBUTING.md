@@ -75,8 +75,8 @@ bakery update files --image-name workbench --image-version 2026.01
 bakery update files --image-name workbench-session-init --image-version 2026.01
 ```
 
-`workbench-session` is a matrix image. Its versions are managed via `matrixVersions` in
-`bakery.yaml`, not with `bakery create version`.
+`workbench-session` is a matrix image. Its versions are managed via
+`matrix.dependencyConstraints` in `bakery.yaml`, not with `bakery create version`.
 
 → [Shared procedure](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#add-a-version)
 
@@ -96,8 +96,9 @@ bakery create image <new-image-name>
 ### Update dependencies
 
 `workbench-session` is a matrix image with R×Python combinations defined in `bakery.yaml`
-under `matrixVersions`. To add a new R or Python version to the session matrix, add it
-to `matrixVersions` and re-render:
+under `matrix.dependencyConstraints`. To add a new R or Python version to the session
+matrix, update the image's `matrix.dependencyConstraints` block in `bakery.yaml` and
+re-render:
 
 ```bash
 bakery update files --image-name workbench-session
@@ -148,7 +149,7 @@ and `AWS_ROLE` for ECR auth.
 |---|---|---|
 | `production.yml` | Weekly Sun 03:15 UTC, push to main, dispatch | `workbench` + `workbench-session-init` (excludes dev and matrix) |
 | `development.yml` | Daily 09:45 UTC, push to main, dispatch | Dev stream previews → AWS ECR |
-| `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` matrix images only |
+| `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` + `workbench-positron-init` matrix images |
 
 All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).
 
