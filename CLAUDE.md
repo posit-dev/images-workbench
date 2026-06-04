@@ -186,11 +186,11 @@ When making changes to the repository, consider whether updates are required for
 
 All workflows call shared reusable workflows from `images-shared`:
 
-| Workflow | Schedule | What it builds | Shared workflow |
-|---|---|---|---|
-| `production.yml` | Weekly (Sun 03:15 UTC), PR, push to main | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
-| `development.yml` | Daily (09:45 UTC), PR, push to main | Dev versions only (daily stream previews) | `bakery-build-native.yml` |
-| `session.yml` | Weekly (Sun 03:45 UTC), PR, push to main | `workbench-session` matrix images only | `bakery-build-native.yml` |
+| Workflow | What it builds | Shared workflow |
+|---|---|---|
+| `production.yml` | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
+| `development.yml` | Dev versions only (daily stream previews) | `bakery-build-native.yml` |
+| `session.yml` | `workbench-session` matrix images only | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
 Dev preview images push to AWS ECR.
