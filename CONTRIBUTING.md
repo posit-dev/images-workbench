@@ -66,10 +66,10 @@ covers the full workflow.
 
 Workbench versions are dispatched automatically from `rstudio/rstudio-pro` via the
 `workbench-ide-release` GitHub App, which triggers this repo's `release.yml` workflow.
-Manual steps are only needed for hotfixes.
+Use manual steps only for hotfixes.
 
 ```bash
-# Create a new version manually (e.g. a hotfix to 2026.01)
+# Create a new version manually (e.g., a hotfix to 2026.01)
 bakery create version 2026.01.2 --image-name workbench --image-name workbench-session-init
 bakery update files --image-name workbench --image-version 2026.01
 bakery update files --image-name workbench-session-init --image-version 2026.01
@@ -125,18 +125,11 @@ bakery run dgoss --image-name workbench --image-version 2026.01
 
 ### Footguns
 
-**`workbench-session-init` downloads from S3 during build.** The Containerfile fetches
-a binary whose URL embeds the image version with `+` replaced by `-` (via
-`{{ Image.Version | replace('+', '-') }}`). Verify the S3 artifact exists at the
-expected URL before creating a new version.
+- **`workbench-session-init` downloads from S3 during build.** The Containerfile fetches a binary whose URL embeds the image version with `+` replaced by `-` (via `{{ Image.Version | replace('+', '-') }}`). Verify the S3 artifact exists at the expected URL before creating a new version.
 
-**Workbench needs time to start.** The server, supervisor, and launcher all need to come
-up before goss can probe the container. Check the `wait:` value in the image's `options`
-block in `bakery.yaml` if goss probes fail immediately.
+- **Workbench needs time to start.** The server, supervisor, and launcher all need to come up before goss can probe the container. Check the `wait:` value in the image's `options` block in `bakery.yaml` if goss probes fail immediately.
 
-**`workbench-session` has no version directories.** It renders into
-`workbench-session/matrix/`. Do not create `workbench-session/<edition>/` directories
-manually.
+- **`workbench-session` has no version directories.** It renders into `workbench-session/matrix/`. Do not create `workbench-session/<edition>/` directories manually.
 
 → [Shared footguns](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#footguns)
 
@@ -152,11 +145,10 @@ All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).
 
 **Workbench-specific failures:**
 
-- _S3 download failure in `workbench-session-init`_ — the build fetches a binary from
+- S3 download failure in `workbench-session-init` — the build fetches a binary from
   S3. If the artifact does not exist for the dispatched version, the build fails at the
-  download step. Verify the product build artifact was published before the image build
-  was triggered.
-- _Goss timeout_ — Workbench needs supervisor and launcher to fully start before probes
+  download step. Verify the product team published the build artifact before the image build ran.
+- Goss timeout — Workbench needs supervisor and launcher to fully start before probes
   succeed. If goss fails immediately, check the `wait:` value in `bakery.yaml`.
 
 → [Shared failure scenarios](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#diagnose-a-build-failure)
