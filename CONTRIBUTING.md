@@ -52,7 +52,8 @@ bakery run dgoss --image-name workbench
 After changing any file in a `template/` directory, re-render the version directories:
 
 ```shell
-bakery update files
+# Omitting filters re-renders every image and version; --help shows available filters
+bakery update files --help
 bakery update files --image-name workbench --image-version 2026.01
 ```
 
