@@ -33,7 +33,9 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+{%- if Image.Variant != "Minimal" %}
 ENV PWB_SSSD=true
+{%- endif %}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 

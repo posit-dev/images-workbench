@@ -33,7 +33,9 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+{%- if Image.Variant != "Minimal" %}
 ENV PWB_SSSD=true
+{%- endif %}
 {% if Image.IsDevelopmentVersion %}
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
