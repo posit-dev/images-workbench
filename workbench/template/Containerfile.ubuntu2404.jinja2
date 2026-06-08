@@ -33,7 +33,7 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
-{%- if Image.Variant != "Minimal" %}
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
 ENV PWB_SSSD=true
 {%- endif %}
 
@@ -94,15 +94,20 @@ RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
-{%- if Image.Variant != "Minimal" %}
-COPY --chmod=0755 "{{ Path.Version }}/scripts/entrypoint.sh" /usr/local/bin/entrypoint.sh
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+COPY --chmod=0755 {{ Path.Image }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 {%- endif %}
 COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
 COPY "{{ Path.Version }}/startup/base" /startup/base
 COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 {%- if Image.Variant != "Minimal" %}
+{%- if not Image.IsDevelopmentVersion %}
+COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
+{%- endif %}
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-COPY "{{ Path.Version }}/startup-templates/sssd.conf" /opt/startup-templates/sssd.conf
+{%- if Image.IsDevelopmentVersion %}
+COPY "{{ Path.Version }}/startup/user-provisioning/sssd.conf" /opt/startup-templates/sssd.conf
+{%- endif %}
 {%- endif %}
 COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio/
 
@@ -154,7 +159,7 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
-{%- if Image.Variant != "Minimal" %}
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 {%- endif %}
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
