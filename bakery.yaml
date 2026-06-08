@@ -127,7 +127,7 @@ images:
     devVersions:
       - sourceType: stream
         product: workbench-session
-        stream: daily
+        channel: daily
         # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
         os:
           - name: Ubuntu 24.04
