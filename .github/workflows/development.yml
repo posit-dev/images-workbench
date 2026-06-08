@@ -69,8 +69,9 @@ jobs:
       contents: read
       packages: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@positron-init-preview-stream"
     with:
+      version: "positron-init-preview-stream"
       dev-versions: "only"
       matrix-versions: "exclude"
       image-version: ${{ inputs.version }}
