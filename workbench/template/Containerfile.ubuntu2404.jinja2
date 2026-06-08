@@ -33,9 +33,18 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+ENV PWB_SSSD=true
+{%- endif %}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+{% if Image.IsDevelopmentVersion -%}
+### Pre-create rstudio-server user (uid/gid 999) before any installs ###
+COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
+RUN /tmp/precreate_rstudio_user.sh && \
+    rm -f /tmp/precreate_rstudio_user.sh
+{% endif %}
 ### Setup environment ###
 {{ apt.run_setup() }}
 
@@ -85,18 +94,44 @@ RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+COPY --chmod=0755 {{ Path.Image }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+{%- endif %}
 COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
 COPY "{{ Path.Version }}/startup/base" /startup/base
 COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 {%- if Image.Variant != "Minimal" %}
+{%- if not Image.IsDevelopmentVersion %}
 COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
+{%- endif %}
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+{%- if Image.IsDevelopmentVersion %}
+COPY "{{ Path.Version }}/startup/user-provisioning/sssd.conf" /opt/startup-templates/sssd.conf
+{%- endif %}
 {%- endif %}
 COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio/
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
+{%- if Image.IsDevelopmentVersion %}
+               /var/lib/rstudio-server/conf \
+               /var/lib/rstudio-server/body \
+               /var/lib/rstudio-server/proxy \
+               /var/lib/rstudio-launcher \
+               /var/log/rstudio \
+               /var/run/supervisor \
+    && chown -R rstudio-server:rstudio-server \
+        /var/lib/rstudio-server \
+        /var/lib/rstudio-launcher \
+        /var/log/rstudio \
+        /var/run/supervisor \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
+    && mkdir -p /var/run/rstudio-server \
+    && chmod 1777 /var/run/rstudio-server \
+{%- else %}
     && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+{%- endif %}
     && mkdir -p /startup/custom/ \
     && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
@@ -124,4 +159,7 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
+{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+{%- endif %}
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
