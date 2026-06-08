@@ -59,6 +59,7 @@ jobs:
     with:
       dev-versions: "exclude"
       matrix-versions: "exclude"
+      latest-only: ${{ github.event_name != 'merge_group' }}
 
   development:
     name: Development
@@ -69,6 +70,7 @@ jobs:
     with:
       dev-versions: "only"
       matrix-versions: "exclude"
+      latest-only: ${{ github.event_name != 'merge_group' }}
 
   session:
     name: Session
@@ -78,6 +80,7 @@ jobs:
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
       matrix-versions: "only"
+      latest-only: ${{ github.event_name != 'merge_group' }}
 
   zizmor:
     name: Zizmor
