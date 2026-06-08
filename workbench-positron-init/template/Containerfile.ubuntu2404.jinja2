@@ -11,6 +11,8 @@ ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 {% if not is_dev %}ARG POSITRON_VERSION{% endif %}
 
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
 {{ apt.run_setup() }}
 
 RUN apt-get update -qq && \
