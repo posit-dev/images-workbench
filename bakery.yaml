@@ -34,6 +34,9 @@ images:
     buildSecrets:
       - id: github_token
         envVar: GITHUB_TOKEN
+    options:
+      - tool: soci
+        enabled: true
     dependencyConstraints:
       - dependency: R
         constraint:
@@ -118,6 +121,9 @@ images:
     displayName: "Posit Workbench Session Init"
     description: "A containerized image for initializing Posit Workbench sessions."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    options:
+      - tool: soci
+        enabled: true
     devVersions:
       - sourceType: stream
         product: workbench-session
@@ -160,6 +166,9 @@ images:
     description: "A containerized image for initializing Positron IDE sessions in
       Posit Workbench."
     documentationUrl: "https://docs.posit.co/ide/server-pro/"
+    options:
+      - tool: soci
+        enabled: true
     matrix:
       namePattern: "{{ Dependencies.positron }}"
       dependencyConstraints:
@@ -178,6 +187,9 @@ images:
     buildSecrets:
       - id: github_token
         envVar: GITHUB_TOKEN
+    options:
+      - tool: soci
+        enabled: true
     matrix:
       namePattern: "R{{ Dependencies.R }}-python{{ Dependencies.python }}"
       dependencyConstraints:
