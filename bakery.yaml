@@ -153,6 +153,19 @@ images:
           - host: "ghcr.io"
             namespace: "posit-dev"
             repository: "workbench-session-init-preview"
+      - sourceType: stream
+        product: workbench-session
+        channel: preview
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+        overrideRegistries:
+          - host: "ghcr.io"
+            namespace: "posit-dev"
+            repository: "workbench-session-init-preview"
     versions:
       - name: 2026.05.0+218.pro1
         subpath: '2026.05'
