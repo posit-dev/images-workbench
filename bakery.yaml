@@ -127,7 +127,7 @@ images:
     devVersions:
       - sourceType: stream
         product: workbench-session
-        stream: daily
+        channel: daily
         # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
         os:
           - name: Ubuntu 24.04
@@ -169,6 +169,23 @@ images:
     options:
       - tool: soci
         enabled: true
+    devVersions:
+      - sourceType: dependency
+        dependency: positron
+        prerelease: true
+        channel: daily
+        values:
+          POSITRON_CHANNEL: dailies
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+        overrideRegistries:
+          - host: "ghcr.io"
+            namespace: "posit-dev"
+            repository: "workbench-positron-init-preview"
     matrix:
       namePattern: "{{ Dependencies.positron }}"
       dependencyConstraints:

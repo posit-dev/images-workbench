@@ -3,14 +3,13 @@ Below are imports for Bakery's macros. If any are unneeded, they can be removed.
 Bakery handles bootstrapping the files into template rendering.
 -#}
 {%- import "apt.j2" as apt -%}
+{%- set is_dev = Image.IsDevelopmentVersion is defined and Image.IsDevelopmentVersion -%}
 FROM docker.io/library/ubuntu:24.04 AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
-ARG POSITRON_VERSION
-
-ENV PWB_POSITRON_TARGET="positron,positron-docs"
+{% if not is_dev %}ARG POSITRON_VERSION{% endif %}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -30,20 +29,28 @@ RUN case ${TARGETARCH} in \
       arm64) CDN_ARCH=arm64;  PKG_ARCH=arm64; INIT_ARTIFACT=linux-arm64 ;; \
       *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
-    # Download positron-server tarball from CDN
     mkdir -p /opt/positron/bin/positron-server && \
     curl -fsSL -o /tmp/positron.tar.gz \
+{% if is_dev %}\
+      "https://cdn.posit.co/positron/dailies/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-{{ Image.Version }}.tar.gz" && \
+{% else %}\
       "https://cdn.posit.co/positron/releases/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
+{% endif %}\
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
     mv /tmp/vscode-reh-web-*linux-* /opt/positron/bin/positron-server/bundled && \
     rm /tmp/positron.tar.gz && \
-    # Download positron docs from CDN
     mkdir -p /opt/positron/docs/positron && \
+{% if is_dev %}\
+    { curl -fsSL -o /tmp/docs.zip \
+        "https://cdn.posit.co/positron/dailies/docs/positron-workbench-docs-{{ Image.Version }}.zip" && \
+      unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron; } || true && \
+    rm -f /tmp/docs.zip && \
+{% else %}\
     curl -fsSL -o /tmp/docs.zip \
       "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-${POSITRON_VERSION}.zip" && \
     unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
     rm /tmp/docs.zip && \
-    # Download latest positron-session-init binary from CDN
+{% endif %}\
     BINARY_URL=$(curl -fsSL "https://cdn.posit.co/pwb-components/positron-session-init/latest.json" \
       | jq -r ".artifacts[\"${INIT_ARTIFACT}\"].url") && \
     curl -fsSL -o /tmp/positron-session-init.tar.gz "$BINARY_URL" && \
@@ -57,7 +64,10 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-{{ apt.run_update_upgrade() }}
+RUN {{ apt.configure_retries() }} && \
+    {{ apt.update_upgrade() | indent(4) }}
+
+ENV PWB_POSITRON_TARGET="positron,positron-docs"
 
 COPY --from=builder --chmod=755 /usr/local/bin/positron-session-init /usr/local/bin/positron-session-init
 COPY --from=builder --chmod=755 /opt/positron /opt/positron
