@@ -173,6 +173,7 @@ images:
       - sourceType: dependency
         dependency: positron
         prerelease: true
+        channel: daily
         values:
           POSITRON_CHANNEL: dailies
         os:
