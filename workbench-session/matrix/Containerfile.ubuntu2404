@@ -6,7 +6,7 @@ ENV UV_PYTHON_INSTALL_DIR=/opt/python
 ENV UV_PYTHON_PREFERENCE=only-managed
 
 ARG PYTHON_VERSION
-RUN uv python install $PYTHON_VERSION
+RUN uv self update && uv python install $PYTHON_VERSION
 RUN mv /opt/python/cpython-$PYTHON_VERSION-linux-*/ /opt/python/$PYTHON_VERSION
 
 

@@ -4,7 +4,7 @@ FROM ghcr.io/astral-sh/uv:debian-slim AS python-builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/opt/python
 ENV UV_PYTHON_PREFERENCE=only-managed
-RUN uv python install 3.13.7
+RUN uv self update && uv python install 3.13.7
 RUN mv /opt/python/cpython-3.13.7-linux-*/ /opt/python/3.13.7
 
 
