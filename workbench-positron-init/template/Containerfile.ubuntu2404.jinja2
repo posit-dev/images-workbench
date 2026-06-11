@@ -38,12 +38,19 @@ RUN case ${TARGETARCH} in \
 {% endif %}\
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
     mv /tmp/vscode-reh-web-*linux-* /opt/positron/bin/positron-server/bundled && \
-    rm /tmp/positron.tar.gz{% if not is_dev %} && \
+    rm /tmp/positron.tar.gz && \
     mkdir -p /opt/positron/docs/positron && \
+{% if is_dev %}\
+    { curl -fsSL -o /tmp/docs.zip \
+        "https://cdn.posit.co/positron/dailies/docs/positron-workbench-docs-{{ Image.Version }}.zip" && \
+      unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron; } || true && \
+    rm -f /tmp/docs.zip && \
+{% else %}\
     curl -fsSL -o /tmp/docs.zip \
       "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-${POSITRON_VERSION}.zip" && \
     unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
-    rm /tmp/docs.zip{% endif %} && \
+    rm /tmp/docs.zip && \
+{% endif %}\
     BINARY_URL=$(curl -fsSL "https://cdn.posit.co/pwb-components/positron-session-init/latest.json" \
       | jq -r ".artifacts[\"${INIT_ARTIFACT}\"].url") && \
     curl -fsSL -o /tmp/positron-session-init.tar.gz "$BINARY_URL" && \
@@ -57,13 +64,10 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-{{ apt.run_update_upgrade() }}
+RUN {{ apt.configure_retries() }} && \
+    {{ apt.update_upgrade() | indent(4) }}
 
-{% if is_dev %}
-ENV PWB_POSITRON_TARGET="positron"
-{% else %}
 ENV PWB_POSITRON_TARGET="positron,positron-docs"
-{% endif %}
 
 COPY --from=builder --chmod=755 /usr/local/bin/positron-session-init /usr/local/bin/positron-session-init
 COPY --from=builder --chmod=755 /opt/positron /opt/positron
