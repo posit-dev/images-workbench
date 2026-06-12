@@ -1,4 +1,4 @@
-name: Development
+name: Development - Workbench
 on:
   workflow_dispatch:
     inputs:
@@ -62,7 +62,9 @@ jobs:
     name: Dev Build
     # Dev Build
     #
-    # Builds all development versions of each image in parallel.
+    # Builds the development versions of the workbench and
+    # workbench-session-init images in parallel. workbench-positron-init dev
+    # builds are handled by the Development - Positron workflow.
     #
     # Run on merges to main, or on hourly scheduled re-builds.
     permissions:
@@ -73,6 +75,8 @@ jobs:
     with:
       dev-versions: "only"
       matrix-versions: "exclude"
+      # Match workbench and workbench-session-init, but not workbench-positron-init.
+      image-name: "^workbench(-session-init)?$"
       image-version: ${{ inputs.version }}
       dev-stream: ${{ inputs.stream }}
       release-branch: ${{ inputs.release-branch }}

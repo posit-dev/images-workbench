@@ -41,10 +41,10 @@ bakery build --image-name workbench --image-version 2026.01
 
 ```shell
 # Run goss tests for all images
-bakery run dgoss
+bakery dgoss run
 
 # Run goss tests for a specific image
-bakery run dgoss --image-name workbench
+bakery dgoss run --image-name workbench
 ```
 
 ### Re-render templates
@@ -119,7 +119,7 @@ bakery update files --image-name workbench-session-init --image-version 2026.01
 
 # Build and test before opening a PR
 bakery build --image-name workbench --image-version 2026.01
-bakery run dgoss --image-name workbench --image-version 2026.01
+bakery dgoss run --image-name workbench --image-version 2026.01
 ```
 
 → [Shared procedure](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#update-older-versions)
@@ -139,7 +139,8 @@ bakery run dgoss --image-name workbench --image-version 2026.01
 | Workflow | Schedule | Builds |
 |---|---|---|
 | `production.yml` | Weekly Sun 03:15 UTC, push to main, dispatch | `workbench` + `workbench-session-init` (excludes dev and matrix) |
-| `development.yml` | Daily 09:45 UTC, push to main, dispatch | Dev stream previews → ghcr.io/posit-dev/workbench-preview |
+| `development-workbench.yml` | Daily 09:45 UTC, push to main, dispatch | `workbench` + `workbench-session-init` dev versions → ghcr.io/posit-dev/workbench-preview |
+| `development-positron.yml` | Daily 09:55 UTC, push to main, dispatch | `workbench-positron-init` dev version → ghcr.io/posit-dev/workbench-positron-init-preview |
 | `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` + `workbench-positron-init` matrix images |
 
 All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).

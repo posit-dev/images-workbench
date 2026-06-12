@@ -1,0 +1,93 @@
+name: Development - Positron
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Positron version to build (e.g. 2026.07.0-1). Omit to build the latest daily."
+        required: false
+        type: string
+      channel:
+        description: "Dev channel to build (e.g. 'daily')"
+        required: false
+        type: string
+
+  schedule:
+    # Daily rebuild of the dev workbench-positron-init image. Runs at 09:55 to
+    # fast-follow the Development - Workbench rebuild (09:45). Weeklies run at
+    # 01–03 UTC, dailies at 07–09 UTC, with 04–06 UTC reserved as growth
+    # headroom.
+    - cron: "55 9 * * *" # At 09:55 every day
+
+  push:
+    branches:
+      - main
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: CI
+    # This should be the only action checked as required in the repo settings.
+    #
+    # This is a meta-job, here to express the conditions we require
+    # in order to consider a CI run to be successful.
+    if: always()
+
+    runs-on: ubuntu-latest
+    permissions: {}
+    timeout-minutes: 10
+    needs:
+      - dev
+
+    steps:
+      - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe  # v1.2.2
+        id: alls-green
+        with:
+          jobs: ${{ toJSON(needs) }}
+      - if: always() && github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
+        with:
+          result: ${{ steps.alls-green.outcome }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  dev:
+    name: Dev Build
+    # Dev Build
+    #
+    # Builds the development version of the workbench-positron-init image from
+    # the latest Positron prerelease daily (or a dispatched version).
+    #
+    # Run on merges to main, or on daily scheduled re-builds.
+    permissions:
+      contents: read
+      packages: write
+
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    with:
+      dev-versions: "only"
+      matrix-versions: "exclude"
+      image-name: "^workbench-positron-init$"
+      dev-version: ${{ inputs.version }}
+      dev-channel: ${{ inputs.channel }}
+      # Push on merges to main, scheduled rebuilds, and dispatches targeting main.
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+
+  clean:
+    name: Clean
+    if: always() && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      packages: write
+    needs:
+      - dev
+
+    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
+    with:
+      dev-versions: "only"
+      remove-dangling-caches: true
+      remove-caches-older-than: 14
+      remove-dangling-temporary-images: true
