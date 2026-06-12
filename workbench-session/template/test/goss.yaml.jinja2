@@ -40,6 +40,12 @@ file:
   /opt:
     exists: true
     filetype: directory
+  /etc/nsswitch.conf:
+    exists: true
+    contains:
+      - "/^passwd:.*\\bpwb\\b/"
+      - "/^group:.*\\bpwb\\b/"
+      - "/^shadow:.*\\bpwb\\b/"
 
 command:
   "Verify Jupyter Notebook works":
@@ -86,4 +92,7 @@ command:
     exit-status: 0
   "Verify /opt directories are world-traversable":
     exec: 'find /opt -type d -not -perm -005 -print 2>&1 | head -c1 | (! grep -q .)'
+    exit-status: 0
+  "Verify libnss_pwb symlink is present for current architecture":
+    exec: 'dpkg-architecture -qDEB_HOST_MULTIARCH | xargs -I{} test -L "/usr/lib/{}/libnss_pwb.so.2"'
     exit-status: 0
