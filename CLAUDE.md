@@ -159,8 +159,8 @@ bakery build
 bakery build --image-name workbench --image-version '2026.01.1+403.pro11' --image-variant Standard
 
 # Run goss tests
-bakery run dgoss
-bakery run dgoss --image-name workbench
+bakery dgoss run
+bakery dgoss run --image-name workbench
 
 # Re-render templates after changes
 bakery update files
@@ -189,11 +189,13 @@ All workflows call shared reusable workflows from `images-shared`:
 | Workflow | What it builds | Shared workflow |
 |---|---|---|
 | `production.yml` | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
-| `development.yml` | Dev versions only (daily stream previews) | `bakery-build-native.yml` |
+| `development-workbench.yml` | `workbench` + `workbench-session-init` dev versions (daily previews) | `bakery-build-native.yml` |
+| `development-positron.yml` | `workbench-positron-init` dev version (daily Positron previews) | `bakery-build-native.yml` |
 | `session.yml` | `workbench-session` + `workbench-positron-init` matrix images | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
-Dev preview images push to ghcr.io/posit-dev/workbench-preview.
+Dev preview images push to ghcr.io/posit-dev/workbench-preview and
+ghcr.io/posit-dev/workbench-positron-init-preview.
 
 For CI failure diagnosis, see [CONTRIBUTING.md](CONTRIBUTING.md#diagnose-a-build-failure).
 

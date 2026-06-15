@@ -4,6 +4,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
 ARG POSITRON_VERSION
+ARG POSITRON_CHANNEL="releases"
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -37,19 +38,20 @@ RUN case ${TARGETARCH} in \
     esac && \
     mkdir -p /opt/positron/bin/positron-server && \
     curl -fsSL -o /tmp/positron.tar.gz \
-\
-      "https://cdn.posit.co/positron/releases/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
-\
+      "https://cdn.posit.co/positron/${POSITRON_CHANNEL}/pwb/${CDN_ARCH}/positron-workbench-linux-${PKG_ARCH}-${POSITRON_VERSION}.tar.gz" && \
     tar -xzf /tmp/positron.tar.gz -C /tmp && \
     mv /tmp/vscode-reh-web-*linux-* /opt/positron/bin/positron-server/bundled && \
     rm /tmp/positron.tar.gz && \
     mkdir -p /opt/positron/docs/positron && \
-\
-    curl -fsSL -o /tmp/docs.zip \
-      "https://cdn.posit.co/positron/releases/docs/positron-workbench-docs-${POSITRON_VERSION}.zip" && \
-    unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
-    rm /tmp/docs.zip && \
-\
+    if curl -fsSL -o /tmp/docs.zip \
+      "https://cdn.posit.co/positron/${POSITRON_CHANNEL}/docs/positron-workbench-docs-${POSITRON_VERSION}.zip"; then \
+      unzip -qo /tmp/docs.zip -d /opt/positron/docs/positron && \
+      rm /tmp/docs.zip; \
+    elif [ "${POSITRON_CHANNEL}" = "releases" ]; then \
+      echo "ERROR: docs bundle not found for release version ${POSITRON_VERSION}" >&2 && exit 1; \
+    else \
+      echo "WARNING: docs bundle not found for development version ${POSITRON_VERSION} on channel '${POSITRON_CHANNEL}', skipping" >&2; \
+    fi && \
     BINARY_URL=$(curl -fsSL "https://cdn.posit.co/pwb-components/positron-session-init/latest.json" \
       | jq -r ".artifacts[\"${INIT_ARTIFACT}\"].url") && \
     curl -fsSL -o /tmp/positron-session-init.tar.gz "$BINARY_URL" && \

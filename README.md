@@ -11,7 +11,8 @@
 Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 
 [![Production CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/production.yml)
-[![Development CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/development.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/development.yml)
+[![Development Workbench CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/development-workbench.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/development-workbench.yml)
+[![Development Positron CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/development-positron.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/development-positron.yml)
 [![Session Image CI Build Status](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml/badge.svg?branch=main)](https://github.com/posit-dev/images-workbench/actions/workflows/session.yml)
 [![Latest Version](https://img.shields.io/docker/v/posit/workbench?sort=semver&label=latest)](https://hub.docker.com/r/posit/workbench/tags)
 
