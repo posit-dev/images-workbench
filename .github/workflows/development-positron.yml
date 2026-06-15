@@ -69,7 +69,7 @@ jobs:
     uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
     with:
       dev-versions: "only"
-      matrix-versions: "exclude"
+      matrix-versions: "include"
       image-name: "^workbench-positron-init$"
       dev-version: ${{ inputs.version }}
       dev-channel: ${{ inputs.channel }}
