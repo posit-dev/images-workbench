@@ -1,6 +1,7 @@
 name: Pull Request
 on:
   pull_request:
+  merge_group:
 
 
 concurrency:
@@ -22,8 +23,15 @@ jobs:
       - zizmor
     steps:
       - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe  # v1.2.2
+        id: alls-green
         with:
           jobs: ${{ toJSON(needs) }}
+      - if: always() && github.event_name == 'merge_group'
+        continue-on-error: true
+        uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
+        with:
+          result: ${{ steps.alls-green.outcome }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
   lint:
     name: Lint
