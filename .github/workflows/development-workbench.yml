@@ -77,7 +77,7 @@ jobs:
       matrix-versions: "exclude"
       # Match workbench and workbench-session-init, but not workbench-positron-init.
       image-name: "^workbench(-session-init)?$"
-      image-version: ${{ inputs.version }}
+      dev-version: ${{ inputs.version }}
       dev-channel: ${{ inputs.channel }}
       release-branch: ${{ inputs.release-branch }}
       # Push on merges to main, scheduled rebuilds, and dispatches targeting main.
