@@ -57,6 +57,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
+      version: "worktree-dgoss-docker-exit-handling"
       dev-versions: "exclude"
       matrix-versions: "exclude"
 
@@ -67,6 +68,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
+      version: "worktree-dgoss-docker-exit-handling"
       dev-versions: "only"
       matrix-versions: "include"
 
@@ -77,6 +79,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
     with:
+      version: "worktree-dgoss-docker-exit-handling"
       matrix-versions: "only"
 
   zizmor:
