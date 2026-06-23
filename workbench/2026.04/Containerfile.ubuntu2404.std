@@ -32,6 +32,7 @@ ENV PWB_EXIT_AFTER_VERIFY=false
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+
 ### Setup environment ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
     apt-get update -yqq --fix-missing && \
@@ -122,6 +123,12 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
 ### Install TinyTeX using Quarto ###
 # Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
 # the cache on new releases.
+#
+# TinyTeX is installed under HOME="/opt" so the install lands at /opt/.TinyTeX,
+# which is readable by non-root runtime users. `--update-path` makes tlmgr
+# symlink the TinyTeX binaries into /usr/local/bin.
+# TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
+# for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
 ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
 RUN --mount=type=secret,id=github_token,required=false \
     GH_TOKEN="$([ -s /run/secrets/github_token ] && cat /run/secrets/github_token)" HOME="/opt" CI=true /lib/rstudio-server/bin/quarto/bin/quarto install tinytex --no-prompt --update-path \

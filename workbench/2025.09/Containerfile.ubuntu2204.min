@@ -20,6 +20,7 @@ ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
 
+
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 ### Setup environment ###
