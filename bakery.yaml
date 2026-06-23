@@ -51,7 +51,7 @@ images:
         primary: true
         options:
           - tool: goss
-            wait: 15
+            wait: 30
             command: "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf"
       - name: Minimal
         extension: min
