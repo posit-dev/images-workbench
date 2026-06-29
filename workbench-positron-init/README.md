@@ -54,7 +54,7 @@ session:
 
 components:
   positron:
-    version: "2026.05.1-2"
+    version: "2026.06.0-2"
     image:
       repository: "ghcr.io/posit-dev/workbench-positron-init"
 ```
