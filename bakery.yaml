@@ -94,6 +94,9 @@ images:
           - name: Ubuntu 22.04
           - name: Ubuntu 24.04
             primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
         dependencies:
           - dependency: R
             version: 4.6.1
@@ -189,6 +192,9 @@ images:
         os:
           - name: Ubuntu 24.04
             primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
       - name: 2026.05.1+225.pro10
         subpath: '2026.05'
         os:
