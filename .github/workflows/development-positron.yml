@@ -83,11 +83,11 @@ jobs:
       contents: read
       packages: write
     needs:
-      - dev
+      - ci
 
     uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
     with:
       dev-versions: "only"
       remove-dangling-caches: true
       remove-caches-older-than: 14
-      remove-dangling-temporary-images: true
+      remove-temporary-images-older-than: 2
