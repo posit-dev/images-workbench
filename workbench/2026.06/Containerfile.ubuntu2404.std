@@ -29,9 +29,14 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
+ENV PWB_SSSD=true
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+### Pre-create rstudio-server user (uid/gid 999) before any installs ###
+COPY --chmod=0755 workbench/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
+RUN /tmp/precreate_rstudio_user.sh && \
+    rm -f /tmp/precreate_rstudio_user.sh
 
 ### Setup environment ###
 RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Timeout "30";' > /etc/apt/apt.conf.d/99-retries && \
@@ -104,16 +109,31 @@ RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2026.06/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY --chmod=0755 workbench/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 COPY "workbench/2026.06/startup/launcher" /startup/launcher
 COPY "workbench/2026.06/startup/base" /startup/base
 COPY "workbench/2026.06/startup/supervisord.conf" /etc/supervisor/supervisord.conf
-COPY "workbench/2026.06/startup/user-provisioning" /startup/user-provisioning
 COPY --chmod=600 "workbench/2026.06/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "workbench/2026.06/startup/user-provisioning/sssd.conf" /opt/startup-templates/sssd.conf
 COPY "workbench/2026.06/conf/jupyter/*" "workbench/2026.06/conf/launcher/*" "workbench/2026.06/conf/rstudio/*" "workbench/2026.06/conf/positron/*" "workbench/2026.06/conf/vscode/*" /etc/rstudio/
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
-    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+               /var/lib/rstudio-server/conf \
+               /var/lib/rstudio-server/body \
+               /var/lib/rstudio-server/proxy \
+               /var/lib/rstudio-launcher \
+               /var/log/rstudio \
+               /var/run/supervisor \
+    && chown -R rstudio-server:rstudio-server \
+        /var/lib/rstudio-server \
+        /var/lib/rstudio-launcher \
+        /var/log/rstudio \
+        /var/run/supervisor \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
+    && mkdir -p /var/run/rstudio-server \
+    && chmod 1777 /var/run/rstudio-server \
     && mkdir -p /startup/custom/ \
     && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
@@ -138,4 +158,5 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

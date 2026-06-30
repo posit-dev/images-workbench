@@ -1,5 +1,9 @@
 ; supervisor config file
-{%- if Image.IsDevelopmentVersion %}
+{%- set version_parts = Image.Version.split('.') %}
+{%- set rootless_support = Image.IsDevelopmentVersion
+    or (version_parts[0] | int > 2026)
+    or (version_parts[0] | int == 2026 and version_parts[1] | int >= 6) %}
+{%- if rootless_support %}
 {%- set supervisor_socket = "/var/run/supervisor/supervisor.sock" %}
 {%- set supervisor_pidfile = "/var/run/supervisor/supervisord.pid" %}
 {%- else %}
@@ -13,7 +17,7 @@ chmod=0700                       ; sockef file mode (default 0700)
 
 [supervisord]
 logfile=/dev/stdout ; (main log file;default $CWD/supervisord.log)
-{%- if not Image.IsDevelopmentVersion %}
+{%- if not rootless_support %}
 user=root
 {%- endif %}
 pidfile={{ supervisor_pidfile }} ; (supervisord pidfile;default supervisord.pid)
