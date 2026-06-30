@@ -1,0 +1,32 @@
+name: Clean
+on:
+  workflow_dispatch:
+
+  schedule:
+    # Nightly cleanup of dangling caches and temporary images across all
+    # version classes (standard, dev, matrix). Runs at 09:30 UTC, just ahead
+    # of the daily dev builds (Development - Workbench 09:45, Positron 09:55),
+    # so each night's sweep clears the previous day's artifacts before the new
+    # builds run.
+    - cron: "30 9 * * *" # At 09:30 every day
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  clean:
+    name: Clean
+    permissions:
+      contents: read
+      packages: write
+
+    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
+    with:
+      # Include every version class so a single pass covers the union of the
+      # former per-workflow clean jobs (standard + dev + matrix).
+      dev-versions: include
+      matrix-versions: include
+      remove-dangling-caches: true
+      remove-caches-older-than: 14
+      remove-dangling-temporary-images: true
