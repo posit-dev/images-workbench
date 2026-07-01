@@ -147,6 +147,7 @@ Posit publishes Workbench images for `linux/amd64` only. `linux/arm64` builds re
 | `PWB_TESTUSER`         | Test user name. If empty, the image creates no test user.                                                                                       |
 | `PWB_TESTUSER_PASSWD`  | Test user password                                                                                                                              |
 | `PWB_TESTUSER_UID`     | Test user UID (default: `10000` when `PWB_TESTUSER` is set)                                                                                     |
+| `PWB_SSSD`             | Enable `sssd` for user provisioning (default: `true`). Set to `false` to disable `sssd`.                                                        |
 | `PWB_STARTUP_DEBUG`    | Set to `1` for verbose startup logging                                                                                                          |
 | `PWB_DIAGNOSTIC_ENABLE`| When true, run `rstudio-server verify-installation` before server start and write results to `$PWB_DIAGNOSTIC_DIR/verify.log` (default: `false`) |
 | `PWB_DIAGNOSTIC_DIR`   | Directory for diagnostic logs (default: `/var/log/rstudio`)                                                                                     |
@@ -266,6 +267,8 @@ docker run -d \
 
 For custom authentication or session behavior with PAM, you might also need to modify the PAM configuration files in the container. See the [Workbench admin guide](https://docs.posit.co/ide/server-pro/admin/authenticating_users/authenticating_users.html) for more information.
 
+To disable `sssd` entirely, set `PWB_SSSD=false`. `sssd` requires root, so it is also skipped automatically when the container runs as a non-root user.
+
 ### Custom configuration
 
 Mount a custom configuration directory or file:
@@ -314,7 +317,7 @@ The image manages these services:
 
 - **Workbench**: the main server process. The startup configuration mounts at `/startup/base`.
 - **Job Launcher**: enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. The startup configuration mounts at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
-- **sssd**: provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, mount an empty volume over `/startup/user-provisioning/`.
+- **sssd**: provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, set `PWB_SSSD=false` or mount an empty volume over `/startup/user-provisioning/`.
 - **custom**: to run additional services inside the container, mount supervisord configuration files into `/startup/custom/`. `supervisord` starts and manages them alongside the built-in services. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
 
 ## User
