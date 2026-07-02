@@ -20,6 +20,10 @@ ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
 
+### Pre-create rstudio-server user (uid/gid 999) before any installs ###
+COPY --chmod=0755 workbench/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
+RUN /tmp/precreate_rstudio_user.sh && \
+    rm -f /tmp/precreate_rstudio_user.sh
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -68,7 +72,21 @@ COPY "workbench/2026.06/conf/jupyter/*" "workbench/2026.06/conf/launcher/*" "wor
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
-    && chown -R rstudio-server:rstudio-server /var/lib/rstudio-server/monitor \
+               /var/lib/rstudio-server/conf \
+               /var/lib/rstudio-server/body \
+               /var/lib/rstudio-server/proxy \
+               /var/lib/rstudio-launcher \
+               /var/log/rstudio \
+               /var/run/supervisor \
+    && chown -R rstudio-server:rstudio-server \
+        /var/lib/rstudio-server \
+        /var/lib/rstudio-launcher \
+        /var/log/rstudio \
+        /var/run/supervisor \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
+    && mkdir -p /var/run/rstudio-server \
+    && chmod 1777 /var/run/rstudio-server \
     && mkdir -p /startup/custom/ \
     && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \

@@ -4,18 +4,22 @@ Bakery handles bootstrapping the files into template rendering.
 -#}
 {%- import "python.j2" as python -%}
 {%- import "r.j2" as r -%}
+{%- set version_parts = Image.Version.split('.') -%}
+{%- set rootless_support = Image.IsDevelopmentVersion
+    or (version_parts[0] | int > 2026)
+    or (version_parts[0] | int == 2026 and version_parts[1] | int >= 6) -%}
 user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: {% if Image.IsDevelopmentVersion %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
+    gid: {% if rootless_support %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: {% if Image.IsDevelopmentVersion %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
+    gid: {% if rootless_support %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
 
 package:
   rstudio-server:
@@ -82,39 +86,46 @@ file:
   # Check for rstudio-launcher executable
   /usr/lib/rstudio-server/bin/rstudio-launcher:
     exists: true
-  {%- if Image.IsDevelopmentVersion %}
+  {%- if rootless_support %}
   # Check for rstudio-server runtime directories with correct ownership and setgid
   /var/lib/rstudio-server:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
     mode: "2775"
   /var/lib/rstudio-server/monitor/log:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
   /var/lib/rstudio-server/conf:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
   /var/lib/rstudio-server/body:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
   /var/lib/rstudio-server/proxy:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
   # rstudio-launcher resets its scratch directory to 0755 on startup, so we
   # only assert ownership here; the build-time setgid mode does not survive.
   /var/lib/rstudio-launcher:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
   /var/log/rstudio:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
     mode: "2775"
   /var/run/rstudio-server:
     exists: true
@@ -123,6 +134,7 @@ file:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
     mode: "2775"
   {%- else %}
   # Check for rstudio-server monitor log directory
@@ -158,7 +170,7 @@ file:
     owner: root
     group: root
     mode: "0600"
-  {%- if Image.IsDevelopmentVersion %}
+  {%- if rootless_support %}
   # sssd supervisord program is staged here; entrypoint installs it at runtime when root
   /opt/startup-templates/sssd.conf:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
@@ -245,7 +257,7 @@ file:
 
 command:
   "Ensure rstudio-server has permissions to log directory":
-    exec: {% if Image.IsDevelopmentVersion %}sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log{% else %}su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'{% endif %}
+    exec: {% if rootless_support %}sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log{% else %}su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'{% endif %}
     exit-status: 0
   "Ensure server log can be created":
     exec: touch /var/log/rstudio-server.log

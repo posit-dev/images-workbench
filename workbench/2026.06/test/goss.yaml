@@ -2,14 +2,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
+    gid: 999
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: {{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}
+    gid: 999
 
 package:
   rstudio-server:
@@ -74,11 +74,55 @@ file:
   # Check for rstudio-launcher executable
   /usr/lib/rstudio-server/bin/rstudio-launcher:
     exists: true
-  # Check for rstudio-server monitor log directory
+  # Check for rstudio-server runtime directories with correct ownership and setgid
+  /var/lib/rstudio-server:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
   /var/lib/rstudio-server/monitor/log:
     exists: true
     owner: rstudio-server
     group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/conf:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/body:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/proxy:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  # rstudio-launcher resets its scratch directory to 0755 on startup, so we
+  # only assert ownership here; the build-time setgid mode does not survive.
+  /var/lib/rstudio-launcher:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/log/rstudio:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
+  /var/run/rstudio-server:
+    exists: true
+    mode: "1777"
+  /var/run/supervisor:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ $version_split := split "." "2026.06.0+242.pro13" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
@@ -104,6 +148,14 @@ file:
     owner: root
     group: root
     mode: "0600"
+  # sssd supervisord program is staged here; entrypoint installs it at runtime when root
+  /opt/startup-templates/sssd.conf:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    contains:
+      - "/^\\[program:sssd\\]$/"
+  /usr/local/bin/entrypoint.sh:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    mode: "0755"
   # Check for repos.conf
   /etc/rstudio/repos.conf:
     exists: true
@@ -179,7 +231,7 @@ file:
 
 command:
   "Ensure rstudio-server has permissions to log directory":
-    exec: su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'
+    exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
     exit-status: 0
   "Ensure server log can be created":
     exec: touch /var/log/rstudio-server.log

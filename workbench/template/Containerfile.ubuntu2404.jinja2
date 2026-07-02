@@ -6,6 +6,10 @@ Bakery handles bootstrapping the files into template rendering.
 {%- import "python.j2" as python -%}
 {%- import "quarto.j2" as quarto -%}
 {%- import "r.j2" as r -%}
+{%- set version_parts = Image.Version.split('.') -%}
+{%- set rootless_support = Image.IsDevelopmentVersion
+    or (version_parts[0] | int > 2026)
+    or (version_parts[0] | int == 2026 and version_parts[1] | int >= 6) -%}
 {%- if Image.Variant != "Minimal" -%}
 # Build Python using uv in a separate stage
 {{ python.build_stage(Dependencies.python) }}
@@ -33,13 +37,13 @@ ENV PWB_LAUNCHER_TIMEOUT=10
 ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
 ENV PWB_DIAGNOSTIC_ENABLE=false
 ENV PWB_EXIT_AFTER_VERIFY=false
-{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+{%- if rootless_support and Image.Variant != "Minimal" %}
 ENV PWB_SSSD=true
 {%- endif %}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-{% if Image.IsDevelopmentVersion -%}
+{% if rootless_support -%}
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
@@ -94,18 +98,18 @@ RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
-{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+{%- if rootless_support and Image.Variant != "Minimal" %}
 COPY --chmod=0755 {{ Path.Image }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 {%- endif %}
 COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
 COPY "{{ Path.Version }}/startup/base" /startup/base
 COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 {%- if Image.Variant != "Minimal" %}
-{%- if not Image.IsDevelopmentVersion %}
+{%- if not rootless_support %}
 COPY "{{ Path.Version }}/startup/user-provisioning" /startup/user-provisioning
 {%- endif %}
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
-{%- if Image.IsDevelopmentVersion %}
+{%- if rootless_support %}
 COPY "{{ Path.Version }}/startup/user-provisioning/sssd.conf" /opt/startup-templates/sssd.conf
 {%- endif %}
 {%- endif %}
@@ -113,7 +117,7 @@ COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
-{%- if Image.IsDevelopmentVersion %}
+{%- if rootless_support %}
                /var/lib/rstudio-server/conf \
                /var/lib/rstudio-server/body \
                /var/lib/rstudio-server/proxy \
@@ -159,7 +163,7 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
-{%- if Image.IsDevelopmentVersion and Image.Variant != "Minimal" %}
+{%- if rootless_support and Image.Variant != "Minimal" %}
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 {%- endif %}
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
