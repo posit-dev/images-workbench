@@ -23,7 +23,6 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
-ARG WORKBENCH_VERSION="{{ Image.Version }}"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV PWB_STARTUP_DEBUG=0
@@ -65,15 +64,6 @@ COPY {{ Path.Version }}/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 ### Install wait-for-it ###
 COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
-### Install Workbench {{ Image.Version }} ###
-COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
-RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
-    /tmp/install_workbench.sh && \
-    rm -f /tmp/install_workbench.sh
-
-### Install Quarto to PATH ###
-RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
-
 {% if not Image.Variant == "Minimal" -%}
 ### Install R ###
 {{ r.run_install(Dependencies.R) }}
@@ -94,7 +84,18 @@ RUN {{ python.install_packages(python_version, "ipykernel") }} && \
 ### Install Pro Drivers ###
 {{ apt.run_install(packages="rstudio-drivers") }}
 RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
-{%- endif %}
+
+{% endif -%}
+
+### Install Workbench {{ Image.Version }} ###
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
+COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Install Quarto to PATH ###
+RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
