@@ -62,7 +62,7 @@ You can build Open Container Initiative (OCI) container images from the definiti
 Each Containerfile uses the root of the repository as the build context.
 
 ```shell
-PWB_VERSION="2026.06"
+PWB_VERSION="2026.07"
 
 # Build the standard Workbench image using docker
 docker buildx build \

@@ -1,0 +1,296 @@
+user:
+  rstudio-server:
+    exists: true
+    uid: 999
+    gid: 999
+    groups:
+      - rstudio-server
+
+group:
+  rstudio-server:
+    exists: true
+    gid: 999
+
+package:
+  rstudio-server:
+    installed: true
+
+  r-4.6.1:
+    installed: true
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+
+  {{ $apt_package_list_path := printf "/tmp/version/deps/%s-%s_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_package_list := readFile $apt_package_list_path | splitList "\n" }}
+  {{- range $apt_package_list }}
+  {{.}}:
+    installed: true
+  {{end}}
+  {{ if eq .Env.IMAGE_VARIANT "Standard" }}
+
+  {{ $apt_optional_package_list_path := printf "/tmp/version/deps/%s-%s_optional_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_optional_package_list := readFile $apt_optional_package_list_path | splitList "\n" }}
+  {{- range $apt_optional_package_list }}
+  {{.}}:
+    installed: true
+  {{end}}
+  {{ end }}
+
+port:
+  # WARNING: This test may fail depending on how ipv6 is configured on the host
+  # Known Issue with goss: https://github.com/goss-org/goss/issues/149
+  tcp:8787:
+    listening: true
+    ip:
+    - 0.0.0.0
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  tcp:5559:
+    listening: true
+    ip:
+    - 127.0.0.1
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+
+process:
+  rserver:
+    running: true
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  # The output from `ps` is trucated to 16 characters, so we check for `rstudio-launche` instead of `rstudio-launcher`
+  rstudio-launche:
+    running: true
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+
+file:
+  # Check that license files were not accidentally included in build
+  /etc/rstudio-server/license.lic:
+    exists: false
+  # Check that the RStudio Server installation directory exists
+  /usr/lib/rstudio-server:
+    exists: true
+  # Check for rserver executable
+  /usr/lib/rstudio-server/bin/rserver:
+    exists: true
+  # Check for rstudio-server executable
+  /usr/lib/rstudio-server/bin/rstudio-server:
+    exists: true
+  # Check for rstudio-launcher executable
+  /usr/lib/rstudio-server/bin/rstudio-launcher:
+    exists: true
+  # Check for rstudio-server runtime directories with correct ownership and setgid
+  /var/lib/rstudio-server:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
+  /var/lib/rstudio-server/monitor/log:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/conf:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/body:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/lib/rstudio-server/proxy:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  # rstudio-launcher resets its scratch directory to 0755 on startup, so we
+  # only assert ownership here; the build-time setgid mode does not survive.
+  /var/lib/rstudio-launcher:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+  /var/log/rstudio:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
+  /var/run/rstudio-server:
+    exists: true
+    mode: "1777"
+  /var/run/supervisor:
+    exists: true
+    owner: rstudio-server
+    group: rstudio-server
+    gid: 999
+    mode: "2775"
+  # Check for code-server executable (path varies based on RStudio Workbench version)
+  {{ $version_split := split "." "2026.07.0+139.pro9" }}
+  {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
+  /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
+    exists: true
+  {{ else }}
+  /usr/lib/rstudio-server/bin/code-server/bin/code-server:
+    exists: true
+  {{ end }}
+  # Check for vscode.conf and ensure VS Code is enabled
+  /etc/rstudio/vscode.conf:
+    exists: true
+    contents:
+      - "enabled=1"
+  # Check pam configuration for mkhomedir
+  /etc/pam.d/common-session:
+    exists: true
+    contents:
+      - "session required pam_mkhomedir.so skel=/etc/skel umask=0077"
+  # Check for sssd.conf
+  /etc/sssd/sssd.conf:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    owner: root
+    group: root
+    mode: "0600"
+  # sssd supervisord program is staged here; entrypoint installs it at runtime when root
+  /opt/startup-templates/sssd.conf:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    contains:
+      - "/^\\[program:sssd\\]$/"
+  /usr/local/bin/entrypoint.sh:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    mode: "0755"
+  # Check for repos.conf
+  /etc/rstudio/repos.conf:
+    exists: true
+    contents:
+      - "RSPM=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
+      - "CRAN=https://p3m.dev/cran/__linux__/{{ .Env.IMAGE_OS_CODENAME }}/latest"
+  # Quarto is bundled with Workbench.
+  /lib/rstudio-server/bin/quarto/bin/quarto:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/local/bin/quarto:
+    exists: true
+    filetype: symlink
+    linked-to: /lib/rstudio-server/bin/quarto/bin/quarto
+  # TinyTeX is installed under /opt/.TinyTeX (via HOME="/opt") so non-root runtime
+  # users can read the install; tlmgr path add symlinks the binaries into
+  # /usr/local/bin so they are on PATH.
+  /opt/.TinyTeX:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: directory
+  /usr/local/bin/tlmgr:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: symlink
+  /usr/local/bin/pdflatex:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: symlink
+  # Check for R installation
+
+  /opt/R/4.6.1/bin/R:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: file
+
+  # Check for Python installation
+
+  /opt/python/3.14.6/bin/python:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+
+  /opt/python/jupyter/bin/python:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+  /opt/python/jupyter/bin/jupyter:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+  /usr/local/bin/jupyter:
+    exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
+    filetype: symlink
+
+  # Check that job nodes are not created for the builder
+  /var/lib/rstudio-launcher/Local/jobs/buildkitsystem:
+    exists: false
+  /var/lib/rstudio-launcher/Local/jobs/buildkitsandbox:
+    exists: false
+
+  # Check that startup files were not accidentally included in build
+  # These can only be reliably checked for minimal variant for now, see #372
+
+  {{ if eq .Env.IMAGE_VARIANT "Minimal" }}
+  /etc/rstudio/launcher.pem:
+    exists: false
+  /etc/rstudio/launcher.pub:
+    exists: false
+  /var/lib/rstudio-server/secure-cookie-key:
+    exists: false
+  /var/lib/rstudio-server/session-rpc-key:
+    exists: false
+  /etc/rstudio/secure-cookie-key:
+    exists: false
+  /etc/rstudio/session-rpc-key:
+    exists: false
+  /var/lib/rstudio-server/rstudio.sqlite:
+    exists: false
+  {{ end }}
+
+
+command:
+  "Ensure rstudio-server has permissions to log directory":
+    exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
+    exit-status: 0
+  "Ensure server log can be created":
+    exec: touch /var/log/rstudio-server.log
+    exit-status: 0
+  "Verify Posit Workbench version":
+    exec: /usr/lib/rstudio-server/bin/rstudio-server version
+    exit-status: 0
+    stdout:
+      - "2026.07.0+139.pro9 Workbench"
+  "Verify Jupyter Notebook works":
+    exec: "echo '{ \"cells\": [], \"metadata\": {}, \"nbformat\": 4, \"nbformat_minor\": 2}' | /opt/python/jupyter/bin/jupyter nbconvert --to notebook --stdin --stdout"
+    timeout: 60000
+    exit-status: 0
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  "Verify R installation is version 4.6.1":
+    exec: /opt/R/4.6.1/bin/R --version
+    exit-status: 0
+    stdout:
+      - "R version 4.6.1"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+
+  "Verify Python installation is version 3.14.6":
+    exec: /opt/python/3.14.6/bin/python --version
+    exit-status: 0
+    stdout:
+      - "3.14.6"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+
+  "Verify Jupyter installation Python version":
+    exec: /opt/python/jupyter/bin/python --version
+    exit-status: 0
+    stdout:
+      - "3.14.6"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  "Verify system OpenSSL":
+    exec: which openssl
+    exit-status: 0
+    stdout:
+      - "/usr/bin/openssl"
+  "Verify Quarto":
+    exec: /usr/local/bin/quarto check
+    timeout: 120000
+    exit-status: 0
+  "Verify Quarto has TinyTeX installed":
+    exec: "HOME='/opt' quarto list tools"
+    exit-status: 0
+    timeout: 120000
+    stderr:
+      - "/tinytex\\s+Up to date/"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
+  "Verify TinyTeX is readable and executable by a non-root user":
+    # Runs tlmgr and pdflatex as `nobody` to confirm the /opt/.TinyTeX install
+    # is accessible to non-root. `command -v` also forces PATH resolution,
+    # not just direct invocation — proves the /usr/local/bin symlinks are on
+    # the user's PATH. Guards against regressions in placement, permissions,
+    # or PATH setup.
+    exec: su -s /bin/sh -c 'command -v tlmgr && command -v pdflatex && tlmgr --version && pdflatex --version' nobody
+    exit-status: 0
+    stdout:
+      - "tlmgr"
+      - "pdfTeX"
+    skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
