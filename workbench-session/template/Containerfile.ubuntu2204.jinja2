@@ -44,6 +44,8 @@ RUN case "${TARGETARCH}" in \
       arm64) TRIPLET=aarch64-linux-gnu ;; \
       *) echo "unsupported arch ${TARGETARCH}"; exit 1 ;; \
     esac && \
+    mkdir -p /usr/lib/rstudio-server/bin/jammy && \
+    touch /usr/lib/rstudio-server/bin/jammy/libnss_pwb.so && \
     ln -sf /usr/lib/rstudio-server/bin/jammy/libnss_pwb.so \
            "/usr/lib/${TRIPLET}/libnss_pwb.so.2" && \
     for db in passwd group shadow; do \
