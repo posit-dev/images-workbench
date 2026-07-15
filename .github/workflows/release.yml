@@ -9,7 +9,20 @@ on:
 
 
 jobs:
+  # Jobs that call a reusable workflow via `uses:` can't also set
+  # `environment:`, so the branch restriction lives in its own job and
+  # release depends on it.
+  main-only:
+    name: Main Only
+    runs-on: ubuntu-latest
+    permissions: {}
+    environment: production
+    steps:
+      - run: echo "Branch allowed by environment policy."
+
   release:
+    needs:
+      - main-only
     if: github.event_name == 'workflow_dispatch'
     permissions:
       contents: write
