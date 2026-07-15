@@ -352,7 +352,7 @@ The legacy image was published as `rstudio/rstudio-workbench` on Docker Hub and 
 
 ### Variants
 
-The legacy image shipped a single variant containing two versions of R and two versions of Python alongside many extraneous system packages. The Standard (`std`) variant is closest to the legacy image. It ships with one version of R, one version of Python, and a reduced set of system packages required for Workbench to run. The Minimal (`min`) variant has no equivalent in the legacy image. See [Image variants](#image-variants).
+The legacy image shipped a single variant containing two versions of R and two versions of Python alongside many extraneous system packages. The Standard (`std`) variant is closest to the legacy image; the Minimal (`min`) variant has no equivalent. See [Image variants](#image-variants) for what each includes.
 
 ### Environment variables
 
@@ -369,10 +369,10 @@ License, launcher, and test user environment variables use the `PWB_` prefix:
 | `PWB_TESTUSER_PASSWD`  | `RSW_TESTUSER_PASSWD`  |
 | `PWB_TESTUSER_UID`     | `RSW_TESTUSER_UID`     |
 
-The image accepts the legacy `RSW_` names as a fallback during the deprecation window.
+The image accepts the legacy `RSW_` names as a fallback.
 
 > [!NOTE]
-> Posit supports legacy `RSW_` variables but plans to deprecate them after 2026. For more details and updates, see the <a href="https://docs.posit.co/ide/server-pro/news/">Workbench release notes</a>. For future deployments, always use the `PWB_` prefix to ensure forward compatibility.
+> Posit plans to deprecate `RSW_` variables after 2026; see the <a href="https://docs.posit.co/ide/server-pro/news/">Workbench release notes</a> for updates. Use the `PWB_` prefix for new deployments.
 
 ### Privileged mode
 
@@ -410,15 +410,6 @@ For production deployments, use license files rather than license keys.
 
 ### Hardware locking
 
-Workbench hardware-locks license state files to a specific machine. Changes to MAC addresses, hostnames, or container orchestration platforms, such as Kubernetes, can invalidate the license state, requiring reactivation.
+Workbench hardware-locks license state files to a specific machine. Changes to MAC addresses, hostnames, or container orchestration platforms, such as Kubernetes, can invalidate the license state, requiring reactivation. See [License activation](#license-activation) for the directories to mount for each license type.
 
-To preserve license state across container restarts, mount these directories to persistent storage:
-
-* License key
-  * `/var/lib/.local`
-  * `/var/lib/.prof`
-  * `/var/lib/rstudio-woorkbench`
-* Floating license
-  * `/var/lib/.TurboFloat`
-
-Files in these directories are hardware-locked and not transferable between hosts. Gracefully shut down containers and allow license deactivation before changing host hardware or firmware (for example, upgrading a network card or updating BIOS). Apply the same caution before changing container resources (for example, the network driver or allocated CPU cores).
+Gracefully shut down containers and allow license deactivation before changing host hardware or firmware (for example, upgrading a network card or updating BIOS). Apply the same caution before changing container resources (for example, the network driver or allocated CPU cores).
