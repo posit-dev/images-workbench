@@ -55,7 +55,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@feat/parallel-build-calls
     with:
       dev-versions: "exclude"
       matrix-versions: "exclude"
@@ -65,7 +65,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@feat/parallel-build-calls
     with:
       dev-versions: "only"
       matrix-versions: "include"
@@ -75,7 +75,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@main
+    uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@feat/parallel-build-calls
     with:
       matrix-versions: "only"
 
