@@ -26,12 +26,12 @@ Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 
 ## Images
 
-| Image | Docker Hub | GitHub Container Registry |
-|:------|:-----------|:--------------------------|
-| [workbench](./workbench/) | [`docker.io/posit/workbench`](https://hub.docker.com/r/posit/workbench) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
-| [workbench-session](./workbench-session/) | [`docker.io/posit/workbench-session`](https://hub.docker.com/r/posit/workbench-session) | [`ghcr.io/posit-dev/workbench-session`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
-| [workbench-session-init](./workbench-session-init/) | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
-| [workbench-positron-init](./workbench-positron-init/) | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
+| Image | Description | Docker Hub | GitHub Container Registry |
+|:------|:------------|:-----------|:--------------------------|
+| [workbench](./workbench/) | Provides the Workbench application.<br>This image is for all containerized deployments of Workbench. | [`docker.io/posit/workbench`](https://hub.docker.com/r/posit/workbench) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
+| [workbench-session](./workbench-session/) | Provides the session runtime environment for Workbench.<br>This image is used for Kubernetes deployments. | [`docker.io/posit/workbench-session`](https://hub.docker.com/r/posit/workbench-session) | [`ghcr.io/posit-dev/workbench-session`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
+| [workbench-session-init](./workbench-session-init/) | An init container for Workbench that pulls runtime components into a shared volume.<br>This image is for Kubernetes deployments. | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| [workbench-positron-init](./workbench-positron-init/) | An init container for Workbench that pulls Positron IDE components into a shared volume.<br>This optional image lets Kubernetes deployments upgrade Positron independently of Workbench releases. | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
 Posit publishes additional container images to [Docker Hub](https://hub.docker.com/u/posit) and [GitHub Container Registry](https://github.com/orgs/posit-dev/packages).
 
