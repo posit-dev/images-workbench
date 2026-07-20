@@ -91,19 +91,3 @@ jobs:
       cache: ${{ github.event_name != 'workflow_dispatch' || inputs.cache }}
       # Push on merges to main, scheduled rebuilds, and dispatches targeting main.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
-
-  clean:
-    name: Clean
-    if: always() && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      packages: write
-    needs:
-      - ci
-
-    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
-    with:
-      dev-versions: "only"
-      remove-dangling-caches: true
-      remove-caches-older-than: 14
-      remove-temporary-images-older-than: 2

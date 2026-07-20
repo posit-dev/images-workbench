@@ -31,7 +31,6 @@ jobs:
         id: alls-green
         with:
           jobs: ${{ toJSON(needs) }}
-          allowed-skips: clean
       - if: always() && github.ref == 'refs/heads/main'
         continue-on-error: true
         uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
@@ -60,19 +59,3 @@ jobs:
       matrix-versions: only
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
-
-  clean:
-    name: Clean
-    if: always() && github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      packages: write
-    needs:
-      - ci
-
-    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
-    with:
-      matrix-versions: "only"
-      remove-dangling-caches: true
-      remove-caches-older-than: 14
-      remove-temporary-images-older-than: 2
