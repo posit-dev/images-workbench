@@ -87,8 +87,8 @@ Each image serves a different role. The right image to customize depends on what
 
 | I want to… | Customize | Example |
 |:-----------|:----------|:--------|
-| Install specific versions of R or Python in sessions | `workbench-session` | [common/R](https://github.com/posit-dev/images-examples/tree/main/extending/common/R) · [common/python](https://github.com/posit-dev/images-examples/tree/main/extending/common/python) |
-| Add system libraries that session packages need | `workbench-session` | [common/system-dependencies](https://github.com/posit-dev/images-examples/tree/main/extending/common/system-dependencies) |
+| Add R or Python packages to sessions | `workbench-session` | [session/r-python-packages](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/r-python-packages) |
+| Add system libraries that session packages need | `workbench-session` | [session/system-dependencies](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/system-dependencies) |
 | Change Workbench server configuration | `workbench` (Minimal) | [server/config](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/config) |
 | Install additional languages on the Workbench server | `workbench` (Minimal) | [common/R](https://github.com/posit-dev/images-examples/tree/main/extending/common/R) · [common/python](https://github.com/posit-dev/images-examples/tree/main/extending/common/python) |
 | Configure a Python package index | any | [Admin docs](https://docs.posit.co/ide/server-pro/admin/python/package_installation.html#setting-a-python-package-index-for-sessions) |
