@@ -39,11 +39,6 @@ Posit publishes additional container images to [Docker Hub](https://hub.docker.c
 
 The fastest way to get started is to pull and run a pre-built image. See each image's documentation for Quick Start examples, configuration, and environment variables.
 
-- [Workbench](./workbench/): the Workbench server
-- [Workbench Session](./workbench-session/): session images for Kubernetes
-- [Workbench Session Init](./workbench-session-init/): init container for Kubernetes session deployments
-- [Workbench Positron Init](./workbench-positron-init/): init container for Positron IDE in Kubernetes
-
 See the [Workbench installation guide](https://docs.posit.co/ide/server-pro/getting_started/installation/) for full setup instructions.
 
 ## Deploying on Kubernetes
