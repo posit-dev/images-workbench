@@ -27,23 +27,18 @@ Container images for [Workbench](https://docs.posit.co/ide/server-pro).
 
 ## Images
 
-| Image | Docker Hub | GitHub Container Registry |
-|:------|:-----------|:--------------------------|
-| [workbench](./workbench/) | [`docker.io/posit/workbench`](https://hub.docker.com/r/posit/workbench) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
-| [workbench-session](./workbench-session/) | [`docker.io/posit/workbench-session`](https://hub.docker.com/r/posit/workbench-session) | [`ghcr.io/posit-dev/workbench-session`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
-| [workbench-session-init](./workbench-session-init/) | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
-| [workbench-positron-init](./workbench-positron-init/) | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
+| Image | Description | Docker Hub | GitHub Container Registry |
+|:------|:------------|:-----------|:--------------------------|
+| [workbench](./workbench/) | Provides the Workbench application.<br>This image is for all containerized deployments of Workbench. | [`docker.io/posit/workbench`](https://hub.docker.com/r/posit/workbench) | [`ghcr.io/posit-dev/workbench`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench) |
+| [workbench-session](./workbench-session/) | Provides the session runtime environment for Workbench.<br>This image is used for Kubernetes deployments. | [`docker.io/posit/workbench-session`](https://hub.docker.com/r/posit/workbench-session) | [`ghcr.io/posit-dev/workbench-session`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session) |
+| [workbench-session-init](./workbench-session-init/) | An init container for Workbench that pulls runtime components into a shared volume.<br>This image is for Kubernetes deployments. | [`docker.io/posit/workbench-session-init`](https://hub.docker.com/r/posit/workbench-session-init) | [`ghcr.io/posit-dev/workbench-session-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-session-init) |
+| [workbench-positron-init](./workbench-positron-init/) | An init container for Workbench that pulls Positron IDE components into a shared volume.<br>This optional image lets Kubernetes deployments upgrade Positron independently of Workbench releases. | [`docker.io/posit/workbench-positron-init`](https://hub.docker.com/r/posit/workbench-positron-init) | [`ghcr.io/posit-dev/workbench-positron-init`](https://github.com/posit-dev/images-workbench/pkgs/container/workbench-positron-init) |
 
 Posit publishes additional container images to [Docker Hub](https://hub.docker.com/u/posit) and [GitHub Container Registry](https://github.com/orgs/posit-dev/packages).
 
 ## Running the images
 
 The fastest way to get started is to pull and run a pre-built image. See each image's documentation for Quick Start examples, configuration, and environment variables.
-
-- [Workbench](./workbench/): the Workbench server
-- [Workbench Session](./workbench-session/): session images for Kubernetes
-- [Workbench Session Init](./workbench-session-init/): init container for Kubernetes session deployments
-- [Workbench Positron Init](./workbench-positron-init/): init container for Positron IDE in Kubernetes
 
 See the [Workbench installation guide](https://docs.posit.co/ide/server-pro/getting_started/installation/) for full setup instructions.
 
@@ -89,9 +84,28 @@ To build images with `bakery` or run the test suite, see the [contributing guide
 For image maintainers, the contributing guide also covers adding versions, updating
 dependencies, backporting to older versions, known footguns, and CI failure diagnosis.
 
+## Customizing images
+
+Each image serves a different role. The right image to customize depends on what you want to change.
+
+| I want to… | Customize | Example |
+|:-----------|:----------|:--------|
+| Add R or Python packages to sessions | `workbench-session` | [session/r-python-packages](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/r-python-packages) |
+| Add system libraries that session packages need | `workbench-session` | [session/system-dependencies](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session/system-dependencies) |
+| Change Workbench server configuration | `workbench` (Minimal) | [server/config](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/config) |
+| Install additional languages on the Workbench server | `workbench` (Minimal) | [common/R](https://github.com/posit-dev/images-examples/tree/main/extending/common/R) · [common/python](https://github.com/posit-dev/images-examples/tree/main/extending/common/python) |
+| Configure a Python package index | any | [Admin docs](https://docs.posit.co/ide/server-pro/admin/python/package_installation.html#setting-a-python-package-index-for-sessions) |
+| Install Posit Pro Drivers on the Workbench server | `workbench` (Minimal) | [server/pro-drivers](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/pro-drivers) |
+| Pre-install VS Code extensions | `workbench` (Standard) | [server/vs-code-extensions](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server/vs-code-extensions) |
+| Bundle session components into a self-contained session image | `workbench-session-init` + `workbench-session` | [session-init](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/session-init) |
+| Run a newer Positron version than the Workbench server ships | `workbench-positron-init` | Helm `components.positron.version` |
+| Upgrade the Workbench server version | `workbench` + `workbench-session-init` (keep in sync) | — |
+
+For detailed guidance and full example code, see the [Workbench extending examples](https://github.com/posit-dev/images-examples/tree/main/extending/workbench).
+
 ## Related repositories
 
-This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. To extend the Minimal image with additional languages or system dependencies, see the [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending). For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
+This repository is part of the [Posit Container Images](https://github.com/posit-dev/images) ecosystem. For shared build tooling and CI workflows, see [images-shared](https://github.com/posit-dev/images-shared).
 
 ## Share your feedback
 

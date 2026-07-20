@@ -114,7 +114,7 @@ Two variants are available:
 
 Each tagged image bundles a fixed set of dependencies. Both variants ship the `YYYY.MM` release of Workbench at the latest patch release available when the image was built. The `std` variant additionally ships one R version and one Python version, locked to the latest available at build time. The Containerfiles in this repository under `workbench/<version>/` document the exact versions in any tag. No arguments are overridden at build time.
 
-See [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending) for how to build on the Minimal image.
+See [server extending examples](https://github.com/posit-dev/images-examples/tree/main/extending/workbench/server) for how to build on the Minimal image.
 
 ## Image tags
 

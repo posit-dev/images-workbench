@@ -59,6 +59,8 @@ components:
       repository: "ghcr.io/posit-dev/workbench-positron-init"
 ```
 
+For a guide to which Workbench image to customize for different goals, see the [Customizing images](https://github.com/posit-dev/images-workbench#customizing-images) section in the Workbench repository README.
+
 ## Image tags
 
 Posit publishes images to:
