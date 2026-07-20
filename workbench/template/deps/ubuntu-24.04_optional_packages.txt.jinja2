@@ -37,8 +37,8 @@ libicu-dev
 libxml2-dev
 libxslt1-dev
 {# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc.
-   libgdal-bin requires default-libmysqlclient-dev and must be removed to install libmariadb-dev
-   and libmariadb-dev-compat as the packages conflict. -#}
+   NOTE: keep default-libmysqlclient-dev. Do NOT substitute libmariadb-dev-compat -- it declares
+   Conflicts: libmysqlclient-dev, which libgdal-dev needs, so the swap breaks the build. -#}
 default-libmysqlclient-dev
 libsqlite3-dev
 unixodbc-dev
