@@ -44,6 +44,17 @@ jobs:
           result: ${{ steps.alls-green.outcome }}
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
 
+  # Jobs that call a reusable workflow via `uses:` can't also set
+  # `environment:`, so the branch restriction lives in its own job and
+  # build depends on it.
+  main-only:
+    name: Main Only
+    runs-on: ubuntu-latest
+    permissions: {}
+    environment: production
+    steps:
+      - run: echo "Branch allowed by environment policy."
+
   build:
     name: Build
     # Build all images, excluding dev versions.
@@ -51,6 +62,8 @@ jobs:
     # Builds all versions of each image in parallel.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
+    needs:
+      - main-only
     permissions:
       contents: read
       packages: write
