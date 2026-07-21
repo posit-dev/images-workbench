@@ -17,9 +17,14 @@ RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Tim
         ca-certificates \
         gnupg \
         tar && \
+    apt-get install -yqq --no-install-recommends locales && \
+    localedef -i en_US -f UTF-8 en_US.UTF-8 && \
     bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 # Download the RStudio Workbench session components
 RUN case ${TARGETARCH} in \
@@ -28,7 +33,7 @@ RUN case ${TARGETARCH} in \
       *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     mkdir -p /pwb-staging && \
-    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/$CDN_ARCH/rsp-session-multi-linux-2026.07.0-139.pro9-$CDN_ARCH.tar.gz" && \
+    curl -fsSL -o /pwb-staging/rsp-session-multi-linux.tar.gz "https://s3.amazonaws.com/rstudio-ide-build/session/multi/$CDN_ARCH/rsp-session-multi-linux-2026.07.1-147.pro6-$CDN_ARCH.tar.gz" && \
     mkdir -p /opt/session-components && \
     tar -C /opt/session-components -xpf /pwb-staging/rsp-session-multi-linux.tar.gz && \
     chmod 755 /opt/session-components && \
