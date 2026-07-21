@@ -6,6 +6,10 @@ on:
         description: "Product version (e.g. 2026.02.1+500.pro12)"
         required: true
         type: string
+      positron-version:
+        description: "Positron version shipped with this release (e.g. 2026.07.1-5). Optional; when omitted the Positron README is left as-is."
+        required: false
+        type: string
 
 
 jobs:
@@ -30,6 +34,7 @@ jobs:
     uses: posit-dev/images-shared/.github/workflows/product-release.yml@main
     with:
       version: ${{ inputs.version }}
+      positron-version: ${{ inputs.positron-version }}
       images: "workbench workbench-session-init"
     secrets:
       APP_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
