@@ -37,9 +37,14 @@ RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Tim
         ca-certificates \
         gnupg \
         tar && \
+    apt-get install -yqq --no-install-recommends locales && \
+    localedef -i en_US -f UTF-8 en_US.UTF-8 && \
     bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 ## Install Apt Packages ###
 COPY workbench/2026.07/deps/ubuntu-24.04_packages.txt /tmp/packages.txt
@@ -51,8 +56,8 @@ RUN apt-get update -yqq && \
 ### Install wait-for-it ###
 COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
-### Install Workbench 2026.07.0+139.pro9 ###
-ARG WORKBENCH_VERSION="2026.07.0+139.pro9"
+### Install Workbench 2026.07.1+147.pro6 ###
+ARG WORKBENCH_VERSION="2026.07.1+147.pro6"
 COPY --chmod=0755 workbench/2026.07/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \

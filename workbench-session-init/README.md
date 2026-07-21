@@ -105,7 +105,7 @@ The container starts as `root` so the session container can read the session com
 You can pull the session components into a custom session image at build time using a multi-stage build:
 
 ```dockerfile
-FROM ghcr.io/posit-dev/workbench-session-init:2026.07.0 AS session-init
+FROM ghcr.io/posit-dev/workbench-session-init:2026.07.1 AS session-init
 
 FROM your-custom-base
 COPY --from=session-init /opt/session-components /opt/session-components
