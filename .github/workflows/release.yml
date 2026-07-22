@@ -24,6 +24,9 @@ jobs:
 
   trigger-specialized:
     needs: release
+    # Disabled for this test branch to avoid cascading a real release into
+    # images-specialized. Remove this line when testing is done.
+    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
