@@ -45,7 +45,7 @@ For Kubernetes deployments, Workbench uses these images together. See the [repos
 ### Quick start
 
 ```bash
-PWB_VERSION="latest"  # or a specific version like "2026.07.1"
+PWB_VERSION="latest"  # or a specific version like "2038.01.1"
 PWB_IMAGE="ghcr.io/posit-dev/workbench"  # or docker.io/posit/workbench
 PWB_LICENSE_FILE_HOST_PATH="/path/to/license.lic"
 PWB_LICENSE_FILE_PATH="/etc/rstudio-server/license.lic"  # this is the default path for the `PWB_LICENSE_FILE_PATH` container environment variable, included for illustrative purposes
@@ -68,7 +68,7 @@ Access Workbench at `http://localhost:8787`. Log in with username `posit` and pa
 ### With a custom configuration file
 
 ```bash
-PWB_VERSION="latest"  # or a specific version like "2026.07.1"
+PWB_VERSION="latest"  # or a specific version like "2038.01.1"
 PWB_IMAGE="ghcr.io/posit-dev/workbench"  # or docker.io/posit/workbench
 PWB_LICENSE_FILE_HOST_PATH="/path/to/license.lic"
 PWB_CONFIG_HOST_PATH="/path/to/rstudio"
