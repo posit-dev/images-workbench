@@ -283,6 +283,14 @@ images:
     buildSecrets:
       - id: github_token
         envVar: GITHUB_TOKEN
+    variants:
+      - name: Standard
+        extension: std
+        tagDisplayName: std
+        primary: true
+      - name: Minimal
+        extension: min
+        tagDisplayName: min
     options:
       - tool: soci
         enabled: true

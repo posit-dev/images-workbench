@@ -5,7 +5,6 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:22.04"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
-ARG WORKBENCH_VERSION="2026.06.0+242.pro13"
 ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
 
 ENV PWB_STARTUP_DEBUG=0
@@ -53,6 +52,7 @@ RUN apt-get update -yqq && \
 COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 ### Install Workbench 2026.06.0+242.pro13 ###
+ARG WORKBENCH_VERSION="2026.06.0+242.pro13"
 COPY --chmod=0755 workbench/2026.06/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \
@@ -60,8 +60,6 @@ RUN \
 
 ### Install Quarto to PATH ###
 RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
-
-
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2026.06/scripts/startup.sh" /usr/local/bin/startup.sh

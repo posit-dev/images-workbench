@@ -11,6 +11,15 @@ package:
   {{.}}:
     installed: true
   {{end}}
+  {{ if eq .Env.IMAGE_VARIANT "Standard" }}
+
+  {{ $apt_optional_package_list_path := printf "/tmp/version/deps/%s-%s_optional_packages.txt" .Env.IMAGE_OS_NAME .Env.IMAGE_OS_VERSION }}
+  {{ $apt_optional_package_list := readFile $apt_optional_package_list_path | splitList "\n" }}
+  {{- range $apt_optional_package_list }}
+  {{.}}:
+    installed: true
+  {{end}}
+  {{ end }}
   {%- endraw %}
   quarto:
     installed: true

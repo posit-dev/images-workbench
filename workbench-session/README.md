@@ -55,14 +55,16 @@ Posit publishes images to:
 - Docker Hub: `docker.io/posit/workbench-session`
 - GitHub Container Registry: `ghcr.io/posit-dev/workbench-session`
 
-Ubuntu 24.04 is the default OS.
+Ubuntu 24.04 is the default OS. The Standard (`std`) variant is the default; tags without a variant suffix resolve to it.
 
-The tag format is: `R{r_version}-python{python_version}-{os}`
+The tag format is: `R{r_version}-python{python_version}-{os}[-{variant}]`
 
 Examples:
-- `R4.5.2-python3.14.3-ubuntu-24.04` — R 4.5.2, Python 3.14.3, Ubuntu 24.04
-- `R4.4.3-python3.12.12-ubuntu-22.04` — R 4.4.3, Python 3.12.12, Ubuntu 22.04
-- `R4.3.3-python3.11.15-ubuntu-24.04` — R 4.3.3, Python 3.11.15, Ubuntu 24.04
+- `R4.5.2-python3.14.3-ubuntu-24.04` — R 4.5.2, Python 3.14.3, Ubuntu 24.04, standard variant
+- `R4.5.2-python3.14.3-ubuntu-24.04-std` — Explicit standard variant
+- `R4.5.2-python3.14.3-ubuntu-24.04-min` — Minimal variant
+- `R4.4.3-python3.12.12-ubuntu-22.04` — R 4.4.3, Python 3.12.12, Ubuntu 22.04, standard variant
+- `R4.3.3-python3.11.15-ubuntu-24.04` — R 4.3.3, Python 3.11.15, Ubuntu 24.04, standard variant
 
 ## Architectures
 
@@ -85,6 +87,19 @@ Each image includes:
 | Posit Professional Drivers | `/opt/rstudio-drivers/`             |
 
 These images do not bundle the Workbench session components themselves. The `workbench-session-init` init container provides those components at runtime through a shared volume.
+
+## Image variants
+
+Two variants are available:
+
+| Variant | Description |
+|---|---|
+| Standard (`std`) | Opinionated image, runs out of the box. Bundles R, Python, Jupyter, Quarto, TinyTeX, and Posit Professional Drivers, plus a curated set of system development libraries that cover the most commonly used CRAN and PyPI packages. |
+| Minimal (`min`) | Same runtime stack as Standard (R, Python, Jupyter, Quarto, TinyTeX, Posit Professional Drivers) without the additional system development libraries. Use this variant as a starting point for custom images when you want to control which system libraries are present. |
+
+Both variants ship the same R, Python, Jupyter, Quarto, TinyTeX, and Posit Professional Drivers versions for a given tag. The Containerfiles in this repository under `workbench-session/matrix/` document the exact packages installed in any tag.
+
+See [extending examples](https://github.com/posit-dev/images-examples/tree/main/extending) for how to build on the Minimal image.
 
 ## User
 
