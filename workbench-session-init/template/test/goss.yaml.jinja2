@@ -41,10 +41,6 @@ file:
     exists: true
     filetype: file
     mode: "0755"
-  /opt/session-components/bin/rserver-url:
-    exists: true
-    filetype: file
-    mode: "0755"
   /opt/session-components/bin/rhel9:
     exists: true
     filetype: directory
@@ -75,6 +71,13 @@ file:
     filetype: file
     mode: "0755"
   /opt/session-components/bin/pwb-mkhomedir:
+    exists: true
+    filetype: file
+    mode: "0755"
+  {#- top-level rserver-url is the dispatch shim added alongside the
+      in-place bin/<platform>/ layout; older tarballs only ship it
+      per-distro under bin/<platform>/ #}
+  /opt/session-components/bin/rserver-url:
     exists: true
     filetype: file
     mode: "0755"
