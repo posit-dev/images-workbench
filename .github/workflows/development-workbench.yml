@@ -75,6 +75,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
     secrets:
