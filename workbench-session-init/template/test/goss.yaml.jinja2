@@ -1,9 +1,3 @@
-{%- set version_parts = Image.Version.split('.') -%}
-{#- shared-run was split into shared-run-includes/rsession-run-includes and
-    pwb-mkhomedir was added in 2026.08 (rstudio-pro#11895, rstudio-pro#11938) -#}
-{%- set split_run_includes = Image.IsDevelopmentVersion
-    or (version_parts[0] | int > 2026)
-    or (version_parts[0] | int == 2026 and version_parts[1] | int >= 8) -%}
 file:
   /opt/session-components/:
     exists: true
@@ -61,7 +55,9 @@ file:
     filetype: directory
     mode: "0755"
   {% raw %}{{- end }}{% endraw %}
-{%- if split_run_includes %}
+  {#- shared-run was split and pwb-mkhomedir/rserver-url added in 2026.08
+      (rstudio-pro#11895, #11938); rendered files for older versions keep
+      the shared-run test. #}
   /opt/session-components/bin/shared-run-includes:
     exists: true
     filetype: file
@@ -74,19 +70,10 @@ file:
     exists: true
     filetype: file
     mode: "0755"
-  {#- top-level rserver-url is the dispatch shim added alongside the
-      in-place bin/<platform>/ layout; older tarballs only ship it
-      per-distro under bin/<platform>/ #}
   /opt/session-components/bin/rserver-url:
     exists: true
     filetype: file
     mode: "0755"
-{%- else %}
-  /opt/session-components/bin/shared-run:
-    exists: true
-    filetype: file
-    mode: "0755"
-{%- endif %}
   /opt/session-components/R:
     exists: true
     filetype: directory
