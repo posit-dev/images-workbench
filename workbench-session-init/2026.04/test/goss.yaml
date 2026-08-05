@@ -43,9 +43,6 @@ file:
     exists: true
     filetype: directory
     mode: "0755"
-  # opensuse15 and rhel8 are only shipped in the amd64 build of the
-  # upstream rsp-session-multi-linux tarball.
-  {{- if eq .Env.IMAGE_OS_PLATFORM "linux/amd64" }}
   /opt/session-components/bin/opensuse15:
     exists: true
     filetype: directory
@@ -54,7 +51,6 @@ file:
     exists: true
     filetype: directory
     mode: "0755"
-  {{- end }}
   /opt/session-components/bin/shared-run:
     exists: true
     filetype: file
