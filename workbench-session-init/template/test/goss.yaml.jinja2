@@ -55,7 +55,22 @@ file:
     filetype: directory
     mode: "0755"
   {% raw %}{{- end }}{% endraw %}
-  /opt/session-components/bin/shared-run:
+  {#- shared-run was split and pwb-mkhomedir/rserver-url added in 2026.08
+      (rstudio-pro#11895, #11938); rendered files for older versions keep
+      the shared-run test. #}
+  /opt/session-components/bin/shared-run-includes:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rsession-run-includes:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/pwb-mkhomedir:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rserver-url:
     exists: true
     filetype: file
     mode: "0755"
