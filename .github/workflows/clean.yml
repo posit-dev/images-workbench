@@ -50,3 +50,18 @@ jobs:
       remove-caches-older-than: 14
       remove-dangling-temporary-images: false
       remove-temporary-images-older-than: 2
+
+  clean-content-development:
+    name: Clean Content Development
+    permissions:
+      contents: read
+      packages: write
+
+    uses: "posit-dev/images-shared/.github/workflows/clean.yml@main"
+    with:
+      dev-versions: "only"
+      matrix-versions: "only"
+      remove-dangling-caches: true
+      remove-caches-older-than: 7
+      remove-dangling-temporary-images: false
+      remove-temporary-images-older-than: 2
