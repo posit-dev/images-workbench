@@ -77,7 +77,7 @@ jobs:
       packages: write
       id-token: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@feat/wizcli-security-scan"
     secrets:
       AWS_ROLE: ${{ secrets.AWS_ROLE }}
       WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
@@ -97,5 +97,7 @@ jobs:
       # `inputs.cache` is unset, so default to true (preserves prior behavior). Only
       # an explicit workflow_dispatch with `cache: false` disables the registry cache.
       cache: ${{ github.event_name != 'workflow_dispatch' || inputs.cache }}
-      # Push on merges to main, scheduled rebuilds, and dispatches targeting main.
-      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+      # [REVERT ME] Forced true for CI testing to exercise Scan; normally
+      # gated to main. Push on merges to main, scheduled rebuilds, and
+      # dispatches targeting main.
+      push: true
