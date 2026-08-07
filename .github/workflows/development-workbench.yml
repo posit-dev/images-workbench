@@ -85,6 +85,10 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
+      # [REVERT ME] Install bakery from the wizcli branch too, not just
+      # point the workflow ref there — otherwise setup-bakery installs
+      # from images-shared@main, which lacks --policies/--projects/--dev-spec.
+      version: "feat/wizcli-security-scan"
       dev-versions: "only"
       matrix-versions: "exclude"
       # Match workbench and workbench-session-init, but not workbench-positron-init.
