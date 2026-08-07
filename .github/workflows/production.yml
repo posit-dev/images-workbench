@@ -11,9 +11,10 @@ on:
       - main
 
 
+# Production and session image builds share a concurrency group so only one
+# of these workflows can run at a time.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: true
+  group: workbench-image-build
 
 jobs:
   ci:

@@ -29,7 +29,7 @@ on:
 
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  group: workbench-development-image-build
   cancel-in-progress: true
 
 jobs:
