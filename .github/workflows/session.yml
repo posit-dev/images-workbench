@@ -52,13 +52,14 @@ jobs:
       packages: write
       id-token: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@feat/trivy-security-scan"
     secrets:
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
       DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
       AWS_ROLE: ${{ secrets.AWS_ROLE }}
     with:
+      version: feat/trivy-security-scan
       matrix-versions: only
       temp-registry: "565037064999.dkr.ecr.us-east-2.amazonaws.com/images"
       # Push images only for merges into main and weekly schduled re-builds.

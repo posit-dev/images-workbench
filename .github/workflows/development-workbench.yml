@@ -77,10 +77,11 @@ jobs:
       packages: write
       id-token: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@feat/trivy-security-scan"
     secrets:
       AWS_ROLE: ${{ secrets.AWS_ROLE }}
     with:
+      version: feat/trivy-security-scan
       dev-versions: "only"
       matrix-versions: "exclude"
       # Match workbench and workbench-session-init, but not workbench-positron-init.
