@@ -1,0 +1,6 @@
+{
+  "extensions.autoCheckUpdates": false,
+  "extensions.autoUpdate": false,
+  "quarto.path": "/usr/lib/rstudio-server/bin/quarto/bin/quarto",
+  "terminal.integrated.defaultProfile.linux": "bash"
+}
