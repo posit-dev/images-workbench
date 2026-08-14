@@ -11,7 +11,7 @@ ARG TARGETARCH=${BUILDARCH}
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-### Initialize PTI in container ###
+### Setup environment ###
 {{ apt.run_setup() }}
 
 # Download the RStudio Workbench session components
