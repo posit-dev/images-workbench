@@ -76,6 +76,10 @@ images:
         product: workbench
         channel: preview
         os:
+          - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
           - name: Ubuntu 24.04
             primary: true
             platforms:
@@ -94,6 +98,10 @@ images:
           - name: Ubuntu 22.04
           - name: Ubuntu 24.04
             primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+          - name: Ubuntu 26.04
             platforms:
               - linux/amd64
               - linux/arm64
@@ -331,6 +339,10 @@ images:
           constraint:
             latest: true
       os:
+        - name: Ubuntu 26.04
+          platforms:
+            - linux/amd64
+            - linux/arm64
         - name: Ubuntu 24.04
           primary: true
           platforms:
