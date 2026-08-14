@@ -4,10 +4,6 @@ Bakery handles bootstrapping the files into template rendering.
 -#}
 {%- import "python.j2" as python -%}
 {%- import "r.j2" as r -%}
-{%- set version_parts = Image.Version.split('.') -%}
-{%- set rootless_support = Image.IsDevelopmentVersion
-    or (version_parts[0] | int > 2026)
-    or (version_parts[0] | int == 2026 and version_parts[1] | int >= 6) -%}
 user:
   rstudio-server:
     exists: true
@@ -86,7 +82,6 @@ file:
   # Check for rstudio-launcher executable
   /usr/lib/rstudio-server/bin/rstudio-launcher:
     exists: true
-  {%- if rootless_support %}
   # Check for rstudio-server runtime directories with correct ownership and setgid
   /var/lib/rstudio-server:
     exists: true
@@ -136,13 +131,6 @@ file:
     group: rstudio-server
     gid: 999
     mode: "2775"
-  {%- else %}
-  # Check for rstudio-server monitor log directory
-  /var/lib/rstudio-server/monitor/log:
-    exists: true
-    owner: rstudio-server
-    group: rstudio-server
-  {%- endif %}
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
   {% raw -%}
@@ -170,7 +158,6 @@ file:
     owner: root
     group: root
     mode: "0600"
-  {%- if rootless_support %}
   # sssd supervisord program is staged here; entrypoint installs it at runtime when root
   /opt/startup-templates/sssd.conf:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
@@ -179,7 +166,6 @@ file:
   /usr/local/bin/entrypoint.sh:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     mode: "0755"
-  {%- endif %}
   # Check for repos.conf
   /etc/rstudio/repos.conf:
     exists: true
@@ -257,7 +243,7 @@ file:
 
 command:
   "Ensure rstudio-server has permissions to log directory":
-    exec: {% if rootless_support %}sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log{% else %}su rstudio-server -c 'touch /var/lib/rstudio-server/monitor/log/rstudio-server.log'{% endif %}
+    exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
     exit-status: 0
   "Ensure server log can be created":
     exec: touch /var/log/rstudio-server.log
