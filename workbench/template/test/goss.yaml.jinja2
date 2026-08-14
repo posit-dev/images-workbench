@@ -12,14 +12,14 @@ user:
   rstudio-server:
     exists: true
     uid: 999
-    gid: {% if rootless_support %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
+    gid: 999
     groups:
       - rstudio-server
 
 group:
   rstudio-server:
     exists: true
-    gid: {% if rootless_support %}999{% else %}{% raw %}{{ if and (eq .Env.IMAGE_VARIANT "Standard") (and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "24.04")) }}997{{ else }}999{{ end }}{% endraw %}{% endif %}
+    gid: 999
 
 package:
   rstudio-server:
