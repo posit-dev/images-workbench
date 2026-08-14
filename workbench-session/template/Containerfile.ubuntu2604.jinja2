@@ -1,0 +1,93 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+{%- import "python.j2" as python -%}
+{%- import "quarto.j2" as quarto -%}
+{%- import "r.j2" as r -%}
+
+# Build Python using uv in a separate stage
+{{ python.build_stage(python.build_arg(), prerun=python.declare_build_arg()) }}
+
+FROM docker.io/library/ubuntu:26.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:26.04"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
+{{ r.declare_build_arg() }}
+{{ python.declare_build_arg() }}
+{{ quarto.declare_build_arg() }}
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Install Apt Packages ###
+{{ apt.run_setup() }}
+
+{% if Image.Variant != "Minimal" -%}
+COPY {{ Path.Version }}/deps/ubuntu-26.04_packages.txt /tmp/ubuntu-26.04_packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-26.04_optional_packages.txt /tmp/ubuntu-26.04_optional_packages.txt
+{{ apt.run_install(files = ['/tmp/ubuntu-26.04_packages.txt', '/tmp/ubuntu-26.04_optional_packages.txt']) }}
+{% else -%}
+COPY {{ Path.Version }}/deps/ubuntu-26.04_packages.txt /tmp/ubuntu-26.04_packages.txt
+{{ apt.run_install(files = '/tmp/ubuntu-26.04_packages.txt') }}
+{%- endif %}
+
+### Install Pro Drivers ###
+{{ apt.run_install(packages="rstudio-drivers") }}
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
+
+### Enable the pwb NSS module for rootless in-session identity resolution ###
+# libnss_pwb.so is delivered at runtime by the workbench-session-init container
+# into /usr/lib/rstudio-server/bin/resolute/. Create the (build-time dangling)
+# multiarch symlink + nsswitch entries so glibc loads it once that volume is
+# populated. Dormant-safe: with no workbench-nss.conf the module returns
+# Unavail and resolution falls through to `files`.
+RUN case "${TARGETARCH}" in \
+      amd64) TRIPLET=x86_64-linux-gnu ;; \
+      arm64) TRIPLET=aarch64-linux-gnu ;; \
+      *) echo "unsupported arch ${TARGETARCH}"; exit 1 ;; \
+    esac && \
+    mkdir -p /usr/lib/rstudio-server/bin/resolute && \
+    touch /usr/lib/rstudio-server/bin/resolute/libnss_pwb.so && \
+    ln -sf /usr/lib/rstudio-server/bin/resolute/libnss_pwb.so \
+           "/usr/lib/${TRIPLET}/libnss_pwb.so.2" && \
+    for db in passwd group shadow; do \
+      touch /etc/nsswitch.conf; \
+      if grep -qE "^${db}:" /etc/nsswitch.conf; then \
+        sed -i -E "/^${db}:/ {/\bpwb\b/! s/\$/ pwb/}" /etc/nsswitch.conf; \
+      else \
+        echo "${db}: files pwb" >> /etc/nsswitch.conf; \
+      fi; \
+    done
+
+# Install Python from previous stage
+{{ python.copy_from_build_stage() }}
+
+### Install Jupyter ###
+{{ python.run_install_jupyterlab_workbench(python.build_arg(), jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
+
+### Install Jupyter kernel ###
+RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
+    {{ python.get_version_directory(python.build_arg()) }}/bin/python -m ipykernel install --user --name python{{ python.build_arg() }} --display-name "Python {{ python.build_arg() }}"
+
+# Install R
+{{ r.run_install(r.build_arg()) }}
+
+### Install Quarto ###
+RUN {{ quarto.install(quarto.build_arg()) | indent(4) }}
+
+### Install TinyTeX ###
+# ADD busts the cache on new TinyTeX releases.
+# HOME="/opt" workaround: https://github.com/quarto-dev/quarto-cli/issues/11800
+ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN {{ quarto.github_token_secret_mount() }} \
+    {{ quarto.install_tinytex_command(quarto.get_directory() ~ "/bin/quarto", update_path=True, home_path="/opt") | indent(4) }} && \
+    rm -f /tmp/tinytex-release.json
+
+COPY {{ Path.Version }}/conf/vscode.extensions.conf /etc/rstudio/vscode.extensions.conf
+COPY {{ Path.Version }}/conf/positron.extensions.conf /etc/rstudio/positron.extensions.conf
+
+EXPOSE 8788/tcp

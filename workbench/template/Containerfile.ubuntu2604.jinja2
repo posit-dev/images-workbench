@@ -1,0 +1,156 @@
+{#-
+Below are imports for Bakery's macros. If any are unneeded, they can be removed.
+Bakery handles bootstrapping the files into template rendering.
+-#}
+{%- import "apt.j2" as apt -%}
+{%- import "python.j2" as python -%}
+{%- import "quarto.j2" as quarto -%}
+{%- import "r.j2" as r -%}
+{%- if Image.Variant != "Minimal" -%}
+# Build Python using uv in a separate stage
+{{ python.build_stage(Dependencies.python) }}
+
+{% endif -%}
+
+FROM docker.io/library/ubuntu:26.04
+LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:26.04"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+ARG BUILDARCH
+ARG TARGETARCH=${BUILDARCH}
+ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
+
+ENV PWB_STARTUP_DEBUG=0
+ENV PWB_LICENSE=""
+ENV PWB_LICENSE_SERVER=""
+ENV PWB_TESTUSER=""
+ENV PWB_TESTUSER_PASSWD=""
+ENV PWB_TESTUSER_UID=""
+ENV PWB_LAUNCHER=true
+ENV PWB_LAUNCHER_TIMEOUT=10
+ENV PWB_DIAGNOSTIC_DIR=/var/log/rstudio
+ENV PWB_DIAGNOSTIC_ENABLE=false
+ENV PWB_EXIT_AFTER_VERIFY=false
+{%- if Image.Variant != "Minimal" %}
+ENV PWB_SSSD=true
+{%- endif %}
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Pre-create rstudio-server user (uid/gid 999) before any installs ###
+COPY --chmod=0755 {{ Path.Image }}/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
+RUN /tmp/precreate_rstudio_user.sh && \
+    rm -f /tmp/precreate_rstudio_user.sh
+
+### Setup environment ###
+{{ apt.run_setup() }}
+
+## Install Apt Packages ###
+{% if not Image.Variant == "Minimal" -%}
+COPY {{ Path.Version }}/deps/ubuntu-26.04_packages.txt /tmp/packages.txt
+COPY {{ Path.Version }}/deps/ubuntu-26.04_optional_packages.txt /tmp/optional_packages.txt
+{{ apt.run_install(files = ['/tmp/packages.txt', '/tmp/optional_packages.txt']) }}
+{% else -%}
+COPY {{ Path.Version }}/deps/ubuntu-26.04_packages.txt /tmp/packages.txt
+{{ apt.run_install(files = ['/tmp/packages.txt']) }}
+{%- endif %}
+
+### Install wait-for-it ###
+COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+
+{% if not Image.Variant == "Minimal" -%}
+### Install R ###
+{{ r.run_install(Dependencies.R) }}
+
+### Install Python from previous stage ###
+{{ python.copy_from_build_stage() }}
+
+### Install Jupyter ###
+{{ python.run_install_jupyterlab_workbench(Dependencies.python.0, jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
+
+### Install Jupyter kernels ###
+{% for python_version in Dependencies.python -%}
+RUN {{ python.install_packages(python_version, "ipykernel") }} && \
+    {{ python.get_version_directory(python_version) }}/bin/python -m ipykernel install --user --name python{{ python_version }} --display-name "Python {{ python_version }}"
+
+{% endfor -%}
+
+### Install Pro Drivers ###
+{{ apt.run_install(packages="rstudio-drivers") }}
+RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
+
+{% endif -%}
+
+### Install Workbench {{ Image.Version }} ###
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
+COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Install Quarto to PATH ###
+RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
+
+### Copy startup scripts ###
+COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
+{%- if Image.Variant != "Minimal" %}
+COPY --chmod=0755 {{ Path.Image }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+{%- endif %}
+COPY "{{ Path.Version }}/startup/launcher" /startup/launcher
+COPY "{{ Path.Version }}/startup/base" /startup/base
+COPY "{{ Path.Version }}/startup/supervisord.conf" /etc/supervisor/supervisord.conf
+{%- if Image.Variant != "Minimal" %}
+COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
+COPY "{{ Path.Version }}/startup/user-provisioning/sssd.conf" /opt/startup-templates/sssd.conf
+{%- endif %}
+COPY "{{ Path.Version }}/conf/jupyter/*" "{{ Path.Version }}/conf/launcher/*" "{{ Path.Version }}/conf/rstudio/*" "{{ Path.Version }}/conf/positron/*" "{{ Path.Version }}/conf/vscode/*" /etc/rstudio/
+
+### Configure Workbench ###
+RUN mkdir -p /var/lib/rstudio-server/monitor/log \
+               /var/lib/rstudio-server/conf \
+               /var/lib/rstudio-server/body \
+               /var/lib/rstudio-server/proxy \
+               /var/lib/rstudio-launcher \
+               /var/log/rstudio \
+               /var/run/supervisor \
+    && chown -R rstudio-server:rstudio-server \
+        /var/lib/rstudio-server \
+        /var/lib/rstudio-launcher \
+        /var/log/rstudio \
+        /var/run/supervisor \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
+    && mkdir -p /var/run/rstudio-server \
+    && chmod 1777 /var/run/rstudio-server \
+    && mkdir -p /startup/custom/ \
+    && mkdir -p /startup/user-provisioning/ \
+    && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
+    && echo "RSPM={{ r.get_p3m_cran_repo(Image.OS) }}" > /etc/rstudio/repos.conf \
+    && echo "CRAN={{ r.get_p3m_cran_repo(Image.OS) }}" >> /etc/rstudio/repos.conf
+
+{%- if Image.Variant != "Minimal" %}
+
+### Install TinyTeX using Quarto ###
+# Caches won't invalidate correctly on new releases for TinyTeX installs. This ADD instruction is a workaround to bust
+# the cache on new releases.
+#
+# TinyTeX is installed under HOME="/opt" so the install lands at /opt/.TinyTeX,
+# which is readable by non-root runtime users. `--update-path` makes tlmgr
+# symlink the TinyTeX binaries into /usr/local/bin.
+# TODO: Remove `HOME="/opt"` once Quarto supports custom install locations
+# for TinyTeX, see https://github.com/quarto-dev/quarto-cli/issues/11800.
+ADD https://github.com/rstudio/tinytex-releases/releases/latest /tmp/tinytex-release.json
+RUN {{ quarto.github_token_secret_mount() }} \
+    {{ quarto.install_tinytex_command("/lib/rstudio-server/bin/quarto/bin/quarto", update_path=True, home_path="/opt") }} \
+    && rm -f /tmp/tinytex-release.json
+{%- endif %}
+
+EXPOSE 8787/tcp
+EXPOSE 5559/tcp
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -fsS http://localhost:8787/health-check || exit 1
+{%- if Image.Variant != "Minimal" %}
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+{%- endif %}
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
