@@ -58,6 +58,10 @@ jobs:
       DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
       DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
       AWS_ROLE: ${{ secrets.AWS_ROLE }}
+      WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+      WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+      WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
+      WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
       matrix-versions: only
       temp-registry: "565037064999.dkr.ecr.us-east-2.amazonaws.com/images"
