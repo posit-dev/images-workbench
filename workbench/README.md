@@ -122,13 +122,14 @@ Posit publishes images to:
 - Docker Hub: `docker.io/posit/workbench`
 - GitHub Container Registry: `ghcr.io/posit-dev/workbench`
 
-Ubuntu 24.04 is the default OS.
+Ubuntu 24.04 is the default OS. Ubuntu 26.04 is also supported for the latest version.
 
 Tag formats where `YYYY.MM.P` is any supported Workbench version:
 - `YYYY.MM.P` - Latest OS, standard variant
 - `YYYY.MM.P-ubuntu-24.04` - Explicit OS, standard variant
 - `YYYY.MM.P-ubuntu-24.04-std` - Explicit OS and variant
 - `YYYY.MM.P-ubuntu-24.04-min` - Minimal variant
+- `YYYY.MM.P-ubuntu-26.04` - Ubuntu 26.04 (latest version only)
 - `latest` - Latest version, default OS, standard variant
 
 ## Architectures
