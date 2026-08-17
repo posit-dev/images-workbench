@@ -76,10 +76,9 @@ images:
         product: workbench
         channel: preview
         os:
-          - name: Ubuntu 26.04
-            platforms:
-              - linux/amd64
-              - linux/arm64
+          # Ubuntu 26.04 omitted from dev builds: preview-channel packages not yet
+          # available for Ubuntu 26.04 (resolute). Re-add once
+          # the preview packages are published for all architectures.
           - name: Ubuntu 24.04
             primary: true
             platforms:
