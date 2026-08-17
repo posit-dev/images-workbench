@@ -72,7 +72,7 @@ jobs:
       packages: write
       id-token: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@feat/trivy-security-scan"
     secrets:
       AWS_ROLE: ${{ secrets.AWS_ROLE }}
       WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
@@ -80,6 +80,7 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
+      version: feat/trivy-security-scan
       dev-versions: "only"
       matrix-versions: "include"
       image-name: "^workbench-positron-init$"
