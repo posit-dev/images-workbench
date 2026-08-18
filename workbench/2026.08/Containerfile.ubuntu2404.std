@@ -102,8 +102,8 @@ RUN apt-get update -yqq && \
     rm -rf /var/lib/apt/lists/*
 RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
-### Install Workbench 2026.08.0+187.pro5 ###
-ARG WORKBENCH_VERSION="2026.08.0+187.pro5"
+### Install Workbench 2026.08.1+195.pro1 ###
+ARG WORKBENCH_VERSION="2026.08.1+195.pro1"
 COPY --chmod=0755 workbench/2026.08/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \

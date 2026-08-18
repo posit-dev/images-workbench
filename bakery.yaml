@@ -90,7 +90,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-preview"
     versions:
-      - name: 2026.08.0+187.pro5
+      - name: 2026.08.1+195.pro1
         subpath: '2026.08'
         latest: true
         os:
@@ -221,7 +221,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-session-init-preview"
     versions:
-      - name: 2026.08.0+187.pro5
+      - name: 2026.08.1+195.pro1
         subpath: '2026.08'
         latest: true
         os:
