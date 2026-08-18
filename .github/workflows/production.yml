@@ -81,6 +81,7 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
+      amd64-builder: "ubuntu-latest-8x"
       dev-versions: "exclude"
       matrix-versions: "exclude"
       temp-registry: "565037064999.dkr.ecr.us-east-2.amazonaws.com/images"
