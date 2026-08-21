@@ -338,10 +338,11 @@ images:
           constraint:
             latest: true
       os:
-        - name: Ubuntu 26.04
-          platforms:
-            - linux/amd64
-            - linux/arm64
+        # Ubuntu 26.04 removed: sessions built on 26.04 cannot start, because
+        # Workbench does not yet resolve session components for 26.04.
+        # See https://github.com/posit-dev/images-workbench/issues/194.
+        # Re-add once a Workbench release with 26.04 session support ships and a
+        # session-launch smoke test passes.
         - name: Ubuntu 24.04
           primary: true
           platforms:
