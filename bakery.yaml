@@ -57,21 +57,20 @@ images:
         extension: min
         tagDisplayName: min
     devVersions:
-      # Dailies temporarily disabled. See https://github.com/posit-dev/images-shared/issues/632
-      # - sourceType: stream
-      #   product: workbench
-      #   channel: daily
-      #   os:
-      #     - name: Ubuntu 24.04
-      #       primary: true
-      #       platforms:
-      #         - linux/amd64
-      #         - linux/arm64
-      #     - name: Ubuntu 22.04
-      #   overrideRegistries:
-      #     - host: "ghcr.io"
-      #       namespace: "posit-dev"
-      #       repository: "workbench-preview"
+      - sourceType: stream
+        product: workbench
+        channel: daily
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+          - name: Ubuntu 22.04
+        overrideRegistries:
+          - host: "ghcr.io"
+            namespace: "posit-dev"
+            repository: "workbench-preview"
       - sourceType: stream
         product: workbench
         channel: preview
@@ -192,21 +191,20 @@ images:
       - tool: soci
         enabled: true
     devVersions:
-      # Dailies temporarily disabled. See https://github.com/posit-dev/images-shared/issues/632
-      # - sourceType: stream
-      #   product: workbench-session
-      #   channel: daily
-      #   # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
-      #   os:
-      #     - name: Ubuntu 24.04
-      #       primary: true
-      #       platforms:
-      #         - linux/amd64
-      #         - linux/arm64
-      #   overrideRegistries:
-      #     - host: "ghcr.io"
-      #       namespace: "posit-dev"
-      #       repository: "workbench-session-init-preview"
+      - sourceType: stream
+        product: workbench-session
+        channel: daily
+        # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+        overrideRegistries:
+          - host: "ghcr.io"
+            namespace: "posit-dev"
+            repository: "workbench-session-init-preview"
       - sourceType: stream
         product: workbench-session
         channel: preview
