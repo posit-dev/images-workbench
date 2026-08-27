@@ -298,7 +298,7 @@ images:
         - dependency: positron
           constraint:
             latest: true
-            count: 6
+            count: 2
       # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
       os:
         - name: Ubuntu 24.04
