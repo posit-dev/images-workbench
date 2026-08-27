@@ -75,7 +75,6 @@ jobs:
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
       DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
-      AWS_ROLE: ${{ secrets.AWS_ROLE }}
       WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
       WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
@@ -84,7 +83,6 @@ jobs:
       amd64-builder: "ubuntu-latest-8x"
       dev-versions: "exclude"
       matrix-versions: "exclude"
-      temp-registry: "565037064999.dkr.ecr.us-east-2.amazonaws.com/images"
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
 

@@ -74,7 +74,6 @@ jobs:
 
     uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
     secrets:
-      AWS_ROLE: ${{ secrets.AWS_ROLE }}
       WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
       WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
@@ -85,7 +84,6 @@ jobs:
       image-name: "^workbench-positron-init$"
       dev-version: ${{ inputs.version }}
       dev-channel: ${{ inputs.channel }}
-      temp-registry: "565037064999.dkr.ecr.us-east-2.amazonaws.com/images"
       # Forward the cache input. For non-workflow_dispatch events (schedule / push),
       # `inputs.cache` is unset, so default to true (preserves prior behavior). Only
       # an explicit workflow_dispatch with `cache: false` disables the registry cache.
