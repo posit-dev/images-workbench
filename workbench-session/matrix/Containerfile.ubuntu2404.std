@@ -109,7 +109,6 @@ RUN /opt/python/$PYTHON_VERSION/bin/pip install --no-cache-dir --upgrade --break
 RUN apt-get update -yqq && \
     apt-get install -yqq --no-install-recommends \
         r-$R_VERSION && \
-    apt-mark hold r-$R_VERSION && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
