@@ -70,14 +70,14 @@ file:
   # Check that license files were not accidentally included in build
   /etc/rstudio-server/license.lic:
     exists: false
-  # Ubuntu 26.04 ships Canonical's pebble service manager, which is not used
-  # by Workbench and is removed from the image during the build.
+  {% raw -%}
+  {{ if eq .Env.IMAGE_OS_VERSION "26.04" }}
   /usr/bin/pebble:
     exists: false
-    skip: {% raw %}{{ if and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "26.04") }}false{{ else }}true{{ end }}{% endraw %}
   /var/lib/pebble:
     exists: false
-    skip: {% raw %}{{ if and (eq .Env.IMAGE_OS_NAME "ubuntu") (eq .Env.IMAGE_OS_VERSION "26.04") }}false{{ else }}true{{ end }}{% endraw %}
+  {{ end }}
+  {%- endraw %}
   # Check that the RStudio Server installation directory exists
   /usr/lib/rstudio-server:
     exists: true
