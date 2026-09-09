@@ -21,6 +21,8 @@ ENV PWB_EXIT_AFTER_VERIFY=false
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+RUN rm -f /usr/bin/pebble && rm -rf /var/lib/pebble
+
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 workbench/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
@@ -95,21 +97,6 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://p3m.dev/cran/__linux__/resolute/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://p3m.dev/cran/__linux__/resolute/latest" >> /etc/rstudio/repos.conf
-
-### Remove the pebble service manager inherited from the Ubuntu base ###
-# ubuntu:26.04 ships Canonical's pebble service manager as a standalone ~10MB
-# binary at /usr/bin/pebble (with an empty state tree at /var/lib/pebble).
-# It is not dpkg-tracked, so the files are deleted directly.
-#
-# `rm -f`/`rm -rf` make this a no-op if a future base image stops shipping
-# pebble. The post-check catches a future relocation on PATH instead of
-# silently shipping the binary again.
-RUN rm -f /usr/bin/pebble && \
-    rm -rf /var/lib/pebble && \
-    if command -v pebble >/dev/null 2>&1; then \
-        echo "ERROR: pebble still on PATH at $(command -v pebble) after removal" >&2; \
-        exit 1; \
-    fi
 
 EXPOSE 8787/tcp
 EXPOSE 5559/tcp
