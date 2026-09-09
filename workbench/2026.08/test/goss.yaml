@@ -62,6 +62,12 @@ file:
   # Check that license files were not accidentally included in build
   /etc/rstudio-server/license.lic:
     exists: false
+  {{ if eq .Env.IMAGE_OS_VERSION "26.04" }}
+  /usr/bin/pebble:
+    exists: false
+  /var/lib/pebble:
+    exists: false
+  {{ end }}
   # Check that the RStudio Server installation directory exists
   /usr/lib/rstudio-server:
     exists: true

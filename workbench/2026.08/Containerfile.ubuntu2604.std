@@ -32,6 +32,8 @@ ENV PWB_SSSD=true
 
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
+RUN rm -f /usr/bin/pebble && rm -rf /var/lib/pebble
+
 ### Pre-create rstudio-server user (uid/gid 999) before any installs ###
 COPY --chmod=0755 workbench/scripts/precreate_rstudio_user.sh /tmp/precreate_rstudio_user.sh
 RUN /tmp/precreate_rstudio_user.sh && \
