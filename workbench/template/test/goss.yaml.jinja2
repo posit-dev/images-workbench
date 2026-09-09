@@ -70,6 +70,12 @@ file:
   # Check that license files were not accidentally included in build
   /etc/rstudio-server/license.lic:
     exists: false
+  # Ubuntu 26.04 ships Canonical's pebble service manager, which is not used
+  # by Workbench and is removed from the image during the build.
+  /usr/bin/pebble:
+    exists: false
+  /var/lib/pebble:
+    exists: false
   # Check that the RStudio Server installation directory exists
   /usr/lib/rstudio-server:
     exists: true
@@ -242,6 +248,16 @@ file:
 {% endraw %}
 
 command:
+  # The file checks above assert the known paths are gone; this also catches a
+  # future base image that relocates pebble elsewhere on PATH.
+  pebble-service-manager-removed:
+    exec: |
+      if command -v pebble >/dev/null 2>&1; then
+        echo "ERROR: pebble still present at $(command -v pebble)" >&2
+        exit 1
+      fi
+      echo "OK: pebble not on PATH"
+    exit-status: 0
   "Ensure rstudio-server has permissions to log directory":
     exec: sudo -u rstudio-server touch /var/lib/rstudio-server/monitor/log/rstudio-server.log
     exit-status: 0
