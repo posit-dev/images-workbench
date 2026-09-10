@@ -89,9 +89,27 @@ images:
             namespace: "posit-dev"
             repository: "workbench-preview"
     versions:
+      - name: 2026.09.0+174.pro3
+        subpath: '2026.09'
+        latest: true
+        os:
+          - name: Ubuntu 22.04
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
+          - name: Ubuntu 26.04
+            platforms:
+              - linux/amd64
+              - linux/arm64
+        dependencies:
+          - dependency: R
+            version: 4.6.1
+          - dependency: python
+            version: 3.14.7
       - name: 2026.08.2+200.pro1
         subpath: '2026.08'
-        latest: true
         os:
           - name: Ubuntu 22.04
           - name: Ubuntu 24.04
@@ -219,9 +237,17 @@ images:
             namespace: "posit-dev"
             repository: "workbench-session-init-preview"
     versions:
+      - name: 2026.09.0+174.pro3
+        subpath: '2026.09'
+        latest: true
+        os:
+          - name: Ubuntu 24.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64
       - name: 2026.08.2+200.pro1
         subpath: '2026.08'
-        latest: true
         os:
           - name: Ubuntu 24.04
             primary: true
