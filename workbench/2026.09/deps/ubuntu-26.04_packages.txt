@@ -1,12 +1,12 @@
 build-essential
+file
 libc6
 libclang-dev
 libpq5
-libssl-dev
 libsqlite3-0
+libssl-dev
 libxkbcommon-x11-0
 lsb-release
-file
 psmisc
 rrdtool
 sudo
