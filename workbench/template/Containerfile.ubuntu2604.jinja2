@@ -46,7 +46,7 @@ RUN /tmp/precreate_rstudio_user.sh && \
     rm -f /tmp/precreate_rstudio_user.sh
 
 ### Setup environment ###
-{{ apt.run_setup() }}
+{{ apt.run_setup(open_repo=True, pro_repo=True) }}
 
 ## Install Apt Packages ###
 {% if not Image.Variant == "Minimal" -%}
