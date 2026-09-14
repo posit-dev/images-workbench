@@ -40,6 +40,7 @@ RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Tim
     apt-get install -yqq --no-install-recommends locales && \
     localedef -i en_US -f UTF-8 en_US.UTF-8 && \
     bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 ENV LANG=en_US.UTF-8

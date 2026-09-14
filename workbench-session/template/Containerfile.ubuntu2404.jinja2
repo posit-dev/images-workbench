@@ -17,14 +17,10 @@ LABEL org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04"
 ARG DEBIAN_FRONTEND=noninteractive
 ARG BUILDARCH
 ARG TARGETARCH=${BUILDARCH}
-{{ r.declare_build_arg() }}
-{{ python.declare_build_arg() }}
-{{ quarto.declare_build_arg() }}
-
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 ### Install Apt Packages ###
-{{ apt.run_setup() }}
+{{ apt.run_setup(open_repo=True, pro_repo=True) }}
 
 {% if Image.Variant != "Minimal" -%}
 COPY {{ Path.Version }}/deps/ubuntu-24.04_packages.txt /tmp/ubuntu-24.04_packages.txt
@@ -67,6 +63,7 @@ RUN case "${TARGETARCH}" in \
 {{ python.copy_from_build_stage() }}
 
 ### Install Jupyter ###
+{{ python.declare_build_arg() }}
 {{ python.run_install_jupyterlab_workbench(python.build_arg(), jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
 
 ### Install Jupyter kernel ###
@@ -74,9 +71,11 @@ RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
     {{ python.get_version_directory(python.build_arg()) }}/bin/python -m ipykernel install --user --name python{{ python.build_arg() }} --display-name "Python {{ python.build_arg() }}"
 
 # Install R
+{{ r.declare_build_arg() }}
 {{ r.run_install(r.build_arg()) }}
 
 ### Install Quarto ###
+{{ quarto.declare_build_arg() }}
 RUN {{ quarto.install(quarto.build_arg()) | indent(4) }}
 
 ### Install TinyTeX ###
