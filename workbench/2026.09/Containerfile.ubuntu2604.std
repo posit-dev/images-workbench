@@ -53,6 +53,7 @@ RUN echo 'Acquire::Retries "3"; Acquire::http::Timeout "30"; Acquire::https::Tim
     apt-get install -yqq --no-install-recommends locales && \
     localedef -i en_US -f UTF-8 en_US.UTF-8 && \
     bash -c "$(curl -1fsSL 'https://dl.posit.co/public/pro/setup.deb.sh')" && \
+    bash -c "$(curl -1fsSL 'https://dl.posit.co/public/open/setup.deb.sh')" && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 ENV LANG=en_US.UTF-8
@@ -73,8 +74,11 @@ RUN apt-get update -yqq && \
 COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
 ### Install R ###
-RUN RUN_UNATTENDED=1 R_VERSION=4.6.1 bash -c "$(curl -fsSL https://rstd.io/r-install)" && \
-    find . -type f -name '[rR]-4.6.1.*\.(deb|rpm)' -delete
+RUN apt-get update -yqq && \
+    apt-get install -yqq --no-install-recommends \
+        r-4.6.1 && \
+    apt-get clean -yqq && \
+    rm -rf /var/lib/apt/lists/*
 
 ### Install Python from previous stage ###
 COPY --from=python-builder /opt/python /opt/python
