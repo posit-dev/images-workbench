@@ -58,9 +58,7 @@ jobs:
 
   build:
     name: Build
-    # Build all images, excluding dev versions.
-    #
-    # Builds all versions of each image in parallel.
+    # Build the three most recent release versions, excluding dev versions.
     #
     # Run on merges to main, or on weekly scheduled re-builds.
     needs:
@@ -83,6 +81,7 @@ jobs:
       amd64-builder: "ubuntu-latest-8x"
       dev-versions: "exclude"
       matrix-versions: "exclude"
+      recent: 3
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
 

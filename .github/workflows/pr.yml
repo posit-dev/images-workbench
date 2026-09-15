@@ -60,6 +60,7 @@ jobs:
       amd64-builder: "ubuntu-latest-8x"
       dev-versions: "exclude"
       matrix-versions: "exclude"
+      recent: 3
 
   development:
     name: Development
