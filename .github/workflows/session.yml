@@ -34,7 +34,7 @@ jobs:
           jobs: ${{ toJSON(needs) }}
       - if: always() && github.ref == 'refs/heads/main'
         continue-on-error: true
-        uses: posit-dev/images-shared/.github/actions/slack-build-notify@main
+        uses: posit-dev/images-shared/.github/actions/slack-build-notify@v0
         with:
           result: ${{ steps.alls-green.outcome }}
           slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -52,7 +52,7 @@ jobs:
       packages: write
       id-token: write
 
-    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@main"
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@v0"
     secrets:
       DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}

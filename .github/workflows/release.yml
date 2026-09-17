@@ -27,7 +27,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: posit-dev/images-shared/.github/workflows/product-release.yml@main
+    uses: posit-dev/images-shared/.github/workflows/product-release.yml@v0
     with:
       version: ${{ inputs.version }}
       images: "workbench workbench-session-init"

@@ -2,7 +2,7 @@ rules:
   unpinned-uses:
     config:
       policies:
-        # Shared workflows and composite actions from images-shared
-        # are kept at @main intentionally.
+        # Shared workflows and composite actions from images-shared use
+        # the moving major alias (@v0) rather than a SHA.
         "posit-dev/images-shared/*": ref-pin
         "*": hash-pin
