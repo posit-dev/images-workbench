@@ -5,7 +5,7 @@ if [[ "${PWB_STARTUP_DEBUG:-0}" -eq 1 ]]; then
   set -x
 fi
 
-# Deactivate license when the process exits
+# Deactivate key or server licenses when the process exits
 deactivate() {
     echo "== Exiting =="
     rstudio-server stop
@@ -31,7 +31,6 @@ deactivate() {
       done
     done
 }
-trap deactivate EXIT
 
 # Backward compatibility for RSW_ prefix
 PWB_TESTUSER=${PWB_TESTUSER:-${RSW_TESTUSER}}
@@ -52,21 +51,42 @@ PWB_LICENSE_FILE_PATH=${PWB_LICENSE_FILE_PATH:-${RSW_LICENSE_FILE_PATH}}
 
 # Activate License
 PWB_LICENSE_FILE_PATH=${PWB_LICENSE_FILE_PATH:-/etc/rstudio-server/license.lic}
+_license_dir=/var/lib/rstudio-server
 if [ -n "$PWB_LICENSE" ]; then
     /usr/lib/rstudio-server/bin/license-manager activate "$PWB_LICENSE"
+    trap deactivate EXIT
 elif [ -n "$PWB_LICENSE_SERVER" ]; then
     /usr/lib/rstudio-server/bin/license-manager license-server "$PWB_LICENSE_SERVER"
+    trap deactivate EXIT
 elif test -f "$PWB_LICENSE_FILE_PATH"; then
-    /usr/lib/rstudio-server/bin/license-manager activate-file "$PWB_LICENSE_FILE_PATH"
+    # License files are read directly from this directory; activate-file requires root.
+    # https://docs.posit.co/ide/server-pro/admin/license_management/license_management.html#license-file-activation
+    case "$(realpath "$PWB_LICENSE_FILE_PATH")" in
+        "${_license_dir}/"*)
+            ;;
+        *)
+            rm -f "${_license_dir}"/*.lic
+            cp "$PWB_LICENSE_FILE_PATH" "${_license_dir}/license.lic"
+            if [ "$(id -u)" -eq 0 ]; then
+                chown rstudio-server:rstudio-server "${_license_dir}/license.lic"
+            fi
+            chmod 0600 "${_license_dir}/license.lic"
+            ;;
+    esac
+    echo "Using license file at ${PWB_LICENSE_FILE_PATH}." >&2
+elif ls "${_license_dir}"/*.lic >/dev/null 2>&1; then
+    echo "Detected a license file in ${_license_dir}/." >&2
 fi
 
 # ensure these cannot be inherited by child processes
 unset PWB_LICENSE
 unset PWB_LICENSE_SERVER
+unset PWB_LICENSE_FILE_PATH
 unset RSP_LICENSE
 unset RSP_LICENSE_SERVER
 unset RSW_LICENSE
 unset RSW_LICENSE_SERVER
+unset RSW_LICENSE_FILE_PATH
 
 # Create one user
 if [ "$(getent passwd "$PWB_TESTUSER_UID")" ] ; then
