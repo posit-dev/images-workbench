@@ -78,7 +78,7 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
-      amd64-builder: "ubuntu-latest-8x"
+      amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
       recent: 3
