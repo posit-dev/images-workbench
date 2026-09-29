@@ -57,7 +57,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
-      amd64-builder: "ubuntu-latest-8x"
+      amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
       recent: 3
