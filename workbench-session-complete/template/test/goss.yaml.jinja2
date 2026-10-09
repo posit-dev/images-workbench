@@ -217,7 +217,7 @@ command:
   # target is the flat path AND that it is non-empty.
   libnss-pwb-symlink-points-at-deb-module:
     exec: |
-      link="/usr/lib/x86_64-linux-gnu/libnss_pwb.so.2"
+      link="/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
       expected="/usr/lib/rstudio-server/bin/libnss_pwb.so"
       if [ ! -L "$link" ]; then
         echo "ERROR: $link is not a symlink" >&2
@@ -265,7 +265,7 @@ command:
   # makes "is this a loadable library at all" an actual assertion.
   libnss-pwb-loadable:
     exec: |
-      so="/usr/lib/x86_64-linux-gnu/libnss_pwb.so.2"
+      so="/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
       magic="$(head -c 4 "$so" 2>/dev/null | od -An -tx1 | tr -d ' \n')"
       if [ "$magic" != "7f454c46" ]; then
         echo "ERROR: $so is not an ELF object (magic='$magic')" >&2

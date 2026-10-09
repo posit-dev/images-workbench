@@ -85,7 +85,7 @@ Also includes Quarto and TinyTeX.
 ### workbench-session-complete
 
 `workbench-session` (OS-qualified `ubuntu-26.04-{std,min}` tag) with the full Workbench deb
-installed, so sessions need no init container. amd64 only. **Rolling release:** `bakery.yaml`
+installed, so sessions need no init container. amd64 + arm64. **Rolling release:** `bakery.yaml`
 keeps only the latest Workbench version; the `release-session-complete` job in `release.yml`
 replaces it on each release. Never add a second version.
 

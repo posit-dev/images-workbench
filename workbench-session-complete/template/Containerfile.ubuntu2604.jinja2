@@ -107,7 +107,7 @@ RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" 
 # libnss_pwb.so purely so ldconfig will not prune the multiarch symlink that
 # points at it while waiting for workbench-session-init to populate the volume
 # (images-workbench commit 6d36fa0). Installing the deb makes that obsolete: its
-# postinst repoints /usr/lib/x86_64-linux-gnu/libnss_pwb.so.2 at the REAL
+# postinst repoints /usr/lib/<triplet>/libnss_pwb.so.2 at the REAL
 # /usr/lib/rstudio-server/bin/libnss_pwb.so and re-adds `pwb` to
 # /etc/nsswitch.conf. The placeholder is then not just dead weight but actively
 # misleading -- a zero-byte libnss_pwb.so is exactly what someone debugging NSS
@@ -128,7 +128,7 @@ RUN codename="$(. /etc/os-release && echo "${VERSION_CODENAME}")" && \
     fi && \
     rmdir "${placeholder_dir}" 2>/dev/null || true && \
     ldconfig && \
-    test -s /usr/lib/x86_64-linux-gnu/libnss_pwb.so.2
+    test -s "/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
 
 ### Remove the pebble service manager inherited from the Ubuntu base ###
 # ubuntu:26.04 ships Canonical's pebble service manager as a standalone ~10MB
