@@ -102,15 +102,7 @@ The version is the **Workbench** version, and it is the exact apt version pin us
 
 ## Architectures
 
-Posit publishes this image for `linux/amd64` only.
-
-`linux/arm64` is not merely out of scope. The `rstudio-server` postinst hardcodes the multiarch triplet when it repoints the NSS module symlink:
-
-```shell
-ln -sf /usr/lib/rstudio-server/bin/libnss_pwb.so /usr/lib/x86_64-linux-gnu/libnss_pwb.so.2
-```
-
-On `arm64` that symlink would be written to a path the loader does not read, silently leaving `libnss_pwb.so.2` pointed at the base image's zero-byte placeholder and the `pwb` NSS module inert.
+Posit publishes this image for `linux/amd64` and `linux/arm64`.
 
 ## Operating systems
 
