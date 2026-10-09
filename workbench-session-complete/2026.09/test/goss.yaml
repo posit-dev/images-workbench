@@ -1,0 +1,437 @@
+package:
+  # --- Workbench is installed, at exactly the pinned version ---------------
+  # The single most important check here: install_workbench.sh pins the apt
+  # version, and the Posit OPEN repo carries a same-numbered non-pro build
+  # (2026.08.1+195 vs 2026.08.1+195.pro1), so asserting the exact version also
+  # asserts we got Workbench and not open-source RStudio Server.
+  rstudio-server:
+    installed: true
+    versions:
+      - 2026.09.0+174.pro3
+  # Carried over from r-session-complete's suite: tlmgr is a Perl script and
+  # silently breaks without it.
+  perl:
+    installed: true
+  # The one apt package this image adds on top of the base.
+  libcurl4-gnutls-dev:
+    installed: true
+
+file:
+  # --- Session components, FLAT layout -------------------------------------
+  # The deb installs directly under bin/ -- NOT under a per-distro
+  # subdirectory the way the workbench-session-init component tarball does
+  # (bin/noble/rsession). These paths are the contract that difference affects.
+  /usr/lib/rstudio-server/bin/rsession:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/rserver:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/rpostback:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/rsandbox:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/filebase:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/r-ldpath:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/pwb-supervisor:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/rserver-url:
+    exists: true
+    filetype: file
+    mode: "0755"
+
+  # --- Per-session-type entrypoints ---------------------------------------
+  # A full Workbench install carries every session type's launcher, so one
+  # image serves rstudio, jupyter, vscode and positron sessions. If a future
+  # change starts trimming the install, these fail first.
+  /usr/lib/rstudio-server/bin/rsession-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/jupyter-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/vscode-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /usr/lib/rstudio-server/bin/positron-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+
+  # --- IDE payloads --------------------------------------------------------
+  # code-server's exact path is asserted the same way r-session-complete's
+  # suite does it (the 2024.07+ pwb-code-server location).
+  /usr/lib/rstudio-server/bin/pwb-code-server/bin/code-server:
+    exists: true
+  /usr/lib/rstudio-server/bin/positron-server:
+    exists: true
+    filetype: directory
+  /usr/lib/rstudio-server/bin/node:
+    exists: true
+    filetype: directory
+  /usr/lib/rstudio-server/bin/copilot-language-server-js:
+    exists: true
+    filetype: directory
+  # The deb's BUNDLED Quarto. It must exist for the session components, but it
+  # is deliberately NOT the one on PATH -- see the quarto-on-path-is-base-build
+  # command check below.
+  /usr/lib/rstudio-server/bin/quarto:
+    exists: true
+    filetype: directory
+
+  # --- Supporting component trees -----------------------------------------
+  /usr/lib/rstudio-server/R:
+    exists: true
+    filetype: directory
+  /usr/lib/rstudio-server/resources:
+    exists: true
+    filetype: directory
+  /usr/lib/rstudio-server/www:
+    exists: true
+    filetype: directory
+  /usr/lib/rstudio-server/extras:
+    exists: true
+    filetype: directory
+
+  # --- The real NSS module ------------------------------------------------
+  # Flat path, installed by the deb. Non-emptiness is asserted in the command
+  # section (goss's file resource cannot express "not zero bytes").
+  /usr/lib/rstudio-server/bin/libnss_pwb.so:
+    exists: true
+    filetype: file
+
+  # --- postinst side effects we DO want ----------------------------------
+  /usr/sbin/rstudio-server:
+    exists: true
+    filetype: symlink
+
+  # --- The base image's curated IDE extension lists survived -------------
+  # The deb postinst copies its own default configs into /etc/rstudio, but each
+  # copy is guarded by `if ! test -f`. workbench-session already ships curated
+  # vscode.extensions.conf and positron.extensions.conf there, so the guards
+  # must keep the base's versions. Verified empirically on the built image: the
+  # base's file is a bare extension list (85 bytes) while the deb default is a
+  # long commented template, so a regression here is a real behavior change
+  # (users would get the deb's default extension set instead of the curated
+  # one). The `contains` matcher below pins a base-curated entry that does NOT
+  # appear in the deb's commented default.
+  /etc/rstudio/vscode.extensions.conf:
+    exists: true
+    filetype: file
+    contents:
+      - "quarto.quarto"
+  # The deb ships no positron.extensions.conf at all, so this one only has to
+  # survive being left alone.
+  /etc/rstudio/positron.extensions.conf:
+    exists: true
+    filetype: file
+  # `pwb` on the lookup chain. The base image already had these entries and the
+  # deb postinst re-adds them idempotently; either way they must be present or
+  # the NSS module is inert.
+  # `contents` (not the older `contains`, which goss 0.4.10 deprecates).
+  /etc/nsswitch.conf:
+    exists: true
+    contents:
+      - "/^passwd:.*\\bpwb\\b/"
+      - "/^group:.*\\bpwb\\b/"
+      - "/^shadow:.*\\bpwb\\b/"
+
+  # --- No server runtime state baked into the image ----------------------
+  # Carried directly from r-session-complete's suite. These files are created
+  # when a Workbench server actually STARTS, so their presence would mean the
+  # postinst patching in install_workbench.sh silently stopped working and the
+  # build started (and captured the state of) a real server. Baking a
+  # secure-cookie-key or launcher keypair into a shared image is a security
+  # problem, not just an untidy one: every container from the image would share
+  # the same secrets.
+  /etc/rstudio/launcher.pem:
+    exists: false
+  /etc/rstudio/launcher.pub:
+    exists: false
+  /etc/rstudio/secure-cookie-key:
+    exists: false
+  /etc/rstudio/session-rpc-key:
+    exists: false
+  /var/lib/rstudio-server/secure-cookie-key:
+    exists: false
+  /var/lib/rstudio-server/session-rpc-key:
+    exists: false
+  /var/lib/rstudio-server/rstudio.sqlite:
+    exists: false
+
+  # --- The Ubuntu base's pebble service manager is gone ------------------
+  # ubuntu:26.04 ships Canonical's pebble (a ~10MB standalone binary at
+  # /usr/bin/pebble, NOT a dpkg package) and workbench-session inherits it.
+  # Nothing in a session image uses it, so the Containerfile deletes the binary
+  # and its /var/lib/pebble state tree. See the pebble-service-manager-removed
+  # command check for the PATH-level guard.
+  /usr/bin/pebble:
+    exists: false
+  /var/lib/pebble:
+    exists: false
+
+command:
+  # --- The NSS symlink points at the DEB's file, not the placeholder -------
+  # This is the integration seam between the base image and the deb, and it is
+  # silent when it breaks. workbench-session ships a zero-byte
+  # bin/<codename>/libnss_pwb.so and points the multiarch symlink at it; the
+  # deb installs the real module at the FLAT bin/libnss_pwb.so and its postinst
+  # repoints the symlink there. If that repoint ever stops happening, NSS just
+  # falls back to `files` with no error anywhere -- so assert the resolved
+  # target is the flat path AND that it is non-empty.
+  libnss-pwb-symlink-points-at-deb-module:
+    exec: |
+      link="/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
+      expected="/usr/lib/rstudio-server/bin/libnss_pwb.so"
+      if [ ! -L "$link" ]; then
+        echo "ERROR: $link is not a symlink" >&2
+        exit 1
+      fi
+      target="$(readlink -f "$link")"
+      if [ "$target" != "$expected" ]; then
+        echo "ERROR: $link resolves to $target, expected $expected" >&2
+        exit 1
+      fi
+      if [ ! -s "$link" ]; then
+        echo "ERROR: $link resolves to an empty file (placeholder not replaced)" >&2
+        exit 1
+      fi
+      echo "OK: $link -> $target"
+    exit-status: 0
+
+  # --- The init-container placeholder is gone ----------------------------
+  # The Containerfile removes the base image's zero-byte
+  # bin/<codename>/libnss_pwb.so once the deb makes it obsolete. Left in place
+  # it is a debugging trap: a zero-byte libnss_pwb.so under a plausible-looking
+  # per-distro path is exactly what someone would mistake for the live module.
+  init-container-placeholder-removed:
+    exec: |
+      codename="$(. /etc/os-release && echo "${VERSION_CODENAME}")"
+      stale="/usr/lib/rstudio-server/bin/${codename}/libnss_pwb.so"
+      if [ -e "$stale" ]; then
+        echo "ERROR: stale init-container placeholder still present at $stale" >&2
+        exit 1
+      fi
+      echo "OK: no stale placeholder for ${codename}"
+    exit-status: 0
+
+  # --- The NSS module is a real ELF object and loads cleanly ------------
+  # Proves the object glibc would dlopen for the `pwb` nsswitch entries is
+  # actually a shared library with no unresolved dependencies. A module that
+  # fails to load is not a loud error -- resolution silently falls back to
+  # `files`.
+  #
+  # The ELF-magic check is not redundant with the ldd check: `ldd` on an EMPTY
+  # file prints "not a dynamic executable" and reports no missing libraries, so
+  # an ldd-only test PASSES against the zero-byte placeholder. That was verified
+  # by deliberately restoring the placeholder and re-running this suite -- the
+  # ldd-only form of this check did not catch it. Reading the ELF magic is what
+  # makes "is this a loadable library at all" an actual assertion.
+  libnss-pwb-loadable:
+    exec: |
+      so="/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
+      magic="$(head -c 4 "$so" 2>/dev/null | od -An -tx1 | tr -d ' \n')"
+      if [ "$magic" != "7f454c46" ]; then
+        echo "ERROR: $so is not an ELF object (magic='$magic')" >&2
+        exit 1
+      fi
+      missing="$(ldd "$so" 2>&1 | awk '/not found/ {print $1}' | sort -u | tr '\n' ' ')"
+      if [ -n "$missing" ]; then
+        echo "ERROR: $so has unresolved libs: $missing" >&2
+        exit 1
+      fi
+      echo "OK: $so is an ELF shared object and loads cleanly"
+    exit-status: 0
+
+  # --- Identity resolution still works with the module live -------------
+  # With no workbench-nss.conf present the module must return Unavail and fall
+  # through to `files`. If it instead wedged NSS, every name lookup in the
+  # container would break -- resolving a known-local account is the canary.
+  nss-identity-resolution-intact:
+    exec: "getent passwd root && getent group root"
+    exit-status: 0
+
+  # --- rsession runs, and reports the version we pinned -----------------
+  # The strongest single check in this suite. It proves end to end that the
+  # installed binary matches the base image's architecture, that its shared
+  # library dependencies are satisfied, that bin/r-ldpath works against the
+  # base's R install, and that the Workbench build is the one the apt pin
+  # asked for (rsession prints `<version>, "<release>" (<sha>, <date>) ...`).
+  #
+  # rsession CANNOT be run bare: it links against libR.so, which lives in R's
+  # own lib dir and is not on the default loader path. bin/r-ldpath exists for
+  # exactly this -- it takes R_HOME as $1, sources $R_HOME/etc/ldpaths and
+  # echoes the resulting LD_LIBRARY_PATH, which is what the session run
+  # scripts do at launch.
+  #
+  # R_HOME is DISCOVERED, not templated: R comes from the workbench-session
+  # base, whose R/Python versions are that image's matrix coordinates and are
+  # unknown to this image's Bakery config. Anything hardcoding an R version
+  # here would break on the next base rebuild.
+  rsession-reports-pinned-workbench-version:
+    exec: |
+      r_bin="$(ls -d /opt/R/*/bin/R 2>/dev/null | head -1)"
+      if [ -z "$r_bin" ]; then
+        echo "ERROR: no R installation found under /opt/R" >&2
+        exit 1
+      fi
+      r_home="$(dirname "$(dirname "$r_bin")")/lib/R"
+      LD_LIBRARY_PATH="$(/usr/lib/rstudio-server/bin/r-ldpath "$r_home")" \
+        /usr/lib/rstudio-server/bin/rsession --version
+    exit-status: 0
+    # Plain substring, not a /regex/: the version contains `+` and `.`, which
+    # would need escaping in goss's regex form and buy nothing here.
+    stdout:
+      - "2026.09.0+174.pro3"
+
+  # --- Every Workbench binary's shared libraries resolve ----------------
+  # The general guard for UNDECLARED dependencies of the rstudio-server deb.
+  # The package's Depends list is incomplete: libcap2 is required by rsession
+  # and 22 other binaries but is not declared, so `apt-get install` of the
+  # deb's own dependencies does not pull it. On the Standard variant that gap
+  # is masked (workbench-session's std package set happens to include libcap2);
+  # on Minimal it is not, and rsession dies at exec time with exit 127. The
+  # Containerfile installs libcap2 explicitly, and this check is what stops the
+  # next such gap from shipping -- a missing shared library is invisible at
+  # build time and only fails when a user tries to start a session.
+  #
+  # libR.so is EXCLUDED on purpose: it genuinely is not resolvable here. It
+  # lives in R's own lib dir, and the session run scripts put it on the loader
+  # path at launch via bin/r-ldpath (see
+  # rsession-reports-pinned-workbench-version above, which exercises exactly
+  # that). Anything else showing up here is a real packaging gap.
+  #
+  # Filtering is done in `awk`, not `grep -v`: under `set -o pipefail` grep
+  # exits 1 when it selects no lines, which is precisely the healthy case here
+  # and would false-fail the check.
+  workbench-binaries-shared-libs-resolve:
+    exec: |
+      missing="$(find /usr/lib/rstudio-server -type f -perm -u+x 2>/dev/null \
+                 | while read -r f; do ldd "$f" 2>/dev/null; done \
+                 | awk '/not found/ && $1 !~ /^libR\.so/ {print $1}' \
+                 | sort -u | tr '\n' ' ')"
+      if [ -n "$missing" ]; then
+        echo "ERROR: unresolved shared libraries in the Workbench install: $missing" >&2
+        echo "These are undeclared deps of the rstudio-server deb; add the providing apt package(s) to the Containerfile." >&2
+        exit 1
+      fi
+      echo "OK: all Workbench binaries' shared libraries resolve (libR.so excluded by design)"
+    exit-status: 0
+
+  # --- No systemd unit was enabled --------------------------------------
+  # install_workbench.sh comments out the postinst's `systemctl enable` lines.
+  #
+  # DELIBERATELY NOT asserting that /etc/rc*.d/S*rstudio-* is absent: it is
+  # NOT. With no systemd in the build container the postinst falls through to
+  # its sysv branch, which runs `update-rc.d rstudio-server defaults` and does
+  # create /etc/rc{2,3,4,5}.d/S01rstudio-{server,launcher} plus
+  # /etc/init.d/rstudio-*. Those links are inert -- nothing in a container runs
+  # sysv rc.d -- and r-session-complete produces exactly the same artifacts
+  # from the same postinst, so requiring their absence would fail a faithful
+  # build. What actually matters is that no server was STARTED and no server
+  # state was captured, which the `exists: false` state-file checks above
+  # assert directly. This check remains as the guard for the systemd path, in
+  # case a future base image ships an init system.
+  no-workbench-systemd-unit-enabled:
+    exec: |
+      found="$(ls -d /etc/systemd/system/multi-user.target.wants/rstudio-*.service 2>/dev/null | tr '\n' ' ')"
+      if [ -n "$found" ]; then
+        echo "ERROR: a Workbench systemd unit was enabled at build time: $found" >&2
+        exit 1
+      fi
+      echo "OK: no Workbench systemd unit enabled"
+    exit-status: 0
+
+  # --- The rstudio-server service account exists ------------------------
+  # Created by the deb postinst (`useradd -r -U rstudio-server`). It has to
+  # exist because the postinst chowns /etc/rstudio/audit-database.conf and
+  # database.conf to it; a missing account would leave those owned by a bare
+  # numeric id.
+  #
+  # The UID/GID is deliberately NOT pinned here. The postinst lets useradd pick
+  # the next free system id, so the value is whatever the base image happens to
+  # leave free and can move on a base rebuild. Pinning it is not as simple as
+  # copying the uid/gid 999 convention from images-workbench's `workbench`
+  # image either: in the workbench-session base, gid 999 is already taken by
+  # systemd-journal (and uid 997 by messagebus), so 999 is unavailable. Left
+  # unpinned to stay faithful to r-session-complete, which also lets the
+  # postinst choose; see the README for the tradeoff.
+  rstudio-server-account-exists:
+    exec: "getent passwd rstudio-server && getent group rstudio-server"
+    exit-status: 0
+
+  # --- No launcher job state captured from the build host ---------------
+  # r-session-complete asserts specific buildkit-derived job directory names
+  # here; this checks the whole directory is empty instead, which does not
+  # depend on what the builder happened to be called.
+  no-launcher-job-state:
+    exec: |
+      d="/var/lib/rstudio-launcher/Local/jobs"
+      if [ -d "$d" ] && [ -n "$(ls -A "$d" 2>/dev/null)" ]; then
+        echo "ERROR: launcher job state baked into image: $(ls -A "$d" | tr '\n' ' ')" >&2
+        exit 1
+      fi
+      echo "OK: no launcher job state"
+    exit-status: 0
+
+  # --- Quarto on PATH is the base's pinned build, not the deb's bundle ---
+  # r-session-complete symlinks the deb's bundled Quarto onto /usr/local/bin;
+  # this image deliberately does not, because the base already provides a
+  # Bakery-pinned /opt/quarto that its own goss suite tests. This asserts that
+  # choice held -- i.e. that installing the deb did not quietly take over
+  # `quarto` on PATH.
+  quarto-on-path-is-base-build:
+    exec: |
+      resolved="$(readlink -f "$(command -v quarto)")"
+      case "$resolved" in
+        /opt/quarto/*) echo "OK: quarto on PATH is the base build ($resolved)" ;;
+        *) echo "ERROR: quarto on PATH resolved to $resolved, expected /opt/quarto/*" >&2; exit 1 ;;
+      esac
+    exit-status: 0
+
+  # --- The base image's own runtimes were not shadowed ------------------
+  # R and Python are deliberately NOT checked with `command -v`: neither is on
+  # PATH in workbench-session -- they live at /opt/R/<version>/bin and
+  # /opt/python/<version>/bin and are resolved by the session run scripts, not
+  # by PATH. A `command -v R` check here fails against a healthy image.
+  base-image-runtimes-not-shadowed:
+    exec: |
+      rc=0
+      ls -d /opt/R/*/bin/R >/dev/null 2>&1 || { echo "ERROR: no R under /opt/R" >&2; rc=1; }
+      ls -d /opt/python/*/bin/python3 >/dev/null 2>&1 || { echo "ERROR: no python3 under /opt/python" >&2; rc=1; }
+      [ -d /opt/.TinyTeX ] || { echo "ERROR: /opt/.TinyTeX missing" >&2; rc=1; }
+      if [ "$rc" -eq 0 ]; then echo "OK: base image runtimes intact"; fi
+      exit "$rc"
+    exit-status: 0
+
+  # --- The Ubuntu base's pebble service manager was removed --------------
+  # The file checks above assert the two known paths are gone; this asserts the
+  # stronger property that pebble is not resolvable on PATH at all, so a future
+  # base image that relocates the binary elsewhere on PATH (rather than leaving
+  # it at /usr/bin/pebble) is still caught. pebble is not dpkg-tracked, so this
+  # is a path/file assertion rather than a `package` one.
+  pebble-service-manager-removed:
+    exec: |
+      if command -v pebble >/dev/null 2>&1; then
+        echo "ERROR: pebble still present at $(command -v pebble)" >&2
+        exit 1
+      fi
+      echo "OK: pebble not on PATH"
+    exit-status: 0

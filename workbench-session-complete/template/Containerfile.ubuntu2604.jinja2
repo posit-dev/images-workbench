@@ -1,0 +1,156 @@
+{%- import "apt.j2" as apt -%}
+{#-
+Map the Bakery variant onto the matching workbench-session tag. The base tag is
+OS-QUALIFIED (ubuntu-26.04-std, not the floating std) because this image's OS
+now matters: install_workbench.sh pulls rstudio-server from the Posit pro apt
+repository that the base image itself has configured, so the deb build is
+whichever Ubuntu suite the base is pinned to. A floating :std tag would silently
+change OS under us on a base rebuild and change which deb gets installed.
+-#}
+{%- set session_variant_tag = "min" if Image.Variant == "Minimal" else "std" -%}
+{%- set session_base = "ghcr.io/posit-dev/workbench-session:ubuntu-26.04-" ~ session_variant_tag -%}
+# syntax=docker/dockerfile:1
+#
+# Posit Workbench "session complete" -- a workbench-session image with a full
+# Workbench installation layered on, so a session container carries its own
+# session components and needs no workbench-session-init init container
+# alongside it.
+#
+# This mirrors the approach in rstudio-docker-products'
+# r-session-complete image: install the entire rstudio-server (Workbench) deb
+# and take the session components that come with it. Installing all of Workbench
+# to get the session components is not the efficient way to do it --
+# workbench-session-init exists precisely to ship just those components -- but
+# it is the method that works today, and it is the method the partner-facing
+# r-session-complete image has always used. The component-copy alternative is
+# blocked on rstudio-pro#12361 (session component setup is broken on Ubuntu
+# 26.04), which is why this image takes the deb route for now.
+#
+# WHAT THIS IMAGE DOES *NOT* REDO:
+# r-session-complete builds on product-base-pro and therefore has to install R,
+# Python, Jupyter, Quarto, TinyTeX, the Pro Drivers and the IDE extension
+# configs itself. All of those are already in workbench-session, so only the
+# Workbench installation itself is mirrored here. Concretely, these steps from
+# r-session-complete's Dockerfile are intentionally absent:
+#   * R / Python / ipykernel / jupyter venv  -- base has them under /opt
+#   * Quarto + TinyTeX                      -- base has /opt/quarto (Bakery-
+#                                              pinned) and /opt/.TinyTeX
+#   * vscode.extensions.conf                -- base ships a curated copy in
+#                                              /etc/rstudio; the deb postinst
+#                                              only writes its own if that file
+#                                              is absent, so the base's wins
+#   * EXPOSE 8788                           -- already declared by the base
+#   * apt packages                          -- all but libcurl4-gnutls-dev are
+#                                              already installed in the base
+#
+# NOT symlinked on purpose: r-session-complete does
+# `ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto`,
+# exposing the deb's BUNDLED Quarto on PATH. Here /usr/local/bin/quarto already
+# points at the base's /opt/quarto/bin/quarto, which is the version Bakery pins
+# and tests. The deb's bundled copy still lands at
+# /usr/lib/rstudio-server/bin/quarto for the session components to use
+# internally; PATH is left pointing at the pinned one.
+
+ARG WORKBENCH_SESSION_IMAGE={{ session_base }}
+FROM ${WORKBENCH_SESSION_IMAGE}
+LABEL org.opencontainers.image.base.name="{{ session_base }}"
+
+### ARG declarations ###
+ARG DEBIAN_FRONTEND=noninteractive
+# Suppresses the postinst's license-manager initialization. install_workbench.sh
+# also strips that block out of the postinst entirely; both are applied so a
+# change to either mechanism alone cannot start baking license state into a
+# layer.
+ARG RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1
+
+SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+
+### Install additional apt packages ###
+# libcurl4-gnutls-dev: r-session-complete installs gdb, krb5-user,
+#   libcurl4-gnutls-dev, libuser, libuser1-dev, libpq-dev, perl, rrdtool,
+#   strace and subversion. Every one of those except libcurl4-gnutls-dev is
+#   already present in the workbench-session base (verified against both
+#   ubuntu-26.04-std and ubuntu-26.04-min), so only the missing one is listed
+#   rather than restating the full list and re-resolving nine no-ops.
+#
+# libcap2: an UNDECLARED dependency of the Workbench deb, and load-bearing.
+#   rsession and 22 other binaries under /usr/lib/rstudio-server link against
+#   libcap.so.2, but the rstudio-server package does not list libcap2 in its
+#   Depends (its declared set is rrdtool, libssl-dev, psmisc, libclang-dev,
+#   libsqlite3-0, lsb-release, sudo, libpq5, libc6). So installing the deb's
+#   own dependencies is NOT sufficient to get a working rsession.
+#
+#   This is invisible on the Standard variant and on r-session-complete:
+#   workbench-session's std package set pulls libcap2 in incidentally, and
+#   r-session-complete's product-base-pro base is fat enough to already have
+#   it. On the MINIMAL variant it is absent, and rsession dies at exec time
+#   with "libcap.so.2: cannot open shared object file" (exit 127) -- a broken
+#   session image that builds perfectly cleanly. Found by the
+#   rsession-reports-pinned-workbench-version goss check; the
+#   workbench-binaries-shared-libs-resolve check now guards the general case.
+RUN {{ apt.install(packages = ["libcurl4-gnutls-dev", "libcap2"]) | trim | indent(4) }}
+
+### Install Workbench {{ Image.Version }} ###
+# Provides the session components at /usr/lib/rstudio-server/bin. Note the
+# layout difference from the workbench-session-init component tarball: the deb
+# is FLAT (/usr/lib/rstudio-server/bin/rsession), whereas the tarball nests
+# per-distro subdirectories (bin/noble/rsession). Anything reading these paths
+# has to expect the flat form.
+ARG WORKBENCH_VERSION="{{ Image.Version }}"
+COPY --chmod=0755 {{ Path.Version }}/scripts/install_workbench.sh /tmp/install_workbench.sh
+RUN {% if Image.DownloadURL is defined %}DOWNLOAD_URL="{{ Image.DownloadURL }}" {% endif %}\
+    /tmp/install_workbench.sh && \
+    rm -f /tmp/install_workbench.sh
+
+### Drop the init-container placeholder left over from the base image ###
+# workbench-session ships a ZERO-BYTE /usr/lib/rstudio-server/bin/<codename>/
+# libnss_pwb.so purely so ldconfig will not prune the multiarch symlink that
+# points at it while waiting for workbench-session-init to populate the volume
+# (images-workbench commit 6d36fa0). Installing the deb makes that obsolete: its
+# postinst repoints /usr/lib/<triplet>/libnss_pwb.so.2 at the REAL
+# /usr/lib/rstudio-server/bin/libnss_pwb.so and re-adds `pwb` to
+# /etc/nsswitch.conf. The placeholder is then not just dead weight but actively
+# misleading -- a zero-byte libnss_pwb.so is exactly what someone debugging NSS
+# would expect to be the live module -- so it is removed.
+#
+# The codename is read from /etc/os-release rather than templated so this block
+# is identical across the per-OS Containerfiles. It is guarded and uses `rmdir`
+# (which only removes an EMPTY directory) instead of `rm -rf` on an interpolated
+# path: an empty VERSION_CODENAME would otherwise expand to
+# `rm -rf /usr/lib/rstudio-server/bin/`, deleting every component in the image.
+# The deb ships no per-distro subdirectories of its own, so nothing it installed
+# can be caught by this.
+RUN codename="$(. /etc/os-release && echo "${VERSION_CODENAME}")" && \
+    if [ -z "${codename}" ]; then echo "ERROR: VERSION_CODENAME is empty in /etc/os-release" >&2; exit 1; fi && \
+    placeholder_dir="/usr/lib/rstudio-server/bin/${codename}" && \
+    if [ -f "${placeholder_dir}/libnss_pwb.so" ] && [ ! -s "${placeholder_dir}/libnss_pwb.so" ]; then \
+        rm -f "${placeholder_dir}/libnss_pwb.so"; \
+    fi && \
+    rmdir "${placeholder_dir}" 2>/dev/null || true && \
+    ldconfig && \
+    test -s "/usr/lib/$(uname -m)-linux-gnu/libnss_pwb.so.2"
+
+### Remove the pebble service manager inherited from the Ubuntu base ###
+# ubuntu:26.04 ships Canonical's pebble service manager as a standalone ~10MB
+# binary at /usr/bin/pebble (with an empty state tree at /var/lib/pebble), and
+# workbench-session inherits both unchanged. It is NOT a dpkg-tracked package
+# -- nothing declares a Depends on it and `dpkg -S /usr/bin/pebble` finds no
+# owner -- so it cannot be removed with `apt-get remove`; the files are deleted
+# directly. Nothing in this image uses it: a session container's process model
+# is the Job Launcher exec'ing a session per request, not a pebble-supervised
+# service tree, and neither the base nor this image sets pebble as an
+# entrypoint or references it from /etc (verified on both the -min and -std
+# bases). Removing it drops dead weight and an unused root-owned service
+# manager from the image's attack surface.
+#
+# `rm -f`/`rm -rf` so this is a no-op (not an error) if a future base image
+# stops shipping pebble, and an explicit post-check so that if a future base
+# instead RELOCATES pebble or starts actually using it, `command -v pebble`
+# still resolving here fails the build -- a signal to revisit this block rather
+# than silently shipping the binary again.
+RUN rm -f /usr/bin/pebble && \
+    rm -rf /var/lib/pebble && \
+    if command -v pebble >/dev/null 2>&1; then \
+        echo "ERROR: pebble still on PATH at $(command -v pebble) after removal" >&2; \
+        exit 1; \
+    fi

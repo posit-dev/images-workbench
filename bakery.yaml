@@ -376,3 +376,40 @@ images:
             - linux/amd64
             - linux/arm64
         - name: Ubuntu 22.04
+  - name: workbench-session-complete
+    displayName: "Posit Workbench Session Complete"
+    description: "A Posit Workbench session image with a full Workbench installation
+      layered on, so the session components ship in the image and sessions run without
+      a workbench-session-init init container alongside them."
+    documentationUrl: "https://docs.posit.co/ide/server-pro/integration/kubernetes.html"
+    variants:
+      - name: Standard
+        extension: std
+        tagDisplayName: std
+        primary: true
+      - name: Minimal
+        extension: min
+        tagDisplayName: min
+    # No `options` here:
+    #   * goss -- a session image starts no long-running service of its own (the
+    #     Job Launcher execs a session per request), so dgoss runs the default
+    #     `sleep infinity` and the suite is purely structural.
+    #   * soci -- deliberately not enabled yet; worth revisiting given the image size.
+    versions:
+      # Rolling release: only the latest Workbench version is kept. The release
+      # workflow replaces this entry on each Workbench release (see
+      # .github/workflows/release.yml).
+      #
+      # The version is the WORKBENCH release, used verbatim as the apt version
+      # pin for the rstudio-server package in scripts/install_workbench.sh. It is
+      # not an R/Python matrix coordinate -- those come from whichever
+      # workbench-session base build the OS-qualified tag resolves to.
+      - name: 2026.09.0+174.pro3
+        subpath: '2026.09'
+        latest: true
+        os:
+          - name: Ubuntu 26.04
+            primary: true
+            platforms:
+              - linux/amd64
+              - linux/arm64

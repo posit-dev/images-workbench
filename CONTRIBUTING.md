@@ -141,7 +141,7 @@ bakery dgoss run --image-name workbench --image-version 2026.01
 | `production.yml` | Weekly Sun 03:15 UTC, push to main, dispatch | `workbench` + `workbench-session-init` (excludes dev and matrix) |
 | `development-workbench.yml` | Daily 09:45 UTC, push to main, dispatch | `workbench` + `workbench-session-init` dev versions → ghcr.io/posit-dev/workbench-preview |
 | `development-positron.yml` | Daily 09:55 UTC, push to main, dispatch | `workbench-positron-init` dev version → ghcr.io/posit-dev/workbench-positron-init-preview |
-| `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` + `workbench-positron-init` matrix images |
+| `session.yml` | Weekly Sun 03:45 UTC, push to main, dispatch | `workbench-session` + `workbench-positron-init` matrix images, then `workbench-session-complete` |
 
 All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).
 
