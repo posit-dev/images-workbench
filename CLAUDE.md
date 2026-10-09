@@ -195,10 +195,10 @@ All workflows call shared reusable workflows from `images-shared`:
 
 | Workflow | What it builds | Shared workflow |
 |---|---|---|
-| `production.yml` | `workbench` + `workbench-session-init` + `workbench-session-complete` (excludes dev/matrix) | `bakery-build-native.yml` |
+| `production.yml` | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
 | `development-workbench.yml` | `workbench` + `workbench-session-init` dev versions (daily previews) | `bakery-build-native.yml` |
 | `development-positron.yml` | `workbench-positron-init` dev version (daily Positron previews) | `bakery-build-native.yml` |
-| `session.yml` | `workbench-session` + `workbench-positron-init` matrix images | `bakery-build-native.yml` |
+| `session.yml` | `workbench-session` + `workbench-positron-init` matrix images, then `workbench-session-complete` | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
 Dev preview images push to ghcr.io/posit-dev/workbench-preview and
