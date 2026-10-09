@@ -1,0 +1,85 @@
+{#-
+Mirrors images-workbench's workbench/template/scripts/install_workbench.sh.jinja2,
+which is itself the Bakery form of rstudio-docker-products'
+r-session-complete/install_workbench.sh. Kept deliberately close to those two so
+a fix in either is easy to port here.
+
+The one substantive difference from r-session-complete: that script curl's a
+jammy-specific deb straight off download2.rstudio.org and verifies it with
+dpkg-sig. Here the package comes from the Posit pro apt repository, which the
+workbench-session base image already has configured (posit-pro.list, pinned to
+the base's own Ubuntu suite). That means:
+  * the deb automatically matches the base image's OS -- no hardcoded
+    download2.rstudio.org/server/<codename>/<arch> path to keep in sync, so
+    adding another OS target later needs no change to this script, and
+  * apt verifies the repository signature via the keyring in
+    /usr/share/keyrings/posit-pro-archive-keyring.gpg, so the manual
+    `gpg --recv-keys` + `dpkg-sig --verify` dance in r-session-complete is
+    already covered and is dropped rather than reimplemented.
+-#}
+{%- import "apt.j2" as apt -%}
+#!/bin/bash
+set -euo pipefail
+
+# Output delimiter
+d="===="
+package_name="rstudio-server"
+
+# Update apt repositories
+apt-get update -yq
+
+echo "$d Fetching Posit Workbench {{ Image.Version }} $d"
+{% if Image.IsDevelopmentVersion -%}
+# Fetch Workbench debian package from the provided URL for development versions
+deb_file="/tmp/workbench.deb"
+curl -fsSL "${DOWNLOAD_URL}" -o "${deb_file}"
+{%- else -%}
+# For non-development versions, download the deb package using apt-get. The
+# version is pinned exactly: the Posit open repo also carries a same-numbered
+# non-pro build (e.g. 2026.08.1+195 alongside 2026.08.1+195.pro1) and only the
+# `.pro1` package is Workbench.
+apt-get download "${package_name}={{ Image.Version }}"
+deb_file="$(pwd)/$(ls ${package_name}*.deb)"
+{%- endif %}
+
+# Install the deb's declared dependencies up front. dpkg cannot resolve them
+# itself, and the `dpkg --unpack` below has to succeed before the postinst can
+# be patched.
+# shellcheck disable=SC2046
+apt-get install -yq $(dpkg -I "$deb_file" | grep '^ Depends:' | sed 's/^ Depends: //' | tr ',' '\n' | awk '{print $1}' | tr -d '(')
+
+# Patch the installer so installing Workbench does not also START Workbench.
+# `dpkg --unpack` lays the files down and writes the maintainer scripts WITHOUT
+# running the postinst, which gives us a window to edit it before `dpkg
+# --configure` executes it below. Each edit removes one thing that only makes
+# sense on a real server host:
+#   * force-suspend-all  -- talks to a running rserver that does not exist here
+#   * systemctl enable   -- there is no init system in a container, and a
+#                           session image must never start a Workbench server
+#   * the license-initialization block -- would bake license state into the
+#                           image layer (it is also gated by the
+#                           RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION=1 build
+#                           arg; both are applied, belt and braces)
+# Deliberately NOT patched out are the last two things the postinst does, which
+# this image actively wants: it repoints
+# /usr/lib/${TRIPLET}/libnss_pwb.so.2 at the real
+# /usr/lib/rstudio-server/bin/libnss_pwb.so, and re-inserts `pwb` into
+# /etc/nsswitch.conf.
+echo "$d Patching ${deb_file} $d"
+dpkg --unpack "${deb_file}"
+sed -i 's/^rstudio-server force-suspend-all/# rstudio-server force-suspend-all/' /var/lib/dpkg/info/rstudio-server.postinst
+sed -i 's/systemctl enable rstudio-server.service/# systemctl enable rstudio-server.service/g' /var/lib/dpkg/info/rstudio-server.postinst
+sed -i 's/systemctl enable rstudio-launcher.service/# systemctl enable rstudio-launcher.service/g' /var/lib/dpkg/info/rstudio-server.postinst
+awk '/if test "\$RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION" != "1"/ { skip=1 }
+    skip { if (/fi/) { skip=0 } next }
+    { print }
+' "/var/lib/dpkg/info/rstudio-server.postinst" > "/var/lib/dpkg/info/rstudio-server.postinst.tmp" && mv "/var/lib/dpkg/info/rstudio-server.postinst.tmp" "/var/lib/dpkg/info/rstudio-server.postinst"
+
+# Install Workbench
+echo "$d Install Posit Workbench {{ Image.Version }} $d"
+dpkg --configure "${package_name}"
+apt-get install -yf
+rm -f "${deb_file}"
+
+# Clean up
+{{ apt.clean_command() }}
