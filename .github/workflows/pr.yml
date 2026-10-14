@@ -57,6 +57,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
+      trivy-scan: true
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
@@ -69,6 +70,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
+      trivy-scan: true
       dev-versions: "only"
       matrix-versions: "include"
 
@@ -79,6 +81,7 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
+      trivy-scan: true
       matrix-versions: "only"
 
   zizmor:
