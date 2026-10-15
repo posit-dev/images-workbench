@@ -197,7 +197,7 @@ file:
 
   # Check for Python installation
 
-  /opt/python/3.15.0/bin/python:
+  /opt/python/3.14.8/bin/python:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
 
   /opt/python/jupyter/bin/python:
@@ -259,18 +259,18 @@ command:
       - "R version 4.6.1"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
-  "Verify Python installation is version 3.15.0":
-    exec: /opt/python/3.15.0/bin/python --version
+  "Verify Python installation is version 3.14.8":
+    exec: /opt/python/3.14.8/bin/python --version
     exit-status: 0
     stdout:
-      - "3.15.0"
+      - "3.14.8"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
     stdout:
-      - "3.15.0"
+      - "3.14.8"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
   "Verify system OpenSSL":
     exec: which openssl
