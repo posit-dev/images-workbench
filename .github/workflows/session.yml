@@ -27,6 +27,7 @@ jobs:
     timeout-minutes: 10
     needs:
       - build
+      - build-complete
     steps:
       - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35  # v1.3.0
         id: alls-green
@@ -63,5 +64,38 @@ jobs:
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
       matrix-versions: only
+      # Push images only for merges into main and weekly schduled re-builds.
+      push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+
+  build-complete:
+    name: Build Session Complete
+    # workbench-session-complete layers Workbench on top of workbench-session,
+    # so it builds after the session matrix to pick up the fresh base. It still
+    # runs if the matrix build fails, falling back to the last published base.
+    #
+    # Excluded from production.yml so it is only built here.
+    needs:
+      - build
+    if: ${{ !cancelled() && (github.event_name == 'push' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@v0"
+    secrets:
+      DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
+      DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
+      WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+      WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+      WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
+      WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
+    with:
+      # ~15 GB image on a ~7 GB base; needs the larger runner's disk.
+      amd64-builder: "ubuntu-latest-amd64-8-core"
+      image-name: "^workbench-session-complete$"
+      dev-versions: "exclude"
+      matrix-versions: "exclude"
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
