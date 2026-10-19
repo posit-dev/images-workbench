@@ -35,6 +35,89 @@ jobs:
       APP_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
       APP_PRIVATE_KEY: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
 
+  # workbench-session-complete is a rolling release: it keeps only the latest
+  # Workbench version. product-release.yml keeps every edition, so this image is
+  # handled here instead, on the same release branch (and therefore the same PR).
+  # A same-edition patch renames the version in place; an edition bump creates
+  # the new version and removes the old one. Backports to an older edition are
+  # skipped.
+  release-session-complete:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        with:
+          app-id: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
+          private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
+          permission-contents: write
+          permission-pull-requests: write
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install bakery
+        uses: posit-dev/images-shared/setup-bakery@v0
+        with:
+          restore-cache: "false"
+
+      - name: Replace version
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          VERSION: ${{ inputs.version }}
+          IMAGE: workbench-session-complete
+        run: |
+          DISPLAY_VERSION="${VERSION%%[+-]*}"
+          EDITION="${DISPLAY_VERSION%.*}"
+          BRANCH="release/${DISPLAY_VERSION}"
+
+          # Inline auth header so the token is never persisted in .git/config.
+          AUTH_HEADER="AUTHORIZATION: basic $(printf '%s' "x-access-token:${GH_TOKEN}" | base64 -w0)"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Continue on the branch the release job just pushed.
+          if git -c "http.https://github.com/.extraheader=$AUTH_HEADER" fetch origin "$BRANCH" 2>/dev/null; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH"
+          fi
+
+          OLD_VERSION=$(bakery get version "$IMAGE")
+          OLD_DISPLAY="${OLD_VERSION%%[+-]*}"
+          OLD_EDITION="${OLD_DISPLAY%.*}"
+
+          if [ "$OLD_VERSION" = "$VERSION" ]; then
+            echo "$IMAGE already at $VERSION; nothing to do."
+            exit 0
+          elif [[ "$EDITION" < "$OLD_EDITION" ]]; then
+            echo "$VERSION is older than $IMAGE's $OLD_VERSION; rolling release skips backports."
+            exit 0
+          elif [ "$OLD_EDITION" = "$EDITION" ]; then
+            echo "Patching $IMAGE: $OLD_VERSION -> $VERSION"
+            bakery update version "$IMAGE" "$VERSION" --target-version "$OLD_VERSION"
+          else
+            echo "Replacing $IMAGE: $OLD_VERSION -> $VERSION (subpath=$EDITION)"
+            bakery create version "$IMAGE" "$VERSION" --subpath "$EDITION" --mark-latest
+            bakery remove version "$IMAGE" "$OLD_VERSION"
+          fi
+
+          git add -A
+          git commit -m "Release ${DISPLAY_VERSION} for ${IMAGE}"
+          git -c "http.https://github.com/.extraheader=$AUTH_HEADER" push -u origin "$BRANCH" --force-with-lease
+
+          gh pr create \
+            --title "Release ${DISPLAY_VERSION}" \
+            --body "Updates images to version \`${VERSION}\`." \
+            --base main \
+            --head "$BRANCH" || echo "PR already exists"
+
   trigger-specialized:
     needs: release
     runs-on: ubuntu-latest

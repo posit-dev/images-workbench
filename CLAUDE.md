@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Posit Workbench container images built with [Posit Bakery](https://github.com/posit-dev/images-shared/tree/main/posit-bakery). Contains `workbench` (Standard/Minimal variants), `workbench-session` (R x Python matrix), and `workbench-session-init`.
+Posit Workbench container images built with [Posit Bakery](https://github.com/posit-dev/images-shared/tree/main/posit-bakery). Contains `workbench` (Standard/Minimal variants), `workbench-session` (R x Python matrix), `workbench-session-init`, and `workbench-session-complete`.
 
 ## Sibling Repositories
 
@@ -81,6 +81,13 @@ All license env vars are unset after activation to prevent child process inherit
 Session images for Workbench's Launcher. Uses a **matrix** of R x Python versions
 (e.g., `R4.5.2-python3.14.3`). No variants — single image per combination.
 Also includes Quarto and TinyTeX.
+
+### workbench-session-complete
+
+`workbench-session` (OS-qualified `ubuntu-26.04-{std,min}` tag) with the full Workbench deb
+installed, so sessions need no init container. amd64 + arm64. **Rolling release:** `bakery.yaml`
+keeps only the latest Workbench version; the `release-session-complete` job in `release.yml`
+replaces it on each release. Never add a second version.
 
 ### workbench-session-init
 
@@ -191,7 +198,7 @@ All workflows call shared reusable workflows from `images-shared`:
 | `production.yml` | `workbench` + `workbench-session-init` (excludes dev/matrix) | `bakery-build-native.yml` |
 | `development-workbench.yml` | `workbench` + `workbench-session-init` dev versions (daily previews) | `bakery-build-native.yml` |
 | `development-positron.yml` | `workbench-positron-init` dev version (daily Positron previews) | `bakery-build-native.yml` |
-| `session.yml` | `workbench-session` + `workbench-positron-init` matrix images | `bakery-build-native.yml` |
+| `session.yml` | `workbench-session` + `workbench-positron-init` matrix images, then `workbench-session-complete` | `bakery-build-native.yml` |
 
 Images push to `docker.io/posit` and `ghcr.io/posit-dev` on main merges and scheduled runs.
 Dev preview images push to ghcr.io/posit-dev/workbench-preview and
