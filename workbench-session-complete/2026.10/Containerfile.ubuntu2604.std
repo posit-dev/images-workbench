@@ -84,14 +84,14 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
-### Install Workbench 2026.09.0+174.pro3 ###
+### Install Workbench 2026.10.0+233.pro1 ###
 # Provides the session components at /usr/lib/rstudio-server/bin. Note the
 # layout difference from the workbench-session-init component tarball: the deb
 # is FLAT (/usr/lib/rstudio-server/bin/rsession), whereas the tarball nests
 # per-distro subdirectories (bin/noble/rsession). Anything reading these paths
 # has to expect the flat form.
-ARG WORKBENCH_VERSION="2026.09.0+174.pro3"
-COPY --chmod=0755 workbench-session-complete/2026.09/scripts/install_workbench.sh /tmp/install_workbench.sh
+ARG WORKBENCH_VERSION="2026.10.0+233.pro1"
+COPY --chmod=0755 workbench-session-complete/2026.10/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \
     rm -f /tmp/install_workbench.sh

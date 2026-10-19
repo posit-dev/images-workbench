@@ -8,12 +8,12 @@ package_name="rstudio-server"
 # Update apt repositories
 apt-get update -yq
 
-echo "$d Fetching Posit Workbench 2026.09.0+174.pro3 $d"
+echo "$d Fetching Posit Workbench 2026.10.0+233.pro1 $d"
 # For non-development versions, download the deb package using apt-get. The
 # version is pinned exactly: the Posit open repo also carries a same-numbered
 # non-pro build (e.g. 2026.08.1+195 alongside 2026.08.1+195.pro1) and only the
 # `.pro1` package is Workbench.
-apt-get download "${package_name}=2026.09.0+174.pro3"
+apt-get download "${package_name}=2026.10.0+233.pro1"
 deb_file="$(pwd)/$(ls ${package_name}*.deb)"
 
 # Install the deb's declared dependencies up front. dpkg cannot resolve them
@@ -50,7 +50,7 @@ awk '/if test "\$RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION" != "1"/ { skip=1 }
 ' "/var/lib/dpkg/info/rstudio-server.postinst" > "/var/lib/dpkg/info/rstudio-server.postinst.tmp" && mv "/var/lib/dpkg/info/rstudio-server.postinst.tmp" "/var/lib/dpkg/info/rstudio-server.postinst"
 
 # Install Workbench
-echo "$d Install Posit Workbench 2026.09.0+174.pro3 $d"
+echo "$d Install Posit Workbench 2026.10.0+233.pro1 $d"
 dpkg --configure "${package_name}"
 apt-get install -yf
 rm -f "${deb_file}"
