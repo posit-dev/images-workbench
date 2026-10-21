@@ -1,6 +1,12 @@
 name: Production
 on:
   workflow_dispatch:
+    inputs:
+      refresh-cache:
+        description: "Rebuild all layers without reading the build cache, but still write fresh layers to the cache registry [default: false]"
+        type: boolean
+        default: false
+        required: false
 
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
@@ -87,6 +93,7 @@ jobs:
       image-name: "^(?!workbench-session-complete$)"
       # Push images only for merges into main and weekly schduled re-builds.
       push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+      refresh-cache: ${{ inputs.refresh-cache || false }}
 
   update-helm:
     name: Update Helm
