@@ -4,7 +4,11 @@ results/
 .bakery-bake.json
 .dev-*
 
-# Claude
+# Agent tooling
+.worktrees/
+.agents/plans/
+
+# Claude Code
 .claude/settings.local.json
 .claude/worktrees/
 .claude/plans/
