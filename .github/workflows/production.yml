@@ -7,6 +7,11 @@ on:
         type: boolean
         default: false
         required: false
+      recent:
+        description: "Number of most recent release versions of each image to build. Use 0 to build all present release versions [default: 3]"
+        type: number
+        default: 3
+        required: false
 
   schedule:
     # Weekly rebuild of all images, to pick up any upstream changes.
@@ -64,7 +69,8 @@ jobs:
 
   build:
     name: Build
-    # Build the three most recent release versions, excluding dev versions.
+    # Build the 3 most recent release versions by default, excluding dev versions.
+    # workflow_dispatch can override this with the `recent` input (0 = all versions).
     #
     # Run on merges to main, or on weekly scheduled re-builds.
     needs:
@@ -87,7 +93,9 @@ jobs:
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
-      recent: 3
+      # Not `inputs.recent || 3` (0 is falsy) or `inputs.recent == null` (null == 0 is true):
+      # both turn a dispatched 0 into 3. Non-dispatch runs have no inputs and build 3.
+      recent: ${{ github.event_name != 'workflow_dispatch' && 3 || inputs.recent }}
       # workbench-session-complete is built by session.yml, after its
       # workbench-session base.
       image-name: "^(?!workbench-session-complete$)"
