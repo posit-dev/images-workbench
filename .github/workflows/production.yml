@@ -93,8 +93,9 @@ jobs:
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
-      # Not `inputs.recent || 3`: 0 is falsy and would become 3. Non-dispatch runs have null inputs.
-      recent: ${{ inputs.recent == null && 3 || inputs.recent }}
+      # Not `inputs.recent || 3` (0 is falsy) or `inputs.recent == null` (null == 0 is true):
+      # both turn a dispatched 0 into 3. Non-dispatch runs have no inputs and build 3.
+      recent: ${{ github.event_name != 'workflow_dispatch' && 3 || inputs.recent }}
       # workbench-session-complete is built by session.yml, after its
       # workbench-session base.
       image-name: "^(?!workbench-session-complete$)"
