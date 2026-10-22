@@ -93,9 +93,10 @@ jobs:
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
-      # Not `inputs.recent || 3` (0 is falsy) or `inputs.recent == null` (null == 0 is true):
-      # both turn a dispatched 0 into 3. Non-dispatch runs have no inputs and build 3.
-      recent: ${{ github.event_name != 'workflow_dispatch' && 3 || inputs.recent }}
+      # Dispatch number inputs arrive as strings, and a reusable workflow's `type: number`
+      # input rejects them (`Unexpected value '0'`), so parse with fromJSON. Don't use
+      # `|| 3` (0 is falsy) or `== null` (null == 0). Non-dispatch runs build 3.
+      recent: ${{ fromJSON(github.event_name != 'workflow_dispatch' && '3' || inputs.recent) }}
       # workbench-session-complete is built by session.yml, after its
       # workbench-session base.
       image-name: "^(?!workbench-session-complete$)"
