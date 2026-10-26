@@ -405,7 +405,6 @@ images:
           platforms:
             - linux/amd64
             - linux/arm64
-        - name: Ubuntu 22.04
   - name: workbench-session-complete
     displayName: "Posit Workbench Session Complete"
     description: "A Posit Workbench session image with a full Workbench installation
