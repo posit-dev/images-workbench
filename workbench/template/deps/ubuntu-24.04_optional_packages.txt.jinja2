@@ -38,7 +38,7 @@ libxml2-dev
 libxslt1-dev
 {# Database client headers - RPostgres, RMariaDB, odbc, DBI, psycopg2, mysqlclient, pyodbc.
    NOTE: keep default-libmysqlclient-dev. Do NOT substitute libmariadb-dev-compat -- it declares
-   Conflicts: libmysqlclient-dev, which libgdal-dev needs, so the swap breaks the build. -#}
+   Conflicts: libmysqlclient-dev. -#}
 default-libmysqlclient-dev
 libsqlite3-dev
 unixodbc-dev
@@ -48,8 +48,6 @@ libgit2-dev
 openssh-client
 wget
 {# Geospatial - sf, terra, stars, geopandas, rasterio, pyproj -#}
-gdal-bin
-libgdal-dev
 libgeos-dev
 libproj-dev
 libudunits2-dev
