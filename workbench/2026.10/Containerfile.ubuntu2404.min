@@ -50,7 +50,7 @@ ENV LC_ALL=en_US.UTF-8
 ## Install Apt Packages ###
 COPY workbench/2026.10/deps/ubuntu-24.04_packages.txt /tmp/packages.txt
 RUN apt-get update -yqq && \
-    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
+    test -f /tmp/packages.txt && sed 's/#.*//' /tmp/packages.txt | xargs -r apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 

@@ -39,6 +39,13 @@ file:
   /usr/local/bin/pdflatex:
     exists: true
     filetype: symlink
+  # TinyTeX's bundle points TEXMFVAR at the root-owned TEXMFSYSVAR; the build
+  # resets it per user so LuaLaTeX can write its font cache.
+  # https://github.com/posit-dev/images-shared/issues/855
+  /opt/.TinyTeX/texmf.cnf:
+    exists: true
+    contains:
+      - "TEXMFVAR = ~/.texlive/texmf-var"
   /opt:
     exists: true
     filetype: directory
