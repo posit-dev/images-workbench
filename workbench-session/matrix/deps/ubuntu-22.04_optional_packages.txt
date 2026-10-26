@@ -26,8 +26,6 @@ unixodbc-dev
 libgit2-dev
 openssh-client
 wget
-gdal-bin
-libgdal-dev
 libgeos-dev
 libproj-dev
 libudunits2-dev
