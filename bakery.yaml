@@ -42,8 +42,13 @@ images:
         constraint:
           latest: true
       - dependency: python
+        # Pinned to 3.15.1: python-build-standalone published 3.15.2 on
+        # 2026-10-26, but no uv release can install it yet (uv 0.13.5 tops out
+        # at 3.15.1), so `uv python install 3.15.2` fails in the build stage.
+        # Restore `latest: true` once a uv release supports 3.15.2.
         constraint:
-          latest: true
+          max: "3.15.1"
+          count: 1
     variants:
       - name: Standard
         extension: std
