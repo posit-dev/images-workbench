@@ -434,7 +434,7 @@ images:
       # pin for the rstudio-server package in scripts/install_workbench.sh. It is
       # not an R/Python matrix coordinate -- those come from whichever
       # workbench-session base build the OS-qualified tag resolves to.
-      - name: 2026.10.0+233.pro1
+      - name: 2026.10.1+239.pro3
         subpath: '2026.10'
         latest: true
         os:

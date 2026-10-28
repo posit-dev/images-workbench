@@ -7,7 +7,7 @@ package:
   rstudio-server:
     installed: true
     versions:
-      - 2026.10.0+233.pro1
+      - 2026.10.1+239.pro3
   # Carried over from r-session-complete's suite: tlmgr is a Perl script and
   # silently breaks without it.
   perl:
@@ -299,7 +299,7 @@ command:
     # Plain substring, not a /regex/: the version contains `+` and `.`, which
     # would need escaping in goss's regex form and buy nothing here.
     stdout:
-      - "2026.10.0+233.pro1"
+      - "2026.10.1+239.pro3"
 
   # --- Every Workbench binary's shared libraries resolve ----------------
   # The general guard for UNDECLARED dependencies of the rstudio-server deb.
