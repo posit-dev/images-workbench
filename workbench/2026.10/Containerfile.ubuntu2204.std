@@ -62,8 +62,8 @@ ENV LC_ALL=en_US.UTF-8
 COPY workbench/2026.10/deps/ubuntu-22.04_packages.txt /tmp/packages.txt
 COPY workbench/2026.10/deps/ubuntu-22.04_optional_packages.txt /tmp/optional_packages.txt
 RUN apt-get update -yqq && \
-    xargs -a /tmp/packages.txt apt-get install -yqq --no-install-recommends && \
-    xargs -a /tmp/optional_packages.txt apt-get install -yqq --no-install-recommends && \
+    test -f /tmp/packages.txt && sed 's/#.*//' /tmp/packages.txt | xargs -r apt-get install -yqq --no-install-recommends && \
+    test -f /tmp/optional_packages.txt && sed 's/#.*//' /tmp/optional_packages.txt | xargs -r apt-get install -yqq --no-install-recommends && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
@@ -106,8 +106,8 @@ RUN apt-get update -yqq && \
     rm -rf /var/lib/apt/lists/*
 RUN cp /opt/rstudio-drivers/odbcinst.ini.sample /etc/odbcinst.ini
 
-### Install Workbench 2026.10.0+233.pro1 ###
-ARG WORKBENCH_VERSION="2026.10.0+233.pro1"
+### Install Workbench 2026.10.1+239.pro3 ###
+ARG WORKBENCH_VERSION="2026.10.1+239.pro3"
 COPY --chmod=0755 workbench/2026.10/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \

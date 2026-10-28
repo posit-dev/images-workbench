@@ -59,7 +59,7 @@ The [Workbench Helm chart](https://docs.posit.co/helm/charts/rstudio-workbench/R
 session:
   image:
     repository: "ghcr.io/posit-dev/workbench-session-complete"
-    tag: "2026.10.0-ubuntu-26.04"
+    tag: "2026.10.1-ubuntu-26.04"
 
 components:
   # No init containers are configured; session.image must be self-contained.
@@ -92,9 +92,9 @@ Posit publishes the image to Docker Hub and GitHub Container Registry:
 
 Tags follow `{version}-{os}[-{variant}]`. The following are valid examples:
 
-- `2026.10.0-ubuntu-26.04`: Standard variant on Ubuntu 26.04
-- `2026.10.0-ubuntu-26.04-std`: Standard variant (explicit)
-- `2026.10.0-ubuntu-26.04-min`: Minimal variant
+- `2026.10.1-ubuntu-26.04`: Standard variant on Ubuntu 26.04
+- `2026.10.1-ubuntu-26.04-std`: Standard variant (explicit)
+- `2026.10.1-ubuntu-26.04-min`: Minimal variant
 - `latest`: Most recent Standard build on the default OS
 - `ubuntu-26.04`, `std`, `min`: Most recent build of that OS or variant
 
