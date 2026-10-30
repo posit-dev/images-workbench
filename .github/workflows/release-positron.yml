@@ -1,0 +1,131 @@
+name: Release - Positron
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Build even if the latest Positron release is already published [default: false]"
+        type: boolean
+        default: false
+        required: false
+
+  # Lets an upstream release pipeline (e.g. Positron's) request an immediate
+  # check instead of waiting for the next scheduled poll.
+  repository_dispatch:
+    types: [positron-release]
+
+  schedule:
+    # Positron releases don't touch this repo, so neither the push-triggered
+    # nor the weekly Session Images run notices them. Poll hourly: the check is
+    # a single CDN + Docker Hub lookup and only builds when a tag is missing.
+    - cron: "25 * * * *" # At minute 25 of every hour
+
+# Not the shared workbench-image-build group: a queued run there replaces any
+# pending Production / Session Images run, and this workflow runs hourly.
+concurrency:
+  group: positron-release-image-build
+
+jobs:
+  ci:
+    name: CI
+    if: always()
+    runs-on: ubuntu-latest
+    permissions: {}
+    timeout-minutes: 10
+    needs:
+      - check
+      - build
+    steps:
+      - uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35  # v1.3.0
+        id: alls-green
+        with:
+          allowed-skips: build
+          jobs: ${{ toJSON(needs) }}
+      # Only notify when a build actually ran (or the check itself broke), so
+      # the hourly no-op polls stay quiet.
+      - if: always() && github.ref == 'refs/heads/main' && (needs.build.result != 'skipped' || needs.check.result != 'success')
+        continue-on-error: true
+        uses: posit-dev/images-shared/.github/actions/slack-build-notify@v0
+        with:
+          result: ${{ steps.alls-green.outcome }}
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  check:
+    name: Check for unpublished Positron release
+    runs-on: ubuntu-latest
+    permissions: {}
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      missing: ${{ steps.check.outputs.missing }}
+    steps:
+      - name: Check Docker Hub for latest Positron release
+        id: check
+        env:
+          # Same source bakery uses to resolve the positron dependency.
+          RELEASES_URL: https://cdn.posit.co/positron/releases/pwb/x86_64/all-releases.json
+          REPOSITORY: posit/workbench-positron-init
+          FORCE: ${{ inputs.force || false }}
+        run: |
+          set -euo pipefail
+
+          version=$(curl -fsSL --retry 3 "$RELEASES_URL" | jq -r '.releases[].version' | sort -V | tail -n 1)
+          if [[ -z "$version" ]]; then
+            echo "::error::No Positron releases found at $RELEASES_URL"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Latest Positron release: $version"
+
+          tag_json=$(mktemp)
+          status=$(curl -sS --retry 3 -o "$tag_json" -w '%{http_code}' \
+            "https://hub.docker.com/v2/repositories/$REPOSITORY/tags/$version")
+          case "$status" in
+            200)
+              archs=$(jq -r '[.images[] | select(.status == "active") | .architecture] | sort | unique | join(",")' "$tag_json")
+              ;;
+            404)
+              archs=""
+              ;;
+            *)
+              echo "::error::Docker Hub returned HTTP $status for $REPOSITORY:$version"
+              exit 1
+              ;;
+          esac
+
+          if [[ "$FORCE" == "true" ]]; then
+            echo "Forced build requested"
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          elif [[ ",$archs," == *",amd64,"* && ",$archs," == *",arm64,"* ]]; then
+            echo "$REPOSITORY:$version is published ($archs); nothing to do"
+            echo "missing=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::$REPOSITORY:$version is not published for amd64+arm64 (found: ${archs:-none}); building"
+            echo "missing=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build
+    # Builds the positron-init matrix (the latest Positron releases, per
+    # bakery.yaml) -- the same image set Session Images builds weekly.
+    needs: check
+    if: needs.check.outputs.missing == 'true'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
+    uses: "posit-dev/images-shared/.github/workflows/bakery-build-native.yml@v0"
+    secrets:
+      DOCKER_HUB_ACCESS_TOKEN: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      DOCKER_HUB_README_USERNAME: ${{ secrets.DOCKER_HUB_README_USERNAME }}
+      DOCKER_HUB_README_PASSWORD: ${{ secrets.DOCKER_HUB_README_PASSWORD }}
+      WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+      WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+      WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
+      WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
+    with:
+      image-name: "^workbench-positron-init$"
+      matrix-versions: only
+      # Push only from main (schedule and repository_dispatch always run on the
+      # default branch).
+      push: ${{ github.ref == 'refs/heads/main' }}
