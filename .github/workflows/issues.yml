@@ -20,6 +20,8 @@ jobs:
         with:
           client-id: ${{ secrets.WORKBENCH_IDE_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
+          permission-issues: write
+          permission-organization-projects: write
 
       - name: Add to Platform Carbon Project
         uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd  # v2.0.0

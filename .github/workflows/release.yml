@@ -7,6 +7,7 @@ on:
         required: true
         type: string
 
+permissions: {}
 
 jobs:
   # Jobs that call a reusable workflow via `uses:` can't also set
@@ -122,6 +123,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions: {}
     steps:
       - name: GitHub App Token
         id: app-token
@@ -131,6 +133,7 @@ jobs:
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
           owner: posit-dev
           repositories: images-specialized
+          permission-actions: write
 
       - name: Trigger images-specialized release
         env:
