@@ -7,6 +7,7 @@ on:
         required: true
         type: string
 
+permissions: {}
 
 jobs:
   # Jobs that call a reusable workflow via `uses:` can't also set
@@ -51,7 +52,7 @@ jobs:
     steps:
       - name: GitHub App Token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
         with:
           app-id: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
@@ -122,15 +123,17 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions: {}
     steps:
       - name: GitHub App Token
         id: app-token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
         with:
           app-id: ${{ secrets.WORKBENCH_IDE_RELEASE_APP_ID }}
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
           owner: posit-dev
           repositories: images-specialized
+          permission-actions: write
 
       - name: Trigger images-specialized release
         env:

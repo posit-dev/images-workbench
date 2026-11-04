@@ -15,11 +15,13 @@ jobs:
     steps:
 
       - name: GitHub App Token
-        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1  # v3.2.0
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510  # v3.3.0
         id: app-token
         with:
           client-id: ${{ secrets.WORKBENCH_IDE_RELEASE_CLIENT_ID }}
           private-key: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
+          permission-issues: write
+          permission-organization-projects: write
 
       - name: Add to Platform Carbon Project
         uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd  # v2.0.0
