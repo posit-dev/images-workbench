@@ -203,6 +203,17 @@ file:
   /usr/local/bin/pdflatex:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     filetype: symlink
+  {% raw -%}
+  {{ if eq .Env.IMAGE_VARIANT "Standard" }}
+  # TinyTeX's bundle points TEXMFVAR at the root-owned TEXMFSYSVAR; the build
+  # resets it per user so LuaLaTeX can write its font cache.
+  # https://github.com/posit-dev/images-shared/issues/855
+  /opt/.TinyTeX/texmf.cnf:
+    exists: true
+    contains:
+      - "TEXMFVAR = ~/.texlive/texmf-var"
+  {{ end }}
+  {%- endraw %}
   # Check for R installation
 {% for r_version in Dependencies.R %}
   {{ r.get_version_directory(r_version) }}/bin/R:
