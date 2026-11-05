@@ -1,0 +1,19 @@
+name: Deprecate Editions
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch: {}
+
+jobs:
+  deprecate:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: posit-dev/images-shared/.github/workflows/deprecate-editions.yml@main
+    with:
+      images: "workbench workbench-session-init"
+      update-positron-min: true
+    secrets:
+      CLIENT_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_CLIENT_ID }}
+      APP_PRIVATE_KEY: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
