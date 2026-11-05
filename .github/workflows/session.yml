@@ -101,7 +101,7 @@ jobs:
     with:
       # ~15 GB image on a ~7 GB base; needs the larger runner's disk.
       amd64-builder: "ubuntu-latest-amd64-8-core"
-      image-name: "^workbench-session-complete$"
+      image-name: "workbench-session-complete"
       dev-versions: "exclude"
       matrix-versions: "exclude"
       # Push images only for merges into main and weekly schduled re-builds.
