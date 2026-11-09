@@ -121,6 +121,8 @@ jobs:
 
       - name: Install bakery
         uses: posit-dev/images-shared/setup-bakery@v0
+        with:
+          restore-cache: "false"
 
       - name: Get latest version
         id: version
