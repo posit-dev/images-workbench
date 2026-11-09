@@ -13,7 +13,6 @@ jobs:
     uses: posit-dev/images-shared/.github/workflows/deprecate-editions.yml@v0
     with:
       images: "workbench workbench-session-init"
-      update-positron-min: true
     secrets:
       CLIENT_ID: ${{ secrets.WORKBENCH_IDE_RELEASE_CLIENT_ID }}
       APP_PRIVATE_KEY: ${{ secrets.WORKBENCH_IDE_RELEASE_PEM }}
