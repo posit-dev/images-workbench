@@ -356,7 +356,7 @@ images:
         - dependency: positron
           constraint:
             latest: true
-            count: 2
+            min: "2025.05"
       # Runtime binary is arch-specific, not OS-specific; Ubuntu 24.04 only.
       os:
         - name: Ubuntu 24.04
@@ -384,11 +384,11 @@ images:
       dependencyConstraints:
         - dependency: R
           constraint:
-            count: 2
+            min: "2025.05"
             latest: true
         - dependency: python
           constraint:
-            count: 2
+            min: "2025.05"
             latest: true
         - dependency: quarto
           constraint:
