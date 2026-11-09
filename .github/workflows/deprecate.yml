@@ -10,7 +10,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: posit-dev/images-shared/.github/workflows/deprecate-editions.yml@main
+    uses: posit-dev/images-shared/.github/workflows/deprecate-editions.yml@v0
     with:
       images: "workbench workbench-session-init"
       update-positron-min: true
