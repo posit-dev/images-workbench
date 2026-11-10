@@ -19,10 +19,9 @@ on:
       - main
 
 
-# Production and session image builds share a concurrency group so only one
-# of these workflows can run at a time.
+# Keep session image builds independent from production image builds.
 concurrency:
-  group: workbench-image-build
+  group: session-image-build
 
 jobs:
   ci:
