@@ -4,8 +4,8 @@ FROM ghcr.io/astral-sh/uv:debian-slim AS python-builder
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 ENV UV_PYTHON_INSTALL_DIR=/opt/python
 ENV UV_PYTHON_PREFERENCE=only-managed
-RUN uv python install 3.15.2
-RUN mv /opt/python/cpython-3.15.2-linux-*/ /opt/python/3.15.2
+RUN uv python install 3.14.10
+RUN mv /opt/python/cpython-3.14.10-linux-*/ /opt/python/3.14.10
 
 
 FROM docker.io/library/ubuntu:26.04
@@ -84,7 +84,7 @@ RUN apt-get update -yqq && \
 COPY --from=python-builder /opt/python /opt/python
 
 ### Install Jupyter ###
-RUN /opt/python/3.15.2/bin/python -m venv /opt/python/jupyter && \
+RUN /opt/python/3.14.10/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade \
         "jupyterlab<5" \
@@ -97,9 +97,9 @@ RUN /opt/python/3.15.2/bin/python -m venv /opt/python/jupyter && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernels ###
-RUN /opt/python/3.15.2/bin/pip install --no-cache-dir --upgrade --break-system-packages \
+RUN /opt/python/3.14.10/bin/pip install --no-cache-dir --upgrade --break-system-packages \
     ipykernel && \
-    /opt/python/3.15.2/bin/python -m ipykernel install --user --name python3.15.2 --display-name "Python 3.15.2"
+    /opt/python/3.14.10/bin/python -m ipykernel install --user --name python3.14.10 --display-name "Python 3.14.10"
 
 ### Install Pro Drivers ###
 RUN apt-get update -yqq && \
