@@ -461,8 +461,8 @@ images:
       # pin for the rstudio-server package in scripts/install_workbench.sh. It is
       # not an R/Python matrix coordinate -- those come from whichever
       # workbench-session base build the OS-qualified tag resolves to.
-      - name: 2026.10.1+239.pro3
-        subpath: '2026.10'
+      - name: 2026.11.0+203.pro4
+        subpath: '2026.11'
         latest: true
         os:
           - name: Ubuntu 26.04
