@@ -40,9 +40,9 @@
 # /usr/lib/rstudio-server/bin/quarto for the session components to use
 # internally; PATH is left pointing at the pinned one.
 
-ARG WORKBENCH_SESSION_IMAGE=ghcr.io/posit-dev/workbench-session:ubuntu-26.04-std
+ARG WORKBENCH_SESSION_IMAGE=ghcr.io/posit-dev/workbench-session:ubuntu-26.04-min
 FROM ${WORKBENCH_SESSION_IMAGE}
-LABEL org.opencontainers.image.base.name="ghcr.io/posit-dev/workbench-session:ubuntu-26.04-std"
+LABEL org.opencontainers.image.base.name="ghcr.io/posit-dev/workbench-session:ubuntu-26.04-min"
 
 ### ARG declarations ###
 ARG DEBIAN_FRONTEND=noninteractive
@@ -84,14 +84,14 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
-### Install Workbench 2026.10.1+239.pro3 ###
+### Install Workbench 2026.11.0+203.pro4 ###
 # Provides the session components at /usr/lib/rstudio-server/bin. Note the
 # layout difference from the workbench-session-init component tarball: the deb
 # is FLAT (/usr/lib/rstudio-server/bin/rsession), whereas the tarball nests
 # per-distro subdirectories (bin/noble/rsession). Anything reading these paths
 # has to expect the flat form.
-ARG WORKBENCH_VERSION="2026.10.1+239.pro3"
-COPY --chmod=0755 workbench-session-complete/2026.10/scripts/install_workbench.sh /tmp/install_workbench.sh
+ARG WORKBENCH_VERSION="2026.11.0+203.pro4"
+COPY --chmod=0755 workbench-session-complete/2026.11/scripts/install_workbench.sh /tmp/install_workbench.sh
 RUN \
     /tmp/install_workbench.sh && \
     rm -f /tmp/install_workbench.sh

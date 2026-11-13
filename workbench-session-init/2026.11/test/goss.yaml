@@ -1,0 +1,125 @@
+file:
+  /opt/session-components/:
+    exists: true
+    mode: "0755"
+    filetype: directory
+  /opt/session-components/bin/session-init:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/git-credential-pwb:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/jammy:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/noble:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/postback:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/pwb-supervisor:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/quarto:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/r-ldpath:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rhel9:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/rhel10:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  # opensuse15 and rhel8 are only shipped in the amd64 build of the
+  # upstream rsp-session-multi-linux tarball.
+  {{- if eq .Env.IMAGE_OS_PLATFORM "linux/amd64" }}
+  /opt/session-components/bin/opensuse15:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/rhel8:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  {{- end }}
+  /opt/session-components/bin/shared-run-includes:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rsession-run-includes:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/pwb-mkhomedir:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rserver-url:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/R:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/resources:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/www:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/www-symbolmaps:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/jupyter-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/extras:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/positron-server:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/positron-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/rsession-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+  /opt/session-components/bin/pwb-code-server:
+    exists: true
+    filetype: directory
+    mode: "0755"
+  /opt/session-components/bin/vscode-session-run:
+    exists: true
+    filetype: file
+    mode: "0755"
+
+command:
+  session-components-files-other-read:
+    exec: 'find /opt/session-components -type f -not -perm -004 -print 2>&1 | head -c1 | (! grep -q .)'
+    exit-status: 0
+  session-components-dirs-other-rx:
+    exec: 'find /opt/session-components -type d -not -perm -005 -print 2>&1 | head -c1 | (! grep -q .)'
+    exit-status: 0

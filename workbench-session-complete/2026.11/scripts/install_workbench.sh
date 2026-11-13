@@ -8,19 +8,20 @@ package_name="rstudio-server"
 # Update apt repositories
 apt-get update -yq
 
-echo "$d Fetching Posit Workbench 2026.10.1+239.pro3 $d"
+echo "$d Fetching Posit Workbench 2026.11.0+203.pro4 $d"
 # For non-development versions, download the deb package using apt-get. The
 # version is pinned exactly: the Posit open repo also carries a same-numbered
 # non-pro build (e.g. 2026.08.1+195 alongside 2026.08.1+195.pro1) and only the
 # `.pro1` package is Workbench.
-apt-get download "${package_name}=2026.10.1+239.pro3"
+apt-get download "${package_name}=2026.11.0+203.pro4"
 deb_file="$(pwd)/$(ls ${package_name}*.deb)"
 
 # Install the deb's declared dependencies up front. dpkg cannot resolve them
 # itself, and the `dpkg --unpack` below has to succeed before the postinst can
-# be patched.
-# shellcheck disable=SC2046
-apt-get install -yq $(dpkg -I "$deb_file" | grep '^ Depends:' | sed 's/^ Depends: //' | tr ',' '\n' | awk '{print $1}' | tr -d '(')
+# be patched. `apt-get satisfy` takes the Depends field verbatim, so
+# alternatives (e.g. `libcurl4t64 | libcurl4`) and version constraints resolve
+# correctly on every distro release.
+apt-get satisfy -yq "$(dpkg-deb -f "$deb_file" Depends)"
 
 # Patch the installer so installing Workbench does not also START Workbench.
 # `dpkg --unpack` lays the files down and writes the maintainer scripts WITHOUT
@@ -50,7 +51,7 @@ awk '/if test "\$RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION" != "1"/ { skip=1 }
 ' "/var/lib/dpkg/info/rstudio-server.postinst" > "/var/lib/dpkg/info/rstudio-server.postinst.tmp" && mv "/var/lib/dpkg/info/rstudio-server.postinst.tmp" "/var/lib/dpkg/info/rstudio-server.postinst"
 
 # Install Workbench
-echo "$d Install Posit Workbench 2026.10.1+239.pro3 $d"
+echo "$d Install Posit Workbench 2026.11.0+203.pro4 $d"
 dpkg --configure "${package_name}"
 apt-get install -yf
 rm -f "${deb_file}"

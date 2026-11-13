@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+# Output delimiter
+d="===="
+package_name="rstudio-server"
+
+# Update apt repositories
+apt-get update -yq
+
+echo "$d Fetching Posit Workbench 2026.11.0+203.pro4 $d"
+# For non-development versions, download the deb package using apt-get
+apt-get download "${package_name}=2026.11.0+203.pro4"
+deb_file="$(pwd)/$(ls ${package_name}*.deb)"
+
+# Install dependencies. `apt-get satisfy` takes the Depends field verbatim, so
+# alternatives (e.g. `libcurl4t64 | libcurl4`) and version constraints resolve
+# correctly on every distro release.
+apt-get satisfy -yq "$(dpkg-deb -f "$deb_file" Depends)"
+
+# Patch the installer to not activate the service
+echo "$d Patching ${deb_file} $d"
+dpkg --unpack "${deb_file}"
+sed -i 's/^rstudio-server force-suspend-all/# rstudio-server force-suspend-all/' /var/lib/dpkg/info/rstudio-server.postinst
+sed -i 's/systemctl enable rstudio-server.service/# systemctl enable rstudio-server.service/g' /var/lib/dpkg/info/rstudio-server.postinst
+sed -i 's/systemctl enable rstudio-launcher.service/# systemctl enable rstudio-launcher.service/g' /var/lib/dpkg/info/rstudio-server.postinst
+awk '/if test "\$RSTUDIO_INSTALL_NO_LICENSE_INITIALIZATION" != "1"/ { skip=1 }
+    skip { if (/fi/) { skip=0 } next }
+    { print }
+' "/var/lib/dpkg/info/rstudio-server.postinst" > "/var/lib/dpkg/info/rstudio-server.postinst.tmp" && mv "/var/lib/dpkg/info/rstudio-server.postinst.tmp" "/var/lib/dpkg/info/rstudio-server.postinst"
+
+# Install Workbench
+echo "$d Install Posit Workbench 2026.11.0+203.pro4 $d"
+dpkg --configure "${package_name}"
+apt-get install -yf
+rm -f "${deb_file}"
+
+# Clean up
+apt-get clean -yqq && \
+rm -rf /var/lib/apt/lists/*
