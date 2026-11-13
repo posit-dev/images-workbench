@@ -81,7 +81,7 @@ jobs:
     with:
       dev-versions: "only"
       matrix-versions: "include"
-      image-name: "^workbench-positron-init$"
+      image-name: "workbench-positron-init"
       dev-version: ${{ inputs.version }}
       dev-channel: ${{ inputs.channel }}
       # Forward the cache input. For non-workflow_dispatch events (schedule / push),
