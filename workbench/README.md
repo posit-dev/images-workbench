@@ -387,6 +387,7 @@ The legacy image documented `docker run --privileged` for some examples. This im
 - License file default path (`/etc/rstudio-server/license.lic`)
 - Service user (`rstudio-server`, UID/GID `999`)
 - Process management with `supervisord` and the `/startup/{base,launcher,user-provisioning,custom}` mount points
+- Standard variant: `/opt/R/default` and `/opt/python/default`, and `R`, `Rscript`, `python`, `python3`, `pip`, and `pip3` on `PATH` through `/usr/local/bin`
 
 ## Caveats
 

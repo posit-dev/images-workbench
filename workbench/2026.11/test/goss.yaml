@@ -275,6 +275,44 @@ command:
       - "3.14.10"
     skip: {{ if eq .Env.IMAGE_VARIANT "Minimal" }}true{{ else }}false{{ end }}
 
+  {{ if eq .Env.IMAGE_VARIANT "Standard" }}
+  R-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v R)")" = "$(readlink -f /opt/R/4.6.2/bin/R)"
+    exit-status: 0
+  Rscript-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v Rscript)")" = "$(readlink -f /opt/R/4.6.2/bin/Rscript)"
+    exit-status: 0
+  R-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/R)" = "/opt/R/default/bin/R"
+    exit-status: 0
+  Rscript-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/Rscript)" = "/opt/R/default/bin/Rscript"
+    exit-status: 0
+  python-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v python)")" = "$(readlink -f /opt/python/3.14.10/bin/python)"
+    exit-status: 0
+  python3-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v python3)")" = "$(readlink -f /opt/python/3.14.10/bin/python3)"
+    exit-status: 0
+  pip-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v pip)")" = "$(readlink -f /opt/python/3.14.10/bin/pip)"
+    exit-status: 0
+  pip3-on-path-is-newest:
+    exec: test "$(readlink -f "$(command -v pip3)")" = "$(readlink -f /opt/python/3.14.10/bin/pip3)"
+    exit-status: 0
+  python-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/python)" = "/opt/python/default/bin/python"
+    exit-status: 0
+  python3-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/python3)" = "/opt/python/default/bin/python3"
+    exit-status: 0
+  pip-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/pip)" = "/opt/python/default/bin/pip"
+    exit-status: 0
+  pip3-link-targets-newest:
+    exec: test "$(readlink /usr/local/bin/pip3)" = "/opt/python/default/bin/pip3"
+    exit-status: 0
+  {{ end }}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0

@@ -80,8 +80,26 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
+RUN ln -sfn /opt/R/4.6.2 /opt/R/default && \
+    for bin in R Rscript; do \
+        case "$(readlink /usr/local/bin/$bin || true)" in \
+            /opt/R/*) ;; \
+            *) if [ -e /usr/local/bin/$bin ]; then echo "Keeping existing /usr/local/bin/$bin" >&2; continue; fi ;; \
+        esac; \
+        ln -sf /opt/R/default/bin/$bin /usr/local/bin/$bin; \
+    done
+
 ### Install Python from previous stage ###
 COPY --from=python-builder /opt/python /opt/python
+
+RUN ln -sfn /opt/python/3.14.10 /opt/python/default && \
+    for bin in python python3 pip pip3; do \
+        case "$(readlink /usr/local/bin/$bin || true)" in \
+            /opt/python/*) ;; \
+            *) if [ -e /usr/local/bin/$bin ]; then echo "Keeping existing /usr/local/bin/$bin" >&2; continue; fi ;; \
+        esac; \
+        ln -sf /opt/python/default/bin/$bin /usr/local/bin/$bin; \
+    done
 
 ### Install Jupyter ###
 RUN /opt/python/3.14.10/bin/python -m venv /opt/python/jupyter && \
@@ -98,7 +116,9 @@ RUN /opt/python/3.14.10/bin/python -m venv /opt/python/jupyter && \
 
 ### Install Jupyter kernels ###
 RUN /opt/python/3.14.10/bin/pip install --no-cache-dir --upgrade --break-system-packages \
-    ipykernel && \
+    ipykernel \
+    pyyaml \
+    nbclient && \
     /opt/python/3.14.10/bin/python -m ipykernel install --user --name python3.14.10 --display-name "Python 3.14.10"
 
 ### Install Pro Drivers ###

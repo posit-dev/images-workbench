@@ -60,19 +60,19 @@ RUN case "${TARGETARCH}" in \
     done
 
 # Install Python from previous stage
-{{ python.copy_from_build_stage() }}
+{{ python.declare_build_arg() }}
+{{ python.copy_from_build_stage(python.build_arg(), link_to_path=True) }}
 
 ### Install Jupyter ###
-{{ python.declare_build_arg() }}
 {{ python.run_install_jupyterlab_workbench(python.build_arg(), jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
 
 ### Install Jupyter kernel ###
-RUN {{ python.install_packages(python.build_arg(), "ipykernel") }} && \
+RUN {{ python.install_packages(python.build_arg(), ["ipykernel", "pyyaml", "nbclient"]) }} && \
     {{ python.get_version_directory(python.build_arg()) }}/bin/python -m ipykernel install --user --name python{{ python.build_arg() }} --display-name "Python {{ python.build_arg() }}"
 
 # Install R
 {{ r.declare_build_arg() }}
-{{ r.run_install(r.build_arg()) }}
+{{ r.run_install(r.build_arg(), link_to_path=True) }}
 
 ### Install Quarto ###
 {{ quarto.declare_build_arg() }}

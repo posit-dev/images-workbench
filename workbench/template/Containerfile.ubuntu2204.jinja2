@@ -61,17 +61,17 @@ COPY --chmod=0755 {{ Path.Image }}/scripts/wait-for-it.sh /usr/local/bin/wait-fo
 
 {% if not Image.Variant == "Minimal" -%}
 ### Install R ###
-{{ r.run_install(Dependencies.R) }}
+{{ r.run_install(Dependencies.R, link_to_path=True) }}
 
 ### Install Python from previous stage ###
-{{ python.copy_from_build_stage() }}
+{{ python.copy_from_build_stage(Dependencies.python, link_to_path=True) }}
 
 ### Install Jupyter ###
 {{ python.run_install_jupyterlab_workbench(Dependencies.python.0, jupyterlab_version_pin = "<5", pwb_jupyterlab_version_pin = "<2") }}
 
 ### Install Jupyter kernels ###
 {% for python_version in Dependencies.python -%}
-RUN {{ python.install_packages(python_version, "ipykernel") }} && \
+RUN {{ python.install_packages(python_version, ["ipykernel", "pyyaml", "nbclient"]) }} && \
     {{ python.get_version_directory(python_version) }}/bin/python -m ipykernel install --user --name python{{ python_version }} --display-name "Python {{ python_version }}"
 
 {% endfor -%}

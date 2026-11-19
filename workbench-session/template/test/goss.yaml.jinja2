@@ -2,6 +2,8 @@
 {%- import "python.j2" as python -%}
 {%- import "quarto.j2" as quarto -%}
 {%- import "r.j2" as r -%}
+{%- set r_bins = ["R", "Rscript"] -%}
+{%- set python_bins = ["python", "python3", "pip", "pip3"] -%}
 
 package:
   {% raw -%}
@@ -78,6 +80,10 @@ command:
     exit-status: 0
     stdout:
       - "{{ goss.build_arg_env_var("PYTHON_VERSION") }}"
+{{- goss.path_link_checks(r_bins, r.get_version_directory(goss.build_arg_env_var("R_VERSION"))) }}
+{{- goss.path_link_targets(r_bins, "/opt/R/default") }}
+{{- goss.path_link_checks(python_bins, python.get_version_directory(goss.build_arg_env_var("PYTHON_VERSION"))) }}
+{{- goss.path_link_targets(python_bins, "/opt/python/default") }}
   "Verify Jupyter installation Python version":
     exec: /opt/python/jupyter/bin/python --version
     exit-status: 0
