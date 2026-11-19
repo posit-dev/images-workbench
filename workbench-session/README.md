@@ -86,6 +86,8 @@ Each image includes:
 | TinyTeX                    | `/opt/TinyTeX/bin/`                 |
 | Posit Professional Drivers | `/opt/rstudio-drivers/`             |
 
+`/opt/R/default` and `/opt/python/default` link to the image's R and Python versions. `R`, `Rscript`, `python`, `python3`, `pip`, and `pip3` are linked into `/usr/local/bin` through them, so they are on the default `PATH` ahead of any system `/usr/bin/python3`. The bundled Python is marked externally managed, so use a virtual environment to install Python packages with `pip`.
+
 These images do not bundle the Workbench session components themselves. The `workbench-session-init` init container provides those components at runtime through a shared volume.
 
 ## Image variants
@@ -146,6 +148,7 @@ The legacy `rstudio/workbench-session` image already followed this init containe
 ### What did not change
 
 - R, Python, Jupyter, and Posit Professional Drivers installation paths under `/opt`
+- `/opt/R/default` and `/opt/python/default`, and `R`, `Rscript`, `python`, `python3`, `pip`, and `pip3` on `PATH` through `/usr/local/bin`
 - The role of these images as session execution environments managed by the Workbench Job Launcher
 - The system dependencies bundled to support popular R packages
 

@@ -79,10 +79,19 @@ RUN case "${TARGETARCH}" in \
     done
 
 # Install Python from previous stage
+ARG PYTHON_VERSION
 COPY --from=python-builder /opt/python /opt/python
 
+RUN ln -sfn /opt/python/$PYTHON_VERSION /opt/python/default && \
+    for bin in python python3 pip pip3; do \
+        case "$(readlink /usr/local/bin/$bin || true)" in \
+            /opt/python/*) ;; \
+            *) if [ -e /usr/local/bin/$bin ]; then echo "Keeping existing /usr/local/bin/$bin" >&2; continue; fi ;; \
+        esac; \
+        ln -sf /opt/python/default/bin/$bin /usr/local/bin/$bin; \
+    done
+
 ### Install Jupyter ###
-ARG PYTHON_VERSION
 RUN /opt/python/$PYTHON_VERSION/bin/python -m venv /opt/python/jupyter && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade pip setuptools wheel && \
     /opt/python/jupyter/bin/pip install --no-cache-dir --upgrade \
@@ -91,12 +100,15 @@ RUN /opt/python/$PYTHON_VERSION/bin/python -m venv /opt/python/jupyter && \
         "pwb_jupyterlab<2" && \
     rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/tests && \
     rm -rf /opt/python/jupyter/lib/python*/site-packages/jupyterlab/galata && \
+    rm -rf /opt/python/jupyter/lib/python*/site-packages/tornado/test && \
     rm -f /opt/python/jupyter/lib/python*/site-packages/jupyterlab/staging/yarn.lock && \
     ln -s /opt/python/jupyter/bin/jupyter /usr/local/bin/jupyter
 
 ### Install Jupyter kernel ###
 RUN /opt/python/$PYTHON_VERSION/bin/pip install --no-cache-dir --upgrade --break-system-packages \
-    ipykernel && \
+    ipykernel \
+    pyyaml \
+    nbclient && \
     /opt/python/$PYTHON_VERSION/bin/python -m ipykernel install --user --name python$PYTHON_VERSION --display-name "Python $PYTHON_VERSION"
 
 # Install R
@@ -106,6 +118,15 @@ RUN apt-get update -yqq && \
         r-$R_VERSION && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
+
+RUN ln -sfn /opt/R/$R_VERSION /opt/R/default && \
+    for bin in R Rscript; do \
+        case "$(readlink /usr/local/bin/$bin || true)" in \
+            /opt/R/*) ;; \
+            *) if [ -e /usr/local/bin/$bin ]; then echo "Keeping existing /usr/local/bin/$bin" >&2; continue; fi ;; \
+        esac; \
+        ln -sf /opt/R/default/bin/$bin /usr/local/bin/$bin; \
+    done
 
 ### Install Quarto ###
 ARG QUARTO_VERSION

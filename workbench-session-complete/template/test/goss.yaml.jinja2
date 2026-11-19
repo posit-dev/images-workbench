@@ -426,10 +426,11 @@ command:
     exit-status: 0
 
   # --- The base image's own runtimes were not shadowed ------------------
-  # R and Python are deliberately NOT checked with `command -v`: neither is on
-  # PATH in workbench-session -- they live at /opt/R/<version>/bin and
-  # /opt/python/<version>/bin and are resolved by the session run scripts, not
-  # by PATH. A `command -v R` check here fails against a healthy image.
+  # R and Python live at /opt/R/<version>/bin and /opt/python/<version>/bin.
+  # Newer workbench-session bases also link them onto PATH through
+  # /opt/{R,python}/default (tested by the base's goss suite). Not checked with
+  # `command -v` here: PR builds use the last published base, which may predate
+  # those links.
   base-image-runtimes-not-shadowed:
     exec: |
       rc=0
