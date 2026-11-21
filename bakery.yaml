@@ -56,6 +56,8 @@ images:
       - name: Minimal
         extension: min
         tagDisplayName: min
+        # Minimal installs no R/Python; omit the co.posit.image.tools.* labels.
+        toolLabels: false
     devVersions:
       - sourceType: stream
         product: workbench
