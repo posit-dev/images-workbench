@@ -309,17 +309,95 @@ To disable the built-in health check, run the container with `--no-healthcheck` 
 
 ## Process management
 
-Workbench runs several services inside the container under [`supervisord`](http://supervisord.org/). `supervisord` exits the container if any required service exits, so the container fails fast on startup errors.
+Workbench runs several services inside the container under [Pebble](https://github.com/canonical/pebble), which runs as PID 1. Pebble starts the services, forwards `SIGTERM` to them, and reaps orphaned processes, so `docker run --init` is not needed. Every service is configured to shut the container down when it exits (`on-success: shutdown`, `on-failure: shutdown`), so the container fails fast on startup errors.
 
 > [!NOTE]
 > Running multiple services in a single container is generally an anti-pattern. The image uses this approach as a workaround until Workbench can handle users and supporting processes in a more container-friendly way.
 
-The image manages these services:
+Pebble reads service definitions from layer files in `/var/lib/posit-pebble/layers/` (`$PEBBLE/layers/`) and merges them in filename order. The image manages these services:
 
-- **Workbench**: the main server process. The startup configuration mounts at `/startup/base`.
-- **Job Launcher**: enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default. The startup configuration mounts at `/startup/launcher`. To disable, mount an empty volume over `/startup/launcher`.
-- **sssd**: provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, set `PWB_SSSD=false` or mount an empty volume over `/startup/user-provisioning/`.
-- **custom**: to run additional services inside the container, mount supervisord configuration files into `/startup/custom/`. `supervisord` starts and manages them alongside the built-in services. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
+- **Workbench** (`rstudio-workbench`): the main server process, defined in `001-workbench.yaml`. Pebble waits up to 110 seconds after `SIGTERM` for the server to stop and the license to deactivate before sending `SIGKILL`.
+- **Job Launcher** (`rstudio-launcher`): enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default and defined in the same layer file. To disable, set `PWB_LAUNCHER=false` and override the service in a custom layer (see below).
+- **sssd** (Standard only): provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, set `PWB_SSSD=false`. The entrypoint adds the sssd layer (`002-sssd.yaml`) only when the container runs as `root` and `PWB_SSSD` is `true`.
+
+To inspect the running services:
+
+```bash
+docker exec <container> pebble services
+```
+
+### Custom services
+
+To run additional services inside the container, or to change a built-in service, mount a Pebble layer file into `/var/lib/posit-pebble/layers/` as an individual file X Do not mount over the whole directory, which would remove the built-in layers. Pebble merges layers in filename order, and a later layer may modify `rstudio-workbench` or `rstudio-launcher` with `override: merge` or `override: replace`. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
+
+```yaml
+# 110-custom.yaml
+services:
+  my-exporter:
+    override: replace
+    command: /usr/local/bin/my-exporter --port 9100
+    startup: enabled
+    # Stop the container if this service exits (omit to keep running)
+    on-failure: shutdown
+```
+
+```bash
+docker run -d \
+  -v "$PWD/110-custom.yaml:/var/lib/posit-pebble/layers/110-custom.yaml:ro" \
+  ghcr.io/posit-dev/workbench:latest
+```
+
+See the [Pebble layer specification](https://documentation.ubuntu.com/pebble/reference/layer-specification/) for all options.
+
+### Entrypoint and command overrides
+
+The image runs Pebble as PID 1. The Standard variant uses `/usr/local/bin/entrypoint.sh`, which stages the sssd layer and then runs `exec pebble run --verbose`. The Minimal variant uses `ENTRYPOINT ["pebble", "run", "--verbose"]` directly.
+
+Arguments passed after the image name are arguments to `pebble run`, not a replacement command. To run a different command, override the entrypoint:
+
+```bash
+docker run --rm -it --entrypoint /bin/bash ghcr.io/posit-dev/workbench -c 'cat /etc/os-release'
+```
+
+In Kubernetes, set `command` (not only `args`) to replace the entrypoint.
+
+### Migrating from supervisord
+
+Earlier images ran `supervisord` and read `.conf` files from `/startup/{base,launcher,user-provisioning,custom}`. Those directories and `/etc/supervisor/supervisord.conf` no longer exist, and supervisord `.conf` files mounted there are ignored. Convert each `[program:x]` section to a Pebble layer file under `/var/lib/posit-pebble/layers/` (named `NNN-label.yaml` with `NNN` from `110` to `999`).
+
+```ini
+; /startup/custom/my-exporter.conf
+[program:my-exporter]
+command=/usr/local/bin/my-exporter --port 9100
+autorestart=false
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+```
+
+becomes
+
+```yaml
+# /var/lib/posit-pebble/layers/110-my-exporter.yaml
+services:
+  my-exporter:
+    override: replace
+    command: /usr/local/bin/my-exporter --port 9100
+    startup: enabled
+    on-success: shutdown
+    on-failure: shutdown
+```
+
+Pebble sends service output to the container's stdout and stderr, so no log settings are needed. `autorestart=false` corresponds to Pebble's default (no `on-failure: restart`). The old eventlistener stopped the container whenever any program exited, which `on-success: shutdown` and `on-failure: shutdown` reproduce; omit them if the service may exit without stopping the container. To disable the Job Launcher, which was done by mounting an empty volume over `/startup/launcher`, set `PWB_LAUNCHER=false` and disable the service with a layer such as:
+
+```yaml
+# 110-no-launcher.yaml
+services:
+  rstudio-launcher:
+    override: merge
+    startup: disabled
+    on-success: ignore
+    on-failure: ignore
+```
 
 ## User
 
@@ -386,7 +464,6 @@ The legacy image documented `docker run --privileged` for some examples. This im
 - Configuration directory (`/etc/rstudio`)
 - License file default path (`/etc/rstudio-server/license.lic`)
 - Service user (`rstudio-server`, UID/GID `999`)
-- Process management with `supervisord` and the `/startup/{base,launcher,user-provisioning,custom}` mount points
 
 ## Caveats
 
@@ -406,6 +483,8 @@ To ensure proper license deactivation, use a sufficient stop timeout for both `d
 docker run -d --stop-timeout 120 -e PWB_LICENSE="your-license-key" ...
 docker stop --time 120 <container>
 ```
+
+Pebble gives Workbench up to 110 seconds after `SIGTERM` to stop and deactivate the license before sending `SIGKILL`, so the 120 second stop timeout leaves headroom. The container runtime's stop timeout (Docker `--stop-timeout`, Kubernetes `terminationGracePeriodSeconds`) still applies on top of that; if it is shorter, the runtime kills the container first. Earlier images used supervisord, which stopped waiting after 10 seconds and could kill license deactivation partway through.
 
 For production deployments, use license files rather than license keys.
 

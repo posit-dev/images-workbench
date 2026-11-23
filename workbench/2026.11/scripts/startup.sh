@@ -127,4 +127,7 @@ fi
 
 # the main container process
 # cannot use "exec" or the "trap" will be lost
+# Pebble sends SIGTERM to this script and rserver alike; exiting on TERM (after rserver
+# stops) lets the EXIT trap deactivate the license.
+trap 'exit 143' TERM
 /usr/lib/rstudio-server/bin/rserver --server-daemonize 0 > /dev/stderr

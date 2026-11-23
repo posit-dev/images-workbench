@@ -32,7 +32,7 @@ Do not make changes directly on `main`; use a topic branch.
 
 The main Posit Workbench server image. Two variants:
 
-- **Standard** (`std`, primary) — includes R, Python, Quarto, VS Code integration, Jupyter, supervisord, and the Job Launcher.
+- **Standard** (`std`, primary) — includes R, Python, Quarto, VS Code integration, Jupyter, Pebble, and the Job Launcher.
 - **Minimal** (`min`) — base image for customers to extend.
 
 **Key env vars** (set in Containerfile, consumed by `startup.sh`):
@@ -84,9 +84,7 @@ workbench/
 │   │   ├── jupyter/, launcher/, rstudio/, sssd/, vscode/
 │   ├── deps/                          # OS package lists
 │   ├── scripts/{install_workbench,startup}.sh.jinja2
-│   ├── startup/                       # Supervisord configs
-│   │   ├── supervisord.conf.jinja2
-│   │   ├── base/, launcher/, user-provisioning/
+│   ├── pebble/                        # Pebble layers (001-workbench, 002-sssd)
 │   └── test/goss.yaml.jinja2
 ├── 2026.01/                           # Rendered (do not edit)
 └── ...

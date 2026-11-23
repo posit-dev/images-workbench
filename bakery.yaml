@@ -52,10 +52,14 @@ images:
         options:
           - tool: goss
             wait: 30
-            command: "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf"
+            # Pebble is the entrypoint; no extra args.
+            command: ""
       - name: Minimal
         extension: min
         tagDisplayName: min
+        options:
+          - tool: goss
+            command: ""
     devVersions:
       - sourceType: stream
         product: workbench

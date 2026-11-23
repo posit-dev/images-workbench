@@ -133,12 +133,27 @@ file:
   /var/run/rstudio-server:
     exists: true
     mode: "1777"
-  /var/run/supervisor:
+  /usr/local/bin/pebble:
+    # Ubuntu 26.04 uses the base image's /usr/bin/pebble instead
+    exists: {% raw %}{{ if eq .Env.IMAGE_OS_VERSION "26.04" }}false{{ else }}true{{ end }}{% endraw %}
+  /var/lib/posit-pebble:
     exists: true
+    filetype: directory
     owner: rstudio-server
     group: rstudio-server
     gid: 999
+    mode: "2770"
+  /var/lib/posit-pebble/layers:
+    exists: true
+    filetype: directory
     mode: "2775"
+  /var/lib/posit-pebble/layers/001-product.yaml:
+    exists: true
+    filetype: file
+    contains:
+      - "/usr/local/bin/startup.sh"
+      - "/usr/lib/rstudio-server/bin/rstudio-launcher"
+      - "kill-delay: 110s"
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ '{{ $version_split := split "." "' | safe }}{{ Image.Version }}{{ '" }}' | safe }}
   {% raw -%}
@@ -166,11 +181,11 @@ file:
     owner: root
     group: root
     mode: "0600"
-  # sssd supervisord program is staged here; entrypoint installs it at runtime when root
-  /opt/startup-templates/sssd.conf:
+  # sssd Pebble layer is staged here; entrypoint installs it at runtime when root
+  /opt/startup-templates/002-sssd.yaml:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     contains:
-      - "/^\\[program:sssd\\]$/"
+      - "/usr/sbin/sssd"
   /usr/local/bin/entrypoint.sh:
     exists: {% raw %}{{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}{% endraw %}
     mode: "0755"
@@ -247,8 +262,8 @@ file:
     exists: false
   /etc/rstudio/launcher.pub:
     exists: false
-  /var/lib/rstudio-server/secure-cookie-key:
-    exists: false
+  # /var/lib/rstudio-server/secure-cookie-key is not checked: Pebble starts the launcher
+  # immediately and it generates this key at runtime, racing the test.
   /var/lib/rstudio-server/session-rpc-key:
     exists: false
   /etc/rstudio/secure-cookie-key:

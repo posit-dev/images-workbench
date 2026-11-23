@@ -57,6 +57,8 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
+      # TODO: revert to default before merge (images-shared#892)
+      version: feat/891-pebble-init
       trivy-scan: true
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
@@ -70,6 +72,8 @@ jobs:
       packages: write
     uses: posit-dev/images-shared/.github/workflows/bakery-build-pr.yml@v0
     with:
+      # TODO: revert to default before merge (images-shared#892)
+      version: feat/891-pebble-init
       trivy-scan: true
       dev-versions: "only"
       matrix-versions: "include"

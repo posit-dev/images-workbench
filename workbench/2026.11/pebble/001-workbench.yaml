@@ -1,0 +1,18 @@
+services:
+  rstudio-workbench:
+    override: replace
+    command: /usr/local/bin/startup.sh
+    startup: enabled
+    # Stop the container when any service exits, whether cleanly or not.
+    on-success: shutdown
+    on-failure: shutdown
+    # Time for rserver to stop and the license to deactivate after SIGTERM, before
+    # SIGKILL. Kept under the recommended 120s stop timeout; the outer
+    # Docker/Kubernetes timeout still wins if it is shorter.
+    kill-delay: 110s
+  rstudio-launcher:
+    override: replace
+    command: /usr/lib/rstudio-server/bin/rstudio-launcher
+    startup: enabled
+    on-success: shutdown
+    on-failure: shutdown

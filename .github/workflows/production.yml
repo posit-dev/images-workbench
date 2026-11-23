@@ -89,6 +89,8 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
+      # TODO: revert to default before merge (images-shared#892)
+      version: feat/891-pebble-init
       amd64-builder: "ubuntu-latest-amd64-8-core"
       dev-versions: "exclude"
       matrix-versions: "exclude"
@@ -121,6 +123,8 @@ jobs:
       - name: Install bakery
         uses: posit-dev/images-shared/setup-bakery@v0
         with:
+          # TODO: revert to default before merge (images-shared#892)
+          version: feat/891-pebble-init
           restore-cache: "false"
 
       - name: Get latest version
