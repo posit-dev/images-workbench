@@ -54,23 +54,6 @@ RUN apt-get update -yqq && \
     apt-get clean -yqq && \
     rm -rf /var/lib/apt/lists/*
 
-### Install Pebble ###
-ARG TARGETARCH
-RUN case "$TARGETARCH" in \
-      amd64) sha256=e9d84f9e461a89abb4437af26a784917bd85cf1612c8de142a3b4449dff332d0 ;; \
-      arm64) sha256=0c19a80498da84e5615138bf804c85b782438c515832430fef8d40057418b4eb ;; \
-      *) echo "Unsupported Pebble architecture: $TARGETARCH" >&2; exit 1 ;; \
-    esac && \
-    version=v1.33.2 && \
-    tmpdir="$(mktemp -d)" && \
-    curl -fsSL "https://github.com/canonical/pebble/releases/download/${version}/pebble_${version}_linux_${TARGETARCH}.tar.gz" \
-      -o "$tmpdir/pebble.tar.gz" && \
-    printf '%s  %s\n' "$sha256" "$tmpdir/pebble.tar.gz" | sha256sum -c - && \
-    tar -xzf "$tmpdir/pebble.tar.gz" -C "$tmpdir" pebble COPYING && \
-    install -D -m 0755 "$tmpdir/pebble" /usr/local/bin/pebble && \
-    install -D -m 0644 "$tmpdir/COPYING" /usr/local/share/doc/pebble/COPYING && \
-    rm -rf "$tmpdir"
-
 ### Install wait-for-it ###
 COPY --chmod=0755 workbench/scripts/wait-for-it.sh /usr/local/bin/wait-for-it.sh
 
@@ -86,16 +69,10 @@ RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 
 ### Copy startup scripts ###
 COPY --chmod=0775 "workbench/2026.11/scripts/startup.sh" /usr/local/bin/startup.sh
+COPY "workbench/2026.11/startup/launcher" /startup/launcher
+COPY "workbench/2026.11/startup/base" /startup/base
+COPY "workbench/2026.11/startup/supervisord.conf" /etc/supervisor/supervisord.conf
 COPY "workbench/2026.11/conf/jupyter/*" "workbench/2026.11/conf/launcher/*" "workbench/2026.11/conf/rstudio/*" "workbench/2026.11/conf/positron/*" "workbench/2026.11/conf/vscode/*" /etc/rstudio/
-
-### Configure Pebble ###
-ENV PEBBLE=/var/lib/posit-pebble
-RUN command -v pebble >/dev/null || { echo "Pebble must be installed and on PATH" >&2; exit 1; }; \
-    install -d -m 0755 "$PEBBLE/layers" && chmod 0750 "$PEBBLE" && \
-    chown "rstudio-server:rstudio-server" "$PEBBLE"
-COPY --chmod=0644 ["workbench/2026.11/pebble/001-workbench.yaml", "/var/lib/posit-pebble/layers/001-product.yaml"]
-# Group-writable/setgid so non-root runs (rstudio-server group) can keep Pebble state
-RUN chown rstudio-server:rstudio-server "$PEBBLE/layers" && chmod g+w "$PEBBLE" "$PEBBLE/layers" && chmod g+s "$PEBBLE" "$PEBBLE/layers"
 
 ### Configure Workbench ###
 RUN mkdir -p /var/lib/rstudio-server/monitor/log \
@@ -104,14 +81,18 @@ RUN mkdir -p /var/lib/rstudio-server/monitor/log \
                /var/lib/rstudio-server/proxy \
                /var/lib/rstudio-launcher \
                /var/log/rstudio \
+               /var/run/supervisor \
     && chown -R rstudio-server:rstudio-server \
         /var/lib/rstudio-server \
         /var/lib/rstudio-launcher \
         /var/log/rstudio \
-    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio \
-    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio -type d -exec chmod g+s {} + \
+        /var/run/supervisor \
+    && chmod -R g+w /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor \
+    && find /var/lib/rstudio-server /var/lib/rstudio-launcher /var/log/rstudio /var/run/supervisor -type d -exec chmod g+s {} + \
     && mkdir -p /var/run/rstudio-server \
     && chmod 1777 /var/run/rstudio-server \
+    && mkdir -p /startup/custom/ \
+    && mkdir -p /startup/user-provisioning/ \
     && printf '\n# allow home directory creation\nsession required pam_mkhomedir.so skel=/etc/skel umask=0077\n' >> /etc/pam.d/common-session \
     && echo "RSPM=https://p3m.dev/cran/__linux__/noble/latest" > /etc/rstudio/repos.conf \
     && echo "CRAN=https://p3m.dev/cran/__linux__/noble/latest" >> /etc/rstudio/repos.conf
@@ -120,4 +101,4 @@ EXPOSE 8787/tcp
 EXPOSE 5559/tcp
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -fsS http://localhost:8787/health-check || exit 1
-ENTRYPOINT ["pebble", "run", "--verbose"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

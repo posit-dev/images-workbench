@@ -52,14 +52,19 @@ images:
         options:
           - tool: goss
             wait: 30
-            # Pebble is the entrypoint; no extra args.
+            # Empty command keeps the image's default CMD: supervisord
+            # on versions rendered before Pebble, Pebble on newer ones.
+            # Options are per-variant only, so this must work for both.
             command: ""
       - name: Minimal
         extension: min
         tagDisplayName: min
         options:
           - tool: goss
-            command: ""
+            # Run sleep instead of the entrypoint (supervisord or Pebble)
+            # so services never start and mutate image state under test.
+            runtimeOptions: "--entrypoint sleep"
+            command: "infinity"
     devVersions:
       - sourceType: stream
         product: workbench

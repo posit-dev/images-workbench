@@ -123,27 +123,12 @@ file:
   /var/run/rstudio-server:
     exists: true
     mode: "1777"
-  /usr/local/bin/pebble:
-    # Ubuntu 26.04 uses the base image's /usr/bin/pebble instead
-    exists: {{ if eq .Env.IMAGE_OS_VERSION "26.04" }}false{{ else }}true{{ end }}
-  /var/lib/posit-pebble:
+  /var/run/supervisor:
     exists: true
-    filetype: directory
     owner: rstudio-server
     group: rstudio-server
     gid: 999
-    mode: "2770"
-  /var/lib/posit-pebble/layers:
-    exists: true
-    filetype: directory
     mode: "2775"
-  /var/lib/posit-pebble/layers/001-product.yaml:
-    exists: true
-    filetype: file
-    contains:
-      - "/usr/local/bin/startup.sh"
-      - "/usr/lib/rstudio-server/bin/rstudio-launcher"
-      - "kill-delay: 110s"
   # Check for code-server executable (path varies based on RStudio Workbench version)
   {{ $version_split := split "." "2026.11.0+203.pro4" }}
   {{ if or (ge ($version_split._0 | atoi) 2025) (and (ge ($version_split._0 | atoi) 2024) (ge ($version_split._1 | atoi) 7)) }}
@@ -169,11 +154,11 @@ file:
     owner: root
     group: root
     mode: "0600"
-  # sssd Pebble layer is staged here; entrypoint installs it at runtime when root
-  /opt/startup-templates/002-sssd.yaml:
+  # sssd supervisord program is staged here; entrypoint installs it at runtime when root
+  /opt/startup-templates/sssd.conf:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     contains:
-      - "/usr/sbin/sssd"
+      - "/^\\[program:sssd\\]$/"
   /usr/local/bin/entrypoint.sh:
     exists: {{ if eq .Env.IMAGE_VARIANT "Standard" }}true{{ else }}false{{ end }}
     mode: "0755"
@@ -246,8 +231,8 @@ file:
     exists: false
   /etc/rstudio/launcher.pub:
     exists: false
-  # /var/lib/rstudio-server/secure-cookie-key is not checked: Pebble starts the launcher
-  # immediately and it generates this key at runtime, racing the test.
+  /var/lib/rstudio-server/secure-cookie-key:
+    exists: false
   /var/lib/rstudio-server/session-rpc-key:
     exists: false
   /etc/rstudio/secure-cookie-key:

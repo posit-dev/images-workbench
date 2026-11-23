@@ -1,7 +1,0 @@
-services:
-  sssd:
-    override: replace
-    command: /usr/sbin/sssd -i -c /etc/sssd/sssd.conf --logger=stderr
-    startup: enabled
-    on-success: shutdown
-    on-failure: shutdown

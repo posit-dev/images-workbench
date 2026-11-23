@@ -128,7 +128,7 @@ bakery dgoss run --image-name workbench --image-version 2026.01
 
 - **`workbench-session-init` downloads from S3 during build.** The Containerfile fetches a binary whose URL embeds the image version with `+` replaced by `-` (via `{{ Image.Version | replace('+', '-') }}`). Verify the S3 artifact exists at the expected URL before creating a new version.
 
-- **Workbench needs time to start.** The server, Pebble, and launcher all need to come up before goss can probe the container. Check the `wait:` value in the image's `options` block in `bakery.yaml` if goss probes fail immediately.
+- **Workbench needs time to start.** The server, Pebble (supervisord in releases up to 2026.11), and launcher all need to come up before goss can probe the container. Check the `wait:` value in the image's `options` block in `bakery.yaml` if goss probes fail immediately.
 
 - **`workbench-session` has no version directories.** It renders into `workbench-session/matrix/`. Do not create `workbench-session/<edition>/` directories manually.
 

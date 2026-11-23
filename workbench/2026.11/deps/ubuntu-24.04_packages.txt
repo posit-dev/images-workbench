@@ -10,3 +10,4 @@ lsb-release
 psmisc
 rrdtool
 sudo
+supervisor

@@ -309,6 +309,9 @@ To disable the built-in health check, run the container with `--no-healthcheck` 
 
 ## Process management
 
+> [!NOTE]
+> Pebble replaces supervisord in releases **after** 2026.11. Currently published images (including 2026.11.x) still use supervisord, `/startup/*` `.conf` files, and `/etc/supervisor/supervisord.conf`; the Pebble behavior below applies only to later releases.
+
 Workbench runs several services inside the container under [Pebble](https://github.com/canonical/pebble), which runs as PID 1. Pebble starts the services, forwards `SIGTERM` to them, and reaps orphaned processes, so `docker run --init` is not needed. Every service is configured to shut the container down when it exits (`on-success: shutdown`, `on-failure: shutdown`), so the container fails fast on startup errors.
 
 > [!NOTE]
@@ -316,7 +319,7 @@ Workbench runs several services inside the container under [Pebble](https://gith
 
 Pebble reads service definitions from layer files in `/var/lib/posit-pebble/layers/` (`$PEBBLE/layers/`) and merges them in filename order. The image manages these services:
 
-- **Workbench** (`rstudio-workbench`): the main server process, defined in `001-workbench.yaml`. Pebble waits up to 110 seconds after `SIGTERM` for the server to stop and the license to deactivate before sending `SIGKILL`.
+- **Workbench** (`rstudio-workbench`): the main server process, defined in `001-product.yaml`. Pebble waits up to 110 seconds after `SIGTERM` for the server to stop and the license to deactivate before sending `SIGKILL`.
 - **Job Launcher** (`rstudio-launcher`): enables Positron, RStudio, JupyterLab, and VS Code sessions, as well as integration with job schedulers like Slurm and Kubernetes. Enabled by default and defined in the same layer file. To disable, set `PWB_LAUNCHER=false` and override the service in a custom layer (see below).
 - **sssd** (Standard only): provides user provisioning when connected to an LDAP directory or other user store. Enabled by default with a placeholder domain that does nothing. To use your own directory, mount required `.conf` files into `/etc/sssd/conf.d/` (see [User provisioning](#user-provisioning)). To disable entirely, set `PWB_SSSD=false`. The entrypoint adds the sssd layer (`002-sssd.yaml`) only when the container runs as `root` and `PWB_SSSD` is `true`.
 
@@ -328,7 +331,7 @@ docker exec <container> pebble services
 
 ### Custom services
 
-To run additional services inside the container, or to change a built-in service, mount a Pebble layer file into `/var/lib/posit-pebble/layers/` as an individual file X Do not mount over the whole directory, which would remove the built-in layers. Pebble merges layers in filename order, and a later layer may modify `rstudio-workbench` or `rstudio-launcher` with `override: merge` or `override: replace`. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
+To run additional services inside the container, or to change a built-in service, mount a Pebble layer file into `/var/lib/posit-pebble/layers/` as an individual file. Do not mount over the whole directory, which would remove the built-in layers. Pebble merges layers in filename order, and a later layer may modify `rstudio-workbench` or `rstudio-launcher` with `override: merge` or `override: replace`. In Kubernetes, `initContainers` or sidecar containers are often a better fit.
 
 ```yaml
 # 110-custom.yaml
@@ -337,8 +340,10 @@ services:
     override: replace
     command: /usr/local/bin/my-exporter --port 9100
     startup: enabled
-    # Stop the container if this service exits (omit to keep running)
-    on-failure: shutdown
+    # Pebble restarts services on success and failure by default; ignore exits instead,
+    # or use `shutdown` to stop the container when this service exits
+    on-success: ignore
+    on-failure: ignore
 ```
 
 ```bash
@@ -363,7 +368,7 @@ In Kubernetes, set `command` (not only `args`) to replace the entrypoint.
 
 ### Migrating from supervisord
 
-Earlier images ran `supervisord` and read `.conf` files from `/startup/{base,launcher,user-provisioning,custom}`. Those directories and `/etc/supervisor/supervisord.conf` no longer exist, and supervisord `.conf` files mounted there are ignored. Convert each `[program:x]` section to a Pebble layer file under `/var/lib/posit-pebble/layers/` (named `NNN-label.yaml` with `NNN` from `110` to `999`).
+Earlier images ran `supervisord` and read `.conf` files from `/startup/{base,launcher,user-provisioning,custom}`. Those directories and `/etc/supervisor/supervisord.conf` no longer exist, and supervisord `.conf` files mounted there are ignored. Convert each `[program:x]` section to a Pebble layer file under `/var/lib/posit-pebble/layers/` (named `NNN-label.yaml` with `NNN` from `110` to `999`; `100`-`109` are reserved for the Helm chart).
 
 ```ini
 ; /startup/custom/my-exporter.conf
@@ -387,7 +392,7 @@ services:
     on-failure: shutdown
 ```
 
-Pebble sends service output to the container's stdout and stderr, so no log settings are needed. `autorestart=false` corresponds to Pebble's default (no `on-failure: restart`). The old eventlistener stopped the container whenever any program exited, which `on-success: shutdown` and `on-failure: shutdown` reproduce; omit them if the service may exit without stopping the container. To disable the Job Launcher, which was done by mounting an empty volume over `/startup/launcher`, set `PWB_LAUNCHER=false` and disable the service with a layer such as:
+Pebble sends service output to the container's stdout and stderr, so no log settings are needed. `autorestart=false` corresponds to Pebble's `on-success: ignore` and `on-failure: ignore`; Pebble's default is to restart on both success and failure. The example above keeps `shutdown` for both actions, which reproduces the old eventlistener that stopped the container whenever any program exited. Use `ignore` if the service may exit without restarting or stopping the container. To disable the Job Launcher, which was done by mounting an empty volume over `/startup/launcher`, set `PWB_LAUNCHER=false` and disable the service with a layer such as:
 
 ```yaml
 # 110-no-launcher.yaml

@@ -70,14 +70,6 @@ file:
   # Check that license files were not accidentally included in build
   /etc/rstudio-server/license.lic:
     exists: false
-  {% raw -%}
-  {{ if eq .Env.IMAGE_OS_VERSION "26.04" }}
-  /usr/bin/pebble:
-    exists: false
-  /var/lib/pebble:
-    exists: false
-  {{ end }}
-  {%- endraw %}
   # Check that the RStudio Server installation directory exists
   /usr/lib/rstudio-server:
     exists: true
@@ -133,8 +125,10 @@ file:
   /var/run/rstudio-server:
     exists: true
     mode: "1777"
+  # Ubuntu 26.04 uses the base image's /usr/bin/pebble; other releases install /usr/local/bin/pebble
+  /usr/bin/pebble:
+    exists: {% raw %}{{ if eq .Env.IMAGE_OS_VERSION "26.04" }}true{{ else }}false{{ end }}{% endraw %}
   /usr/local/bin/pebble:
-    # Ubuntu 26.04 uses the base image's /usr/bin/pebble instead
     exists: {% raw %}{{ if eq .Env.IMAGE_OS_VERSION "26.04" }}false{{ else }}true{{ end }}{% endraw %}
   /var/lib/posit-pebble:
     exists: true
@@ -262,8 +256,8 @@ file:
     exists: false
   /etc/rstudio/launcher.pub:
     exists: false
-  # /var/lib/rstudio-server/secure-cookie-key is not checked: Pebble starts the launcher
-  # immediately and it generates this key at runtime, racing the test.
+  /var/lib/rstudio-server/secure-cookie-key:
+    exists: false
   /var/lib/rstudio-server/session-rpc-key:
     exists: false
   /etc/rstudio/secure-cookie-key:

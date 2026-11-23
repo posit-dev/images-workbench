@@ -99,7 +99,7 @@ RUN ln -s /lib/rstudio-server/bin/quarto/bin/quarto /usr/local/bin/quarto
 ### Copy startup scripts ###
 COPY --chmod=0775 "{{ Path.Version }}/scripts/startup.sh" /usr/local/bin/startup.sh
 {%- if Image.Variant != "Minimal" %}
-COPY --chmod=0755 {{ Path.Image }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chmod=0755 {{ Path.Version }}/scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
 {%- endif %}
 {%- if Image.Variant != "Minimal" %}
 COPY --chmod=600 "{{ Path.Version }}/conf/sssd/sssd.conf" /etc/sssd/sssd.conf
