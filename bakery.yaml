@@ -87,7 +87,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-preview"
     versions:
-      - name: 2026.11.0+203.pro4
+      - name: 2026.11.1+204.pro2
         subpath: '2026.11'
         latest: true
         os:
@@ -271,7 +271,7 @@ images:
             namespace: "posit-dev"
             repository: "workbench-session-init-preview"
     versions:
-      - name: 2026.11.0+203.pro4
+      - name: 2026.11.1+204.pro2
         subpath: '2026.11'
         latest: true
         os:
@@ -461,7 +461,7 @@ images:
       # pin for the rstudio-server package in scripts/install_workbench.sh. It is
       # not an R/Python matrix coordinate -- those come from whichever
       # workbench-session base build the OS-qualified tag resolves to.
-      - name: 2026.11.0+203.pro4
+      - name: 2026.11.1+204.pro2
         subpath: '2026.11'
         latest: true
         os:
