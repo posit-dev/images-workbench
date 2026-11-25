@@ -128,7 +128,7 @@ bakery dgoss run --image-name workbench --image-version 2026.01
 
 - **`workbench-session-init` downloads from S3 during build.** The Containerfile fetches a binary whose URL embeds the image version with `+` replaced by `-` (via `{{ Image.Version | replace('+', '-') }}`). Verify the S3 artifact exists at the expected URL before creating a new version.
 
-- **Workbench needs time to start.** The server, supervisor, and launcher all need to come up before goss can probe the container. Check the `wait:` value in the image's `options` block in `bakery.yaml` if goss probes fail immediately.
+- **Workbench needs time to start.** The server, Pebble (supervisord in releases up to 2026.11), and launcher all need to come up before goss can probe the container. Check the `wait:` value in the image's `options` block in `bakery.yaml` if goss probes fail immediately.
 
 - **`workbench-session` has no version directories.** It renders into `workbench-session/matrix/`. Do not create `workbench-session/<edition>/` directories manually.
 
@@ -150,7 +150,7 @@ All workflows use `bakery-build-native.yml` (native amd64 + arm64 runners).
 - S3 download failure in `workbench-session-init` — the build fetches a binary from
   S3. If the artifact does not exist for the dispatched version, the build fails at the
   download step. Verify the product team published the build artifact before the image build ran.
-- Goss timeout — Workbench needs supervisor and launcher to fully start before probes
+- Goss timeout — Workbench needs Pebble and launcher to fully start before probes
   succeed. If goss fails immediately, check the `wait:` value in `bakery.yaml`.
 
 → [Shared failure scenarios](https://github.com/posit-dev/images-shared/blob/main/CONTRIBUTING.md#diagnose-a-build-failure)

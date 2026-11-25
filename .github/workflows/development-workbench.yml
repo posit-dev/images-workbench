@@ -84,6 +84,8 @@ jobs:
       WIZ_POLICY_ID: ${{ secrets.WIZ_POLICY_ID }}
       WIZ_PROJECT_ID: ${{ secrets.WIZ_PROJECT_ID }}
     with:
+      # TODO: revert to default before merge (images-shared#892)
+      version: feat/891-pebble-init
       dev-versions: "only"
       matrix-versions: "exclude"
       # Match workbench and workbench-session-init, but not workbench-positron-init.

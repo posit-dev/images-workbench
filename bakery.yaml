@@ -52,10 +52,19 @@ images:
         options:
           - tool: goss
             wait: 30
-            command: "/usr/bin/supervisord -c /etc/supervisor/supervisord.conf"
+            # Empty command keeps the image's default CMD: supervisord
+            # on versions rendered before Pebble, Pebble on newer ones.
+            # Options are per-variant only, so this must work for both.
+            command: ""
       - name: Minimal
         extension: min
         tagDisplayName: min
+        options:
+          - tool: goss
+            # Run sleep instead of the entrypoint (supervisord or Pebble)
+            # so services never start and mutate image state under test.
+            runtimeOptions: "--entrypoint sleep"
+            command: "infinity"
     devVersions:
       - sourceType: stream
         product: workbench
